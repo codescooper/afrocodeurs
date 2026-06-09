@@ -4,6 +4,7 @@ import {
   Users,
   Map,
   Briefcase,
+  MessageSquare,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -19,6 +20,7 @@ export const MAIN_NAV: NavItem[] = [
   { label: "Explorer", href: "/explorer", icon: Compass },
   { label: "Apprendre", href: "/knowledge", icon: GraduationCap },
   { label: "Communauté", href: "/communities", icon: Users },
+  { label: "Forum", href: "/forum", icon: MessageSquare },
   { label: "Atlas", href: "/atlas", icon: Map },
   { label: "Opportunités", href: "/opportunities", icon: Briefcase },
 ];

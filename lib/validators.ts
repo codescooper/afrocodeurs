@@ -93,6 +93,27 @@ export const solutionSchema = z.object({
   license: z.string().max(80).optional(),
 });
 
+export const questionSchema = z.object({
+  title: z
+    .string()
+    .min(8, "Au moins 8 caractères")
+    .max(160, "160 caractères maximum"),
+  body: z.string().min(20, "Détaillez votre question (20 caractères minimum)"),
+});
+
+export const answerSchema = z.object({
+  body: z
+    .string()
+    .min(10, "Votre réponse est trop courte (10 caractères minimum)"),
+});
+
+export const commentSchema = z.object({
+  body: z
+    .string()
+    .min(2, "Commentaire trop court")
+    .max(1000, "1000 caractères maximum"),
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
@@ -100,3 +121,6 @@ export type CommunityInput = z.infer<typeof communitySchema>;
 export type ProblemInput = z.infer<typeof problemSchema>;
 export type KnowledgeInput = z.infer<typeof knowledgeSchema>;
 export type SolutionInput = z.infer<typeof solutionSchema>;
+export type QuestionInput = z.infer<typeof questionSchema>;
+export type AnswerInput = z.infer<typeof answerSchema>;
+export type CommentInput = z.infer<typeof commentSchema>;
