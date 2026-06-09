@@ -58,8 +58,29 @@ export const problemSchema = z.object({
   difficultyLevel: z.coerce.number().int().min(1).max(5).default(1),
 });
 
+export const knowledgeSchema = z.object({
+  title: z
+    .string()
+    .min(5, "Au moins 5 caractères")
+    .max(160, "160 caractères maximum"),
+  summary: z.string().max(300).optional(),
+  content: z.string().min(50, "Le contenu doit faire au moins 50 caractères"),
+  type: z.enum([
+    "ARTICLE",
+    "TUTORIAL",
+    "GUIDE",
+    "CASE_STUDY",
+    "DOCUMENTATION",
+    "DOSSIER",
+    "TRANSLATION",
+  ]),
+  language: z.string().min(2).max(10).default("fr"),
+  level: z.string().max(40).optional(),
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type CommunityInput = z.infer<typeof communitySchema>;
 export type ProblemInput = z.infer<typeof problemSchema>;
+export type KnowledgeInput = z.infer<typeof knowledgeSchema>;
