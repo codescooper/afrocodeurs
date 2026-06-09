@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
+/* AfroCodeurs — charte visuelle (cf. PRD UX/UI §2) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf8; /* blanc cassé */
+  --foreground: #111111; /* noir profond */
+  --primary: #f5b800; /* jaune-or africain */
+  --primary-foreground: #111111;
+  --secondary: #111111;
+  --secondary-foreground: #fafaf8;
+  --accent: #22c55e; /* vert innovation */
+  --accent-foreground: #ffffff;
+  --muted: #f1f0ec;
+  --muted-foreground: #5c5c54;
+  --border: #e6e4dd;
+  --destructive: #dc2626; /* rouge doux */
+  --destructive-foreground: #ffffff;
+  --radius: 0.75rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-sm: calc(var(--radius) - 0.5rem);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
