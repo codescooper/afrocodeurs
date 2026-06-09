@@ -26,7 +26,7 @@ export default function HomePage() {
         </p>
 
         <form
-          action="/explorer"
+          action="/search"
           className="flex w-full max-w-xl items-center gap-2 rounded-lg border border-border bg-background p-2 shadow-sm"
         >
           <Search className="ml-2 size-5 text-muted-foreground" />
