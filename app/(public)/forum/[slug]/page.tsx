@@ -6,7 +6,6 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 import { Markdown } from "@/components/shared/markdown";
-import { Button } from "@/components/ui/button";
 import { tallyVotes } from "@/features/forum/votes";
 import { VoteControl } from "@/features/forum/vote-control";
 import { AnswerForm } from "@/features/forum/answer-form";
