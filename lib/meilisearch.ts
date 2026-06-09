@@ -1,4 +1,4 @@
-import { MeiliSearch } from "meilisearch";
+import { Meilisearch } from "meilisearch";
 
 /** Index Meilisearch par type d'entité (cf. SDD §9). */
 export const SEARCH_INDEXES = [
@@ -12,14 +12,14 @@ export const SEARCH_INDEXES = [
 
 export type SearchIndex = (typeof SEARCH_INDEXES)[number];
 
-let client: MeiliSearch | null = null;
+let client: Meilisearch | null = null;
 
 /** Client Meilisearch partagé (lazy). Retourne null si non configuré. */
-export function getSearchClient(): MeiliSearch | null {
+export function getSearchClient(): Meilisearch | null {
   const host = process.env.MEILISEARCH_HOST;
   if (!host) return null;
   if (!client) {
-    client = new MeiliSearch({
+    client = new Meilisearch({
       host,
       apiKey: process.env.MEILISEARCH_API_KEY,
     });
