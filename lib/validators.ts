@@ -43,7 +43,23 @@ export const communitySchema = z.object({
   city: z.string().max(80).optional(),
 });
 
+export const problemSchema = z.object({
+  title: z
+    .string()
+    .min(5, "Au moins 5 caractères")
+    .max(140, "140 caractères maximum"),
+  summary: z.string().max(280).optional(),
+  description: z
+    .string()
+    .min(20, "Décrivez le problème (20 caractères minimum)"),
+  sector: z.string().min(2, "Indiquez un secteur").max(80),
+  countries: z.array(z.string()).default([]),
+  impactLevel: z.coerce.number().int().min(1).max(5).default(1),
+  difficultyLevel: z.coerce.number().int().min(1).max(5).default(1),
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type CommunityInput = z.infer<typeof communitySchema>;
+export type ProblemInput = z.infer<typeof problemSchema>;
