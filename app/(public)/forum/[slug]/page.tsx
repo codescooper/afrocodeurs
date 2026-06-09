@@ -13,6 +13,7 @@ import { AnswerForm } from "@/features/forum/answer-form";
 import { CommentForm } from "@/features/forum/comment-form";
 import { acceptAnswerAction } from "@/features/forum/actions";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
+import { ReportForm } from "@/features/admin/report-form";
 
 /** Page détail d'une question : votes, réponses, acceptation, commentaires. */
 export default async function QuestionDetailPage({
@@ -87,6 +88,12 @@ export default async function QuestionDetailPage({
           <article className="mt-4">
             <Markdown>{question.body}</Markdown>
           </article>
+
+          {userId && (
+            <div className="mt-3">
+              <ReportForm targetType="QUESTION" targetId={question.id} />
+            </div>
+          )}
 
           <div className="mt-6 border-t border-border pt-4">
             <h2 className="text-sm font-semibold text-muted-foreground">

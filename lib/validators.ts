@@ -121,6 +121,20 @@ export type CommunityInput = z.infer<typeof communitySchema>;
 export type ProblemInput = z.infer<typeof problemSchema>;
 export type KnowledgeInput = z.infer<typeof knowledgeSchema>;
 export type SolutionInput = z.infer<typeof solutionSchema>;
+export const reportSchema = z.object({
+  reason: z.enum([
+    "SPAM",
+    "HARASSMENT",
+    "PLAGIARISM",
+    "MISINFORMATION",
+    "OFF_TOPIC",
+    "INAPPROPRIATE",
+    "OTHER",
+  ]),
+  details: z.string().max(500).optional(),
+});
+
 export type QuestionInput = z.infer<typeof questionSchema>;
 export type AnswerInput = z.infer<typeof answerSchema>;
 export type CommentInput = z.infer<typeof commentSchema>;
+export type ReportInput = z.infer<typeof reportSchema>;
