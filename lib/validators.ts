@@ -32,6 +32,18 @@ export const profileSchema = z.object({
   portfolioUrl: z.string().url().optional().or(z.literal("")),
 });
 
+export const communitySchema = z.object({
+  name: z
+    .string()
+    .min(3, "Au moins 3 caractères")
+    .max(80, "80 caractères maximum"),
+  description: z.string().max(500).optional(),
+  type: z.enum(["SKILL", "GEO", "UNIVERSITY", "SECTOR", "PROJECT"]),
+  country: z.string().max(80).optional(),
+  city: z.string().max(80).optional(),
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
+export type CommunityInput = z.infer<typeof communitySchema>;

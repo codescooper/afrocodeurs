@@ -26,6 +26,7 @@ export const PERMISSIONS = {
   "question:create": "USER",
   "answer:create": "USER",
   "community:join": "USER",
+  "community:create": "USER",
   "problem:propose": "USER",
   "solution:propose": "USER",
   // Contributor
