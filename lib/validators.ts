@@ -78,9 +78,25 @@ export const knowledgeSchema = z.object({
   level: z.string().max(40).optional(),
 });
 
+export const solutionSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Au moins 2 caractères")
+    .max(120, "120 caractères maximum"),
+  description: z
+    .string()
+    .min(20, "Décrivez la solution (20 caractères minimum)"),
+  type: z.enum(["SOFTWARE", "API", "STARTUP", "ORGANIZATION", "SERVICE"]),
+  country: z.string().max(80).optional(),
+  websiteUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  documentationUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  license: z.string().max(80).optional(),
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type CommunityInput = z.infer<typeof communitySchema>;
 export type ProblemInput = z.infer<typeof problemSchema>;
 export type KnowledgeInput = z.infer<typeof knowledgeSchema>;
+export type SolutionInput = z.infer<typeof solutionSchema>;
