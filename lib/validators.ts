@@ -134,7 +134,18 @@ export const reportSchema = z.object({
   details: z.string().max(500).optional(),
 });
 
+export const accountSchema = z.object({
+  name: z.string().min(1, "Le nom ne peut pas être vide").max(80),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8, "Au moins 8 caractères"),
+});
+
 export type QuestionInput = z.infer<typeof questionSchema>;
 export type AnswerInput = z.infer<typeof answerSchema>;
 export type CommentInput = z.infer<typeof commentSchema>;
 export type ReportInput = z.infer<typeof reportSchema>;
+export type AccountInput = z.infer<typeof accountSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
