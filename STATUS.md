@@ -16,12 +16,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - Sprint 8 — Admin & modération : validation, signalements, gestion des rôles (`/admin`)
 - Page Paramètres du compte (`/dashboard/settings`) + correctif du lien de sidebar mort
 - Lancement local vérifié : base autonome (`embedded-postgres`) + jeu de données de démo
+- Migration initiale Prisma versionnée (`prisma/migrations/…_init`)
 
 ## 🚧 En cours
-- [ ] Arbitrer le travail non committé : versionner `prisma/migrations/` (migration `init`) et décider du sort de l'échafaudage DB jetable (`dev-db.mjs`, `seed.mjs`, dép `embedded-postgres`, `.gitignore`)
+- [ ] Décider du sort de l'échafaudage DB jetable (`dev-db.mjs`, `seed.mjs`, dép `embedded-postgres`, `.gitignore`) : le garder comme outil de dev documenté, ou le retirer
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Committer la migration `prisma/migrations/…_init` (actuellement non versionnée) — sans elle, un clone neuf ne peut pas créer le schéma ; l'échafaudage DB local reste hors-commit.
+Brancher un vrai Postgres : obtenir un `DATABASE_URL` exploitable (identifiants de l'instance locale, ou une base cloud), créer le `.env`, puis `prisma migrate deploy` — pour valider l'app hors base jetable. C'est le cœur de l'objectif de phase (sortir du mode démo).
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -32,7 +33,6 @@ Committer la migration `prisma/migrations/…_init` (actuellement non versionné
 
 ## ⚠️ Dettes / risques connus
 - App **non vérifiée sur un vrai Postgres** : tout tourne sur une base jetable `embedded-postgres` (:5433, encodage WIN1252) ; pas de `.env` de production
-- `prisma/migrations/` pas encore committé → un clone neuf ne peut pas initialiser le schéma
 - `/search` liste les **membres sans lien** (pas de page profil public `/u/[username]`)
 - Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
