@@ -20,12 +20,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - **PostgreSQL 18.4 réel installé** (binaires officiels EDB, espace utilisateur, sans admin) : `C:\Users\BEJ technologie\PostgreSQL`, port 5432, rôle/base `afrocodeurs` — app migrée (`migrate deploy`), seedée et vérifiée dessus (base jetable :5433 arrêtée)
 - **Build de production validé** : `next build` vert (TS OK, 25 pages statiques, 28 routes) + `next start` vérifié sur :3001 (toutes pages 200 avec données réelles)
 - `/opportunities` tranché : placeholder v1 **conforme au PRD produit V1**, texte aligné sur AfroOpportunities (emplois, stages, concours, bourses, financements) — module complet reporté en v2
+- **Profil public `/u/[username]`** : identité, skills, liens, stats, contributions — et membres cliquables partout (recherche, forum, ressources, problèmes, atlas, communautés)
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Construire la page profil public `/u/[username]` (bio, compétences, liens, contributions). Choisi car c'est le manque le plus visible restant : la recherche liste des membres sans lien, et le profil est le cœur d'une plateforme communautaire.
+Relier les problèmes aux solutions et ressources (UI sur `EntityRelation`, déjà modélisé) : la page problème affiche encore « bientôt ». Choisi car c'est le cœur du pitch produit — « des problèmes aux solutions » — et le principe central du PRD (tout doit se relier à un problème).
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -36,7 +37,6 @@ Construire la page profil public `/u/[username]` (bio, compétences, liens, cont
 
 ## ⚠️ Dettes / risques connus
 - Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
-- `/search` liste les **membres sans lien** (pas de page profil public `/u/[username]`)
 - Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
 - `README.md` est encore le template create-next-app par défaut
