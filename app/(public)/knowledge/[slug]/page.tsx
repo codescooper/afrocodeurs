@@ -64,7 +64,13 @@ export default async function KnowledgeDetailPage({
       <h1 className="mt-1 text-3xl font-bold tracking-tight">{item.title}</h1>
       <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
         <span>
-          Par {item.author.name ?? `@${item.author.username}`}
+          Par{" "}
+          <Link
+            href={`/u/${item.author.username}`}
+            className="font-medium text-foreground hover:underline"
+          >
+            {item.author.name ?? `@${item.author.username}`}
+          </Link>
           {item.level ? ` · ${item.level}` : ""}
         </span>
         <span className="flex items-center gap-1.5">

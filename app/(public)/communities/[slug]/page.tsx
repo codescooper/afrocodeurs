@@ -99,9 +99,12 @@ export default async function CommunityDetailPage({
               key={member.id}
               className="flex items-center justify-between rounded-md border border-border px-4 py-2 text-sm"
             >
-              <span className="font-medium">
+              <Link
+                href={`/u/${member.user.username}`}
+                className="font-medium hover:underline"
+              >
                 {member.user.name ?? `@${member.user.username}`}
-              </span>
+              </Link>
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
                 {member.role}
               </span>

@@ -82,7 +82,13 @@ export default async function QuestionDetailPage({
             {question.title}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Par {question.author.name ?? `@${question.author.username}`}
+            Par{" "}
+            <Link
+              href={`/u/${question.author.username}`}
+              className="font-medium text-foreground hover:underline"
+            >
+              {question.author.name ?? `@${question.author.username}`}
+            </Link>
           </p>
           <article className="mt-4">
             <Markdown>{question.body}</Markdown>
@@ -103,9 +109,12 @@ export default async function QuestionDetailPage({
                 <li key={comment.id} className="text-sm">
                   <span className="text-muted-foreground">
                     {comment.body} —{" "}
-                    <span className="font-medium text-foreground">
+                    <Link
+                      href={`/u/${comment.author.username}`}
+                      className="font-medium text-foreground hover:underline"
+                    >
                       {comment.author.name ?? `@${comment.author.username}`}
-                    </span>
+                    </Link>
                   </span>
                 </li>
               ))}
@@ -153,9 +162,12 @@ export default async function QuestionDetailPage({
                     <Markdown>{answer.body}</Markdown>
                   </article>
                   <div className="mt-2 flex items-center gap-4">
-                    <span className="text-xs text-muted-foreground">
+                    <Link
+                      href={`/u/${answer.author.username}`}
+                      className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                    >
                       {answer.author.name ?? `@${answer.author.username}`}
-                    </span>
+                    </Link>
                     {isQuestionAuthor && !answer.isAccepted && (
                       <form action={acceptAnswerAction}>
                         <input type="hidden" name="answerId" value={answer.id} />

@@ -104,9 +104,9 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
       title: s.name,
       href: `/atlas/${s.slug}`,
     })),
-    // Pas (encore) de page profil publique → membres listés sans lien.
     users: users.map((u) => ({
       title: u.name ?? u.username,
+      href: `/u/${u.username}`,
       subtitle: `@${u.username}`,
     })),
     total: 0,

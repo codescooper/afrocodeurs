@@ -43,7 +43,12 @@ export default async function ProblemDetailPage({
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Proposé par{" "}
-        {problem.createdBy.name ?? `@${problem.createdBy.username}`}
+        <Link
+          href={`/u/${problem.createdBy.username}`}
+          className="font-medium text-foreground hover:underline"
+        >
+          {problem.createdBy.name ?? `@${problem.createdBy.username}`}
+        </Link>
       </p>
 
       <div className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">

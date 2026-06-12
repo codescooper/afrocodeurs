@@ -37,7 +37,12 @@ export default async function SolutionDetailPage({
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Référencé par{" "}
-        {solution.createdBy.name ?? `@${solution.createdBy.username}`}
+        <Link
+          href={`/u/${solution.createdBy.username}`}
+          className="font-medium text-foreground hover:underline"
+        >
+          {solution.createdBy.name ?? `@${solution.createdBy.username}`}
+        </Link>
       </p>
 
       <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed">
