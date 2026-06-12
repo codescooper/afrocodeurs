@@ -19,12 +19,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - Migration initiale Prisma versionnée (`prisma/migrations/…_init`)
 - **PostgreSQL 18.4 réel installé** (binaires officiels EDB, espace utilisateur, sans admin) : `C:\Users\BEJ technologie\PostgreSQL`, port 5432, rôle/base `afrocodeurs` — app migrée (`migrate deploy`), seedée et vérifiée dessus (base jetable :5433 arrêtée)
 - **Build de production validé** : `next build` vert (TS OK, 25 pages statiques, 28 routes) + `next start` vérifié sur :3001 (toutes pages 200 avec données réelles)
+- `/opportunities` tranché : placeholder v1 **conforme au PRD produit V1**, texte aligné sur AfroOpportunities (emplois, stages, concours, bourses, financements) — module complet reporté en v2
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Trancher `/opportunities` : c'est le dernier placeholder de l'app, présent dans la nav mais jamais scopé au backlog. Décision produit (utilisateur) : le construire pour v1, ou le retirer de la nav. Choisi car c'est le dernier trou visible du produit ; les clés OAuth restent en parallèle côté utilisateur.
+Construire la page profil public `/u/[username]` (bio, compétences, liens, contributions). Choisi car c'est le manque le plus visible restant : la recherche liste des membres sans lien, et le profil est le cœur d'une plateforme communautaire.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
