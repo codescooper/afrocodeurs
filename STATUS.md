@@ -1,5 +1,5 @@
 # STATUS — AfroCodeurs
-> Dernière MAJ : 2026-06-10
+> Dernière MAJ : 2026-06-12
 
 ## 🎯 Objectif de la phase actuelle
 Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgres et déployable — sortir du mode démo local.
@@ -17,12 +17,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - Page Paramètres du compte (`/dashboard/settings`) + correctif du lien de sidebar mort
 - Lancement local vérifié : base autonome (`embedded-postgres`) + jeu de données de démo
 - Migration initiale Prisma versionnée (`prisma/migrations/…_init`)
+- **PostgreSQL 18.4 réel installé** (binaires officiels EDB, espace utilisateur, sans admin) : `C:\Users\BEJ technologie\PostgreSQL`, port 5432, rôle/base `afrocodeurs` — app migrée (`migrate deploy`), seedée et vérifiée dessus (base jetable :5433 arrêtée)
 
 ## 🚧 En cours
-- [ ] Décider du sort de l'échafaudage DB jetable (`dev-db.mjs`, `seed.mjs`, dép `embedded-postgres`, `.gitignore`) : le garder comme outil de dev documenté, ou le retirer
+- [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Brancher un vrai Postgres : obtenir un `DATABASE_URL` exploitable (identifiants de l'instance locale, ou une base cloud), créer le `.env`, puis `prisma migrate deploy` — pour valider l'app hors base jetable. C'est le cœur de l'objectif de phase (sortir du mode démo).
+Valider un build de production : `npm run build` (jamais exécuté — seul le serveur dev a tourné). C'est le dernier verrou technique avant de parler déploiement.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -32,7 +33,7 @@ Brancher un vrai Postgres : obtenir un `DATABASE_URL` exploitable (identifiants 
 - Recherche en Postgres pour l'instant ; Meilisearch prévu en upgrade
 
 ## ⚠️ Dettes / risques connus
-- App **non vérifiée sur un vrai Postgres** : tout tourne sur une base jetable `embedded-postgres` (:5433, encodage WIN1252) ; pas de `.env` de production
+- Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
 - `/search` liste les **membres sans lien** (pas de page profil public `/u/[username]`)
 - Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
