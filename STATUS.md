@@ -21,12 +21,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - **Build de production validé** : `next build` vert (TS OK, 25 pages statiques, 28 routes) + `next start` vérifié sur :3001 (toutes pages 200 avec données réelles)
 - `/opportunities` tranché : placeholder v1 **conforme au PRD produit V1**, texte aligné sur AfroOpportunities (emplois, stages, concours, bourses, financements) — module complet reporté en v2
 - **Profil public `/u/[username]`** : identité, skills, liens, stats, contributions — et membres cliquables partout (recherche, forum, ressources, problèmes, atlas, communautés)
+- **Relations problème ↔ solutions/ressources** (cœur du pitch) : la page problème liste les solutions (SOLVES) et ressources (EXPLAINS) liées, liaison/retrait par la communauté (`EntityRelation` enfin servi par l'UI)
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Relier les problèmes aux solutions et ressources (UI sur `EntityRelation`, déjà modélisé) : la page problème affiche encore « bientôt ». Choisi car c'est le cœur du pitch produit — « des problèmes aux solutions » — et le principe central du PRD (tout doit se relier à un problème).
+Généraliser le bouton « Signaler » (déjà câblé sur le forum) aux ressources, problèmes, solutions et communautés — pour que la modération couvre tous les contenus publics. Petit chantier : le composant `ReportForm` est déjà réutilisable.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
