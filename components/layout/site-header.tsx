@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { MainNav } from "./main-nav";
+import { NotificationBell } from "./notification-bell";
 
 /** En-tête public : logo + navigation desktop + état d'authentification. */
 export async function SiteHeader() {
@@ -23,6 +24,7 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           {session?.user ? (
             <>
+              <NotificationBell />
               <Link
                 href="/dashboard"
                 className={buttonVariants({ variant: "ghost", size: "sm" })}

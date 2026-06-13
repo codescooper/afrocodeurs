@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { communitySchema } from "@/lib/validators";
+import { notify } from "@/features/notifications/notify";
 
 export type CommunityFormState = { error?: string } | undefined;
 
@@ -80,11 +81,38 @@ export async function joinCommunityAction(formData: FormData): Promise<void> {
   const slug = formData.get("slug");
   if (typeof communityId !== "string") return;
 
-  await db.communityMember.upsert({
+  const existing = await db.communityMember.findUnique({
     where: { userId_communityId: { userId: session.user.id, communityId } },
-    create: { userId: session.user.id, communityId, role: "MEMBER" },
-    update: {},
+    select: { id: true },
   });
+
+  if (!existing) {
+    await db.communityMember.create({
+      data: { userId: session.user.id, communityId, role: "MEMBER" },
+    });
+
+    // Notifier les responsables (ADMIN) de la communauté.
+    const [community, admins] = await Promise.all([
+      db.community.findUnique({
+        where: { id: communityId },
+        select: { name: true },
+      }),
+      db.communityMember.findMany({
+        where: { communityId, role: "ADMIN" },
+        select: { userId: true },
+      }),
+    ]);
+    for (const admin of admins) {
+      await notify({
+        userId: admin.userId,
+        actorId: session.user.id,
+        type: "COMMUNITY_JOIN",
+        title: "Nouveau membre dans ta communauté",
+        body: `Quelqu'un a rejoint « ${community?.name ?? "ta communauté"} ».`,
+        link: typeof slug === "string" ? `/communities/${slug}` : null,
+      });
+    }
+  }
 
   if (typeof slug === "string") revalidatePath(`/communities/${slug}`);
   revalidatePath("/dashboard/communities");
