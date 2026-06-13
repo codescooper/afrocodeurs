@@ -59,16 +59,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = (user as { role?: UserRole }).role ?? "USER";
         token.username = (user as { username?: string }).username;
       }
-      // Pour les connexions OAuth, on complète depuis la base si manquant.
-      if (token.id && (!token.username || !token.role)) {
+      // À chaque résolution : vérifier que l'utilisateur existe encore et
+      // rafraîchir rôle/username (un changement de rôle se propage aussitôt).
+      // S'il a disparu (compte supprimé, base reseedée…), on invalide la
+      // session — évite des erreurs de clé étrangère sur session.user.id.
+      if (token.id) {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
           select: { username: true, role: true },
         });
-        if (dbUser) {
-          token.username = dbUser.username;
-          token.role = dbUser.role;
-        }
+        if (!dbUser) return null;
+        token.username = dbUser.username;
+        token.role = dbUser.role;
       }
       return token;
     },
