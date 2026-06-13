@@ -4,7 +4,12 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { markNotificationsReadAction } from "@/features/notifications/actions";
+import {
+  markNotificationsReadAction,
+  updateNotificationPrefsAction,
+} from "@/features/notifications/actions";
+import { NOTIFICATION_CATEGORIES } from "@/features/notifications/constants";
+import { PushToggle } from "@/features/notifications/push-toggle";
 
 export const metadata = { title: "Notifications" };
 
@@ -17,6 +22,12 @@ export default async function NotificationsPage() {
     take: 50,
   });
   const hasUnread = notifications.some((n) => !n.read);
+
+  const me = await db.user.findUnique({
+    where: { id: session!.user.id },
+    select: { notificationOptOut: true },
+  });
+  const optOut = me?.notificationOptOut ?? [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -77,6 +88,53 @@ export default async function NotificationsPage() {
           })}
         </ul>
       )}
+
+      <section className="mt-2 rounded-lg border border-border p-5">
+        <h2 className="font-semibold">Préférences</h2>
+
+        <form
+          action={updateNotificationPrefsAction}
+          className="mt-4 flex flex-col gap-3"
+        >
+          <p className="text-sm text-muted-foreground">
+            Choisis les événements pour lesquels tu veux être notifié·e.
+          </p>
+          {NOTIFICATION_CATEGORIES.map((c) => (
+            <label key={c.key} className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="category"
+                value={c.key}
+                defaultChecked={!optOut.includes(c.key)}
+                className="mt-0.5"
+              />
+              <span className="flex flex-col">
+                <span className="font-medium">{c.label}</span>
+                <span className="text-xs text-muted-foreground">
+                  {c.description}
+                </span>
+              </span>
+            </label>
+          ))}
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            className="self-start"
+          >
+            Enregistrer les préférences
+          </Button>
+        </form>
+
+        <div className="mt-6 border-t border-border pt-4">
+          <h3 className="text-sm font-semibold">
+            Notifications push (navigateur)
+          </h3>
+          <div className="mt-2">
+            <PushToggle />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
