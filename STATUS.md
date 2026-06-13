@@ -1,5 +1,5 @@
 # STATUS — AfroCodeurs
-> Dernière MAJ : 2026-06-12
+> Dernière MAJ : 2026-06-13
 
 ## 🎯 Objectif de la phase actuelle
 Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgres et déployable — sortir du mode démo local.
@@ -22,12 +22,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - `/opportunities` tranché : placeholder v1 **conforme au PRD produit V1**, texte aligné sur AfroOpportunities (emplois, stages, concours, bourses, financements) — module complet reporté en v2
 - **Profil public `/u/[username]`** : identité, skills, liens, stats, contributions — et membres cliquables partout (recherche, forum, ressources, problèmes, atlas, communautés)
 - **Relations problème ↔ solutions/ressources** (cœur du pitch) : la page problème liste les solutions (SOLVES) et ressources (EXPLAINS) liées, liaison/retrait par la communauté (`EntityRelation` enfin servi par l'UI)
+- **Outillage collaboratif (OSS) — 1/n** : runner de commandes portable `./run` (start/build/test/lint/format/logs/deploy/clean/doctor, réutilisable toute stack, auto-détection + `run.config.json`) + `.gitattributes` (normalisation LF/CRLF)
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Généraliser le bouton « Signaler » (déjà câblé sur le forum) aux ressources, problèmes, solutions et communautés — pour que la modération couvre tous les contenus publics. Petit chantier : le composant `ReportForm` est déjà réutilisable.
+Outillage collaboratif (2/n) : rédiger un vrai `README.md` (il est encore le template create-next-app) + un `CONTRIBUTING.md` qui s'appuie sur `./run`. Choisi car c'est la porte d'entrée indispensable avant d'ouvrir les contributions ; le runner vient d'être posé, autant enchaîner la doc qui le référence.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
