@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookOpen, Globe, MapPin, Scale } from "lucide-react";
 
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { SOLUTION_TYPE_LABELS } from "@/features/solutions/constants";
+import { ReportForm } from "@/features/admin/report-form";
 
 /** Page détail d'une solution de l'AfroAtlas (Sprint 6). */
 export default async function SolutionDetailPage({
@@ -12,6 +14,7 @@ export default async function SolutionDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const session = await auth();
 
   const solution = await db.solution.findUnique({
     where: { slug },
@@ -85,6 +88,12 @@ export default async function SolutionDetailPage({
           </a>
         )}
       </dl>
+
+      {session?.user && (
+        <div className="mt-10 border-t border-border pt-4">
+          <ReportForm targetType="SOLUTION" targetId={solution.id} />
+        </div>
+      )}
     </div>
   );
 }

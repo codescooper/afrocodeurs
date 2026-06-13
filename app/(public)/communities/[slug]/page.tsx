@@ -10,6 +10,7 @@ import {
   leaveCommunityAction,
 } from "@/features/communities/actions";
 import { COMMUNITY_TYPE_LABELS } from "@/features/communities/constants";
+import { ReportForm } from "@/features/admin/report-form";
 
 /** Page détail d'une communauté + rejoindre/quitter (Sprint 2). */
 export default async function CommunityDetailPage({
@@ -112,6 +113,12 @@ export default async function CommunityDetailPage({
           ))}
         </ul>
       </section>
+
+      {session?.user && (
+        <div className="mt-10 border-t border-border pt-4">
+          <ReportForm targetType="COMMUNITY" targetId={community.id} />
+        </div>
+      )}
     </div>
   );
 }

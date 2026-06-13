@@ -12,6 +12,7 @@ import {
 } from "@/features/relations/queries";
 import { unlinkFromProblemAction } from "@/features/relations/actions";
 import { LinkForm } from "@/features/relations/link-form";
+import { ReportForm } from "@/features/admin/report-form";
 
 /** Page détail d'un problème (Sprint 3). */
 export default async function ProblemDetailPage({
@@ -159,6 +160,12 @@ export default async function ProblemDetailPage({
           </div>
         )}
       </section>
+
+      {session?.user && (
+        <div className="mt-10 border-t border-border pt-4">
+          <ReportForm targetType="PROBLEM" targetId={problem.id} />
+        </div>
+      )}
     </div>
   );
 }

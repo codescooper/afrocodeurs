@@ -13,6 +13,7 @@ import {
   CONTENT_STATUS_LABELS,
   KNOWLEDGE_TYPE_LABELS,
 } from "@/features/knowledge/constants";
+import { ReportForm } from "@/features/admin/report-form";
 
 /** Page détail d'une ressource (Sprint 4) : rendu Markdown + modération. */
 export default async function KnowledgeDetailPage({
@@ -106,6 +107,12 @@ export default async function KnowledgeDetailPage({
               Rejeter
             </Button>
           </form>
+        </div>
+      )}
+
+      {session?.user && (
+        <div className="mt-10 border-t border-border pt-4">
+          <ReportForm targetType="KNOWLEDGE" targetId={item.id} />
         </div>
       )}
     </div>
