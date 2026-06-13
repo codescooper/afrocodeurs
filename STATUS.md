@@ -27,6 +27,7 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **CI — 3/n** : workflow GitHub Actions (`.github/workflows/ci.yml`) — `./run lint` + `./run build` sur push/PR, Postgres de service + `migrate deploy` ; s'activera au 1ᵉʳ push GitHub
 - **LICENSE (MIT) + CODE_OF_CONDUCT (Contributor Covenant 2.1) — 4/n** : repo prêt à être rendu public ; liés depuis README (FR/EN) et CONTRIBUTING
 - **Templates GitHub — 5/n** : formulaires d'issue (bug, amélioration) + template de PR (rappelle de relier à un problème, checklist `./run`) → **outillage collaboratif complet**
+- **Bonus OSS** : `SECURITY.md`, `SUPPORT.md`, `.github/FUNDING.yml`, et `docs/good-first-issues.md` (idées de démarrage tirées du backlog, liées depuis CONTRIBUTING)
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
