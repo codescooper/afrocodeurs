@@ -34,6 +34,7 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Notifications sur tous les événements** (helper `notify()` centralisé, anti-auto-notification) : réponse à ta question, réponse acceptée, commentaire, ressource publiée/refusée, solution/ressource liée à ton problème, rôle modifié, contenu modéré, **nouveau membre dans ta communauté**
 - **Cloche temps réel** : icône dans le header (connecté) avec compteur de non-lues, panneau déroulant et **toasts « push up »** (polling 15 s, `/api/notifications`)
 - **Préférences + Web Push** : opt-out par catégorie (respecté par `notify()`) et **vraies notifications navigateur** (service worker, clés VAPID, abonnement, `web-push`) — réglages sur `/dashboard/notifications`. Au passage : `.env.example` corrigé (était masqué par `.env*`), échafaudage `embedded-postgres` retiré
+- **Système de réputation** (« Build Before Consume ») : barème + niveaux (Curieux·se → Légende), attribution de points dans toutes les actions (question, réponse, réponse acceptée, commentaire, ressource publiée, problème, solution, relation, join, **upvotes reçus**), carte sur le profil, niveau sur le dashboard, **classement public `/afromakers`**
 
 ## 🚧 En cours
 - [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
@@ -49,7 +50,7 @@ Rendre le dépôt public sur GitHub : créer l'organisation/dépôt, ajouter le 
 - Recherche en Postgres pour l'instant ; Meilisearch prévu en upgrade
 
 ## ⚠️ Dettes / risques connus
-- Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
+- Postgres local : **conflit de port** — un autre Postgres (`C:\dev\pgsql`) reprend le 5432 au reboot, donc AfroCodeurs tourne sur **5433** (`.env` pointe dessus). Pas de démarrage auto : après un reboot, relancer le mien sur 5433 (`pg_ctl -D "…\PostgreSQL\data" -o "-p 5433" start`)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
 - CI invérifiable tant que le repo n'a pas de remote GitHub (le workflow s'activera au 1ᵉʳ push)
 - `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — s'assurer que cette adresse route vers une vraie boîte avant l'ouverture publique
