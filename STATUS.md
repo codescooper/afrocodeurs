@@ -25,12 +25,13 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Outillage collaboratif (OSS) — 1/n** : runner de commandes portable `./run` (start/build/test/lint/format/logs/deploy/clean/doctor, réutilisable toute stack, auto-détection + `run.config.json`) + `.gitattributes` (normalisation LF/CRLF)
 - **Accueil open source — 2/n** : README **bilingue FR/EN** + CONTRIBUTING panafricains et accueillants (Build Before Consume, contributions sans code, langues africaines, esprit Ubuntu) ; `seed.mjs` de démo versionné pour l'onboarding. Commande globale `/awema-pre-commit-check` posée.
 - **CI — 3/n** : workflow GitHub Actions (`.github/workflows/ci.yml`) — `./run lint` + `./run build` sur push/PR, Postgres de service + `migrate deploy` ; s'activera au 1ᵉʳ push GitHub
+- **LICENSE (MIT) + CODE_OF_CONDUCT (Contributor Covenant 2.1) — 4/n** : repo prêt à être rendu public ; liés depuis README (FR/EN) et CONTRIBUTING
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Outillage collaboratif (4/n) : ajouter `LICENSE` (MIT, déjà recommandé par le README) + `CODE_OF_CONDUCT.md` (esprit Ubuntu, déjà évoqué dans CONTRIBUTING). Choisi car ce sont les deux fichiers attendus d'un repo open source, référencés mais manquants — dernière brique avant d'ouvrir publiquement.
+Outillage collaboratif (5/n) : ajouter les templates GitHub (`.github/ISSUE_TEMPLATE/` : bug + proposition de problème/fonctionnalité, et `PULL_REQUEST_TEMPLATE.md` rappelant de relier la PR à un problème). Choisi car ça cadre et facilite les toutes premières contributions des jeunes qu'on vient d'inviter — après ça, le repo peut être poussé public.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -43,5 +44,5 @@ Outillage collaboratif (4/n) : ajouter `LICENSE` (MIT, déjà recommandé par le
 - Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
 - Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
-- Pas encore de `LICENSE` — le README recommande MIT (à finaliser)
 - CI invérifiable tant que le repo n'a pas de remote GitHub (le workflow s'activera au 1ᵉʳ push)
+- `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — s'assurer que cette adresse route vers une vraie boîte avant l'ouverture publique
