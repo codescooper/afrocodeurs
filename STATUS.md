@@ -2,7 +2,7 @@
 > Dernière MAJ : 2026-06-13
 
 ## 🎯 Objectif de la phase actuelle
-Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgres et déployable — sortir du mode démo local.
+Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai Postgres ; on outille la collaboration (commandes, docs, CI) avant le passage en open source.
 
 ## ✅ Fait (cette semaine)
 - Socle Next.js 16 + Auth.js v5 + Prisma 7 (driver adapter Postgres), incluant le correctif bloquant Prisma 7
@@ -23,12 +23,13 @@ Rendre le MVP (fonctionnellement complet) exécutable sur une vraie base Postgre
 - **Profil public `/u/[username]`** : identité, skills, liens, stats, contributions — et membres cliquables partout (recherche, forum, ressources, problèmes, atlas, communautés)
 - **Relations problème ↔ solutions/ressources** (cœur du pitch) : la page problème liste les solutions (SOLVES) et ressources (EXPLAINS) liées, liaison/retrait par la communauté (`EntityRelation` enfin servi par l'UI)
 - **Outillage collaboratif (OSS) — 1/n** : runner de commandes portable `./run` (start/build/test/lint/format/logs/deploy/clean/doctor, réutilisable toute stack, auto-détection + `run.config.json`) + `.gitattributes` (normalisation LF/CRLF)
+- **Accueil open source — 2/n** : README **bilingue FR/EN** + CONTRIBUTING panafricains et accueillants (Build Before Consume, contributions sans code, langues africaines, esprit Ubuntu) ; `seed.mjs` de démo versionné pour l'onboarding. Commande globale `/awema-pre-commit-check` posée.
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Outillage collaboratif (2/n) : rédiger un vrai `README.md` (il est encore le template create-next-app) + un `CONTRIBUTING.md` qui s'appuie sur `./run`. Choisi car c'est la porte d'entrée indispensable avant d'ouvrir les contributions ; le runner vient d'être posé, autant enchaîner la doc qui le référence.
+Outillage collaboratif (3/n) : ajouter un workflow CI GitHub Actions (`.github/workflows/ci.yml`) qui lance `./run lint` + `./run build` sur chaque push/PR. Choisi car c'est le filet qualité automatique dès que des contributions externes arrivent — il prolonge `/awema-pre-commit-check` côté serveur. (LICENSE + CODE_OF_CONDUCT à suivre.)
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -41,4 +42,4 @@ Outillage collaboratif (2/n) : rédiger un vrai `README.md` (il est encore le te
 - Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
 - Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
-- `README.md` est encore le template create-next-app par défaut
+- Pas encore de `LICENSE` ni de CI — le README recommande MIT (à finaliser)
