@@ -28,6 +28,7 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **LICENSE (MIT) + CODE_OF_CONDUCT (Contributor Covenant 2.1) — 4/n** : repo prêt à être rendu public ; liés depuis README (FR/EN) et CONTRIBUTING
 - **Templates GitHub — 5/n** : formulaires d'issue (bug, amélioration) + template de PR (rappelle de relier à un problème, checklist `./run`) → **outillage collaboratif complet**
 - **Bonus OSS** : `SECURITY.md`, `SUPPORT.md`, `.github/FUNDING.yml`, et `docs/good-first-issues.md` (idées de démarrage tirées du backlog, liées depuis CONTRIBUTING)
+- **« Signaler » généralisé** : le contrôle de signalement couvre désormais ressources, problèmes, solutions et communautés (plus seulement le forum) — modération sur tous les contenus publics
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
@@ -44,7 +45,6 @@ Rendre le dépôt public sur GitHub : créer l'organisation/dépôt, ajouter le 
 
 ## ⚠️ Dettes / risques connus
 - Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
-- Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
 - CI invérifiable tant que le repo n'a pas de remote GitHub (le workflow s'activera au 1ᵉʳ push)
 - `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — s'assurer que cette adresse route vers une vraie boîte avant l'ouverture publique
