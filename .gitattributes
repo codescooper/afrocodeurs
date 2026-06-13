@@ -1,0 +1,24 @@
+# Normalisation des fins de ligne — cohérence cross-plateforme (collaboration).
+# Tout le texte est stocké en LF dans le dépôt.
+* text=auto eol=lf
+
+# Scripts exécutés sous Unix : DOIVENT rester en LF.
+run text eol=lf
+*.sh text eol=lf
+*.mjs text eol=lf
+
+# Lanceurs Windows : CRLF.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binaires : aucune conversion.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
