@@ -34,7 +34,7 @@ Ouvre simplement une **issue** pour proposer — on t'aide à transformer ça en
 
 ## 🚀 Ta première contribution (code)
 
-1. Cherche une issue étiquetée **`good first issue`** ou **`help wanted`**.
+1. Cherche une issue étiquetée **`good first issue`** ou **`help wanted`** — ou pioche dans notre **[liste d'idées pour démarrer](docs/good-first-issues.md)**.
 2. Commente « je prends » pour que personne ne travaille en double.
 3. Même une **correction de typo** est une vraie contribution. Commence petit.
 
