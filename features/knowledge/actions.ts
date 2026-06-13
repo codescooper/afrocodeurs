@@ -9,6 +9,7 @@ import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { knowledgeSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
+import { award } from "@/features/reputation/award";
 
 export type KnowledgeFormState = { error?: string } | undefined;
 
@@ -110,6 +111,7 @@ export async function moderateKnowledgeAction(
           ? `/knowledge/${slug}`
           : "/dashboard/contributions",
     });
+    await award(k.authorId, "KNOWLEDGE_PUBLISHED", { type: "KNOWLEDGE", id });
   } else if (decision === "reject") {
     const k = await db.knowledge.update({
       where: { id },

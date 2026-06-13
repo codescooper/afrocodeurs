@@ -9,6 +9,7 @@ import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { communitySchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
+import { award } from "@/features/reputation/award";
 
 export type CommunityFormState = { error?: string } | undefined;
 
@@ -89,6 +90,10 @@ export async function joinCommunityAction(formData: FormData): Promise<void> {
   if (!existing) {
     await db.communityMember.create({
       data: { userId: session.user.id, communityId, role: "MEMBER" },
+    });
+    await award(session.user.id, "COMMUNITY_JOINED", {
+      type: "COMMUNITY",
+      id: communityId,
     });
 
     // Notifier les responsables (ADMIN) de la communauté.

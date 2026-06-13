@@ -10,6 +10,7 @@ import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { answerSchema, commentSchema, questionSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
+import { award, awardVote } from "@/features/reputation/award";
 
 export type ForumFormState = { error?: string } | undefined;
 
@@ -46,13 +47,17 @@ export async function createQuestionAction(
   }
 
   const slug = await uniqueSlug(parsed.data.title);
-  await db.question.create({
+  const question = await db.question.create({
     data: {
       title: parsed.data.title,
       slug,
       body: parsed.data.body,
       authorId: session.user.id,
     },
+  });
+  await award(session.user.id, "QUESTION_ASKED", {
+    type: "QUESTION",
+    id: question.id,
   });
 
   revalidatePath("/forum");
@@ -79,12 +84,16 @@ export async function createAnswerAction(
   const slug = formData.get("slug");
   if (typeof questionId !== "string") return { error: "Question introuvable." };
 
-  await db.answer.create({
+  const answer = await db.answer.create({
     data: {
       questionId,
       body: parsed.data.body,
       authorId: session.user.id,
     },
+  });
+  await award(session.user.id, "ANSWER_POSTED", {
+    type: "ANSWER",
+    id: answer.id,
   });
   await db.question.updateMany({
     where: { id: questionId, status: "OPEN" },
@@ -145,6 +154,31 @@ export async function voteAction(formData: FormData): Promise<void> {
     await db.vote.update({ where: { id: existing.id }, data: { value } });
   }
 
+  // Réputation de l'auteur du contenu (sur les upvotes uniquement).
+  const oldWasUp = existing?.value === "UP";
+  const removed = existing != null && existing.value === value;
+  const newIsUp = !removed && value === "UP";
+  const delta = (newIsUp ? 1 : 0) - (oldWasUp ? 1 : 0);
+  if (delta !== 0) {
+    const author =
+      targetType === "QUESTION"
+        ? (
+            await db.question.findUnique({
+              where: { id: targetId },
+              select: { authorId: true },
+            })
+          )?.authorId
+        : (
+            await db.answer.findUnique({
+              where: { id: targetId },
+              select: { authorId: true },
+            })
+          )?.authorId;
+    if (author && author !== session.user.id) {
+      await awardVote(author, delta, { type: targetType, id: targetId });
+    }
+  }
+
   if (typeof slug === "string") revalidatePath(`/forum/${slug}`);
 }
 
@@ -179,6 +213,13 @@ export async function acceptAnswerAction(formData: FormData): Promise<void> {
       data: { status: "SOLVED" },
     }),
   ]);
+
+  if (answer.authorId !== session.user.id) {
+    await award(answer.authorId, "ANSWER_ACCEPTED", {
+      type: "ANSWER",
+      id: answerId,
+    });
+  }
 
   await notify({
     userId: answer.authorId,

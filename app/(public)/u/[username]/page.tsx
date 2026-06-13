@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { db } from "@/lib/db";
+import { getReputation } from "@/features/reputation/queries";
 import { USER_ROLE_LABELS } from "@/features/admin/constants";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
@@ -66,6 +67,8 @@ export default async function PublicProfilePage({
   });
 
   if (!user) notFound();
+
+  const rep = await getReputation(user.id);
 
   const p = user.profile;
   const location = [p?.city, p?.country].filter(Boolean).join(", ");
@@ -137,6 +140,33 @@ export default async function PublicProfilePage({
           </div>
         )}
       </header>
+
+      {/* Réputation */}
+      <section className="mt-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-muted/40 p-5">
+        <div className="flex flex-col">
+          <span className="text-3xl font-bold text-primary">{rep.total}</span>
+          <span className="text-xs text-muted-foreground">
+            points de réputation
+          </span>
+        </div>
+        <div className="h-10 w-px bg-border" />
+        <div className="flex flex-col">
+          <span className="font-semibold">{rep.level.label}</span>
+          {rep.next && (
+            <span className="text-xs text-muted-foreground">
+              {rep.next.min - rep.total} pts vers {rep.next.label}
+            </span>
+          )}
+        </div>
+        <div className="ml-auto flex gap-4 text-sm text-muted-foreground">
+          <span>
+            Contribution <b className="text-foreground">{rep.contribution}</b>
+          </span>
+          <span>
+            Participation <b className="text-foreground">{rep.participation}</b>
+          </span>
+        </div>
+      </section>
 
       {/* Langues & compétences */}
       {(p?.languages.length || p?.skills.length) ? (

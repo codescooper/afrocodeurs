@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { problemSchema } from "@/lib/validators";
+import { award } from "@/features/reputation/award";
 
 export type ProblemFormState = { error?: string } | undefined;
 
@@ -66,7 +67,7 @@ export async function createProblemAction(
   const d = parsed.data;
   const slug = await uniqueSlug(d.title);
 
-  await db.problem.create({
+  const problem = await db.problem.create({
     data: {
       title: d.title,
       slug,
@@ -78,6 +79,10 @@ export async function createProblemAction(
       difficultyLevel: d.difficultyLevel,
       createdById: session.user.id,
     },
+  });
+  await award(session.user.id, "PROBLEM_PROPOSED", {
+    type: "PROBLEM",
+    id: problem.id,
   });
 
   revalidatePath("/explorer");

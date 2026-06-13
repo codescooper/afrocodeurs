@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { auth } from "@/lib/auth";
+import { getReputation } from "@/features/reputation/queries";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -11,16 +14,32 @@ const BLOCKS = [
 export default async function DashboardPage() {
   const session = await auth();
   const user = session!.user;
+  const rep = await getReputation(user.id);
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-bold">
-          Bienvenue, {user.name ?? `@${user.username}`} 👋
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Niveau AfroMaker · {user.role}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">
+            Bienvenue, {user.name ?? `@${user.username}`} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Niveau{" "}
+            <span className="font-medium text-foreground">
+              {rep.level.label}
+            </span>{" "}
+            · {rep.total} pts
+            {rep.next
+              ? ` · ${rep.next.min - rep.total} vers ${rep.next.label}`
+              : ""}
+          </p>
+        </div>
+        <Link
+          href="/afromakers"
+          className="text-sm font-medium text-foreground underline"
+        >
+          Classement AfroMakers →
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

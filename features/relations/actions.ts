@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can, hasRank } from "@/lib/permissions";
 import { notify } from "@/features/notifications/notify";
+import { award } from "@/features/reputation/award";
 
 export type LinkFormState = { error?: string } | undefined;
 
@@ -87,6 +88,10 @@ export async function linkToProblemAction(
       rawType === "SOLUTION" ? "solution" : "ressource"
     } à « ${problem.title} ».`,
     link: typeof slug === "string" ? `/explorer/${slug}` : null,
+  });
+  await award(session.user.id, "RELATION_ADDED", {
+    type: "PROBLEM",
+    id: problemId,
   });
 
   if (typeof slug === "string") revalidatePath(`/explorer/${slug}`);

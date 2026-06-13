@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { solutionSchema } from "@/lib/validators";
+import { award } from "@/features/reputation/award";
 
 export type SolutionFormState = { error?: string } | undefined;
 
@@ -57,7 +58,7 @@ export async function createSolutionAction(
   const d = parsed.data;
   const slug = await uniqueSlug(d.name);
 
-  await db.solution.create({
+  const solution = await db.solution.create({
     data: {
       name: d.name,
       slug,
@@ -69,6 +70,10 @@ export async function createSolutionAction(
       license: orNull(d.license),
       createdById: session.user.id,
     },
+  });
+  await award(session.user.id, "SOLUTION_ADDED", {
+    type: "SOLUTION",
+    id: solution.id,
   });
 
   revalidatePath("/atlas");

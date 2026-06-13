@@ -264,6 +264,29 @@ async function main() {
     });
   }
 
+  // Réputation de démo (idempotent : seulement si le registre est vide).
+  if ((await db.reputationEvent.count()) === 0) {
+    await db.reputationEvent.createMany({
+      data: [
+        ...Array(4).fill({ userId: amina.id, action: "UPVOTE_RECEIVED", points: 10, dimension: "CONTRIBUTION" }),
+        { userId: amina.id, action: "KNOWLEDGE_PUBLISHED", points: 20, dimension: "CONTRIBUTION" },
+        { userId: amina.id, action: "KNOWLEDGE_PUBLISHED", points: 20, dimension: "CONTRIBUTION" },
+        { userId: amina.id, action: "ANSWER_ACCEPTED", points: 15, dimension: "CONTRIBUTION" },
+        { userId: amina.id, action: "ANSWER_POSTED", points: 5, dimension: "CONTRIBUTION" },
+        { userId: amina.id, action: "PROBLEM_PROPOSED", points: 8, dimension: "CONTRIBUTION" },
+        { userId: amina.id, action: "COMMUNITY_JOINED", points: 1, dimension: "PARTICIPATION" },
+        { userId: kwame.id, action: "PROBLEM_PROPOSED", points: 8, dimension: "CONTRIBUTION" },
+        ...Array(3).fill({ userId: kwame.id, action: "SOLUTION_ADDED", points: 8, dimension: "CONTRIBUTION" }),
+        { userId: kwame.id, action: "RELATION_ADDED", points: 3, dimension: "CONTRIBUTION" },
+        { userId: kwame.id, action: "QUESTION_ASKED", points: 2, dimension: "PARTICIPATION" },
+        { userId: kwame.id, action: "UPVOTE_RECEIVED", points: 10, dimension: "CONTRIBUTION" },
+        { userId: admin.id, action: "KNOWLEDGE_PUBLISHED", points: 20, dimension: "CONTRIBUTION" },
+        { userId: admin.id, action: "SOLUTION_ADDED", points: 8, dimension: "CONTRIBUTION" },
+        { userId: admin.id, action: "COMMUNITY_JOINED", points: 1, dimension: "PARTICIPATION" },
+      ],
+    });
+  }
+
   console.log("SEED_OK");
 }
 
