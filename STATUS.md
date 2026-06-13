@@ -26,12 +26,13 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Accueil open source — 2/n** : README **bilingue FR/EN** + CONTRIBUTING panafricains et accueillants (Build Before Consume, contributions sans code, langues africaines, esprit Ubuntu) ; `seed.mjs` de démo versionné pour l'onboarding. Commande globale `/awema-pre-commit-check` posée.
 - **CI — 3/n** : workflow GitHub Actions (`.github/workflows/ci.yml`) — `./run lint` + `./run build` sur push/PR, Postgres de service + `migrate deploy` ; s'activera au 1ᵉʳ push GitHub
 - **LICENSE (MIT) + CODE_OF_CONDUCT (Contributor Covenant 2.1) — 4/n** : repo prêt à être rendu public ; liés depuis README (FR/EN) et CONTRIBUTING
+- **Templates GitHub — 5/n** : formulaires d'issue (bug, amélioration) + template de PR (rappelle de relier à un problème, checklist `./run`) → **outillage collaboratif complet**
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Outillage collaboratif (5/n) : ajouter les templates GitHub (`.github/ISSUE_TEMPLATE/` : bug + proposition de problème/fonctionnalité, et `PULL_REQUEST_TEMPLATE.md` rappelant de relier la PR à un problème). Choisi car ça cadre et facilite les toutes premières contributions des jeunes qu'on vient d'inviter — après ça, le repo peut être poussé public.
+Rendre le dépôt public sur GitHub : créer l'organisation/dépôt, ajouter le remote, `git push`. Ça active la CI, les templates et les docs. Action côté mainteneur (compte GitHub) — l'outillage collaboratif est complet. Pré-vol : vérifier le détenteur du copyright (`LICENSE`) et que `conduct@afrocodeurs.org` route vers une vraie boîte.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
