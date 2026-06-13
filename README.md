@@ -120,7 +120,8 @@ pour qu'on **apprenne en contribuant**. Détails d'architecture dans
 
 ## 📜 Licence
 
-Open source — licence **MIT** recommandée (à finaliser dans `LICENSE`).
+Open source sous licence **MIT** — voir [`LICENSE`](LICENSE). En participant, tu
+acceptes notre [Code de conduite](CODE_OF_CONDUCT.md).
 Marque : or `#F5B800`, noir `#111111`, vert `#22C55E`.
 
 <div align="center">

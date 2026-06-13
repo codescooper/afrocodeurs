@@ -19,6 +19,8 @@ réussie, et fière.
 Notre seule règle de fond, c'est le respect — esprit **Ubuntu**, _je suis parce
 que nous sommes_. Pas de mépris, pas de gatekeeping. On élève, on n'écrase pas.
 
+> 📜 En participant, tu acceptes notre [Code de conduite](CODE_OF_CONDUCT.md).
+
 ## ✋ Contribuer, même sans coder
 
 Le projet est **panafricain** : il a besoin de bien plus que du code.

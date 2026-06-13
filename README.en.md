@@ -114,7 +114,8 @@ progress in [STATUS.md](STATUS.md).
 
 ## 📜 License
 
-Open source — **MIT** license recommended (to be finalized in `LICENSE`).
+Open source under the **MIT** license — see [`LICENSE`](LICENSE). By taking part,
+you agree to our [Code of Conduct](CODE_OF_CONDUCT.md).
 Brand: gold `#F5B800`, black `#111111`, green `#22C55E`.
 
 <div align="center">
