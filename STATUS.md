@@ -1,5 +1,5 @@
 # STATUS — AfroCodeurs
-> Dernière MAJ : 2026-06-13
+> Dernière MAJ : 2026-06-14
 
 ## 🎯 Objectif de la phase actuelle
 Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai Postgres ; on outille la collaboration (commandes, docs, CI) avant le passage en open source.
@@ -29,6 +29,7 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Templates GitHub — 5/n** : formulaires d'issue (bug, amélioration) + template de PR (rappelle de relier à un problème, checklist `./run`) → **outillage collaboratif complet**
 - **Bonus OSS** : `SECURITY.md`, `SUPPORT.md`, `.github/FUNDING.yml`, et `docs/good-first-issues.md` (idées de démarrage tirées du backlog, liées depuis CONTRIBUTING)
 - **« Signaler » généralisé** : le contrôle de signalement couvre désormais ressources, problèmes, solutions et communautés (plus seulement le forum) — modération sur tous les contenus publics
+- **Fix auth** : une session dont l'utilisateur n'existe plus est invalidée (revalidation du JWT à chaque résolution) — corrige les 500 sur clé étrangère (ex. Signaler après reseed) et propage aussitôt les changements de rôle
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
