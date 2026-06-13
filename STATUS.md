@@ -24,12 +24,13 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Relations problème ↔ solutions/ressources** (cœur du pitch) : la page problème liste les solutions (SOLVES) et ressources (EXPLAINS) liées, liaison/retrait par la communauté (`EntityRelation` enfin servi par l'UI)
 - **Outillage collaboratif (OSS) — 1/n** : runner de commandes portable `./run` (start/build/test/lint/format/logs/deploy/clean/doctor, réutilisable toute stack, auto-détection + `run.config.json`) + `.gitattributes` (normalisation LF/CRLF)
 - **Accueil open source — 2/n** : README **bilingue FR/EN** + CONTRIBUTING panafricains et accueillants (Build Before Consume, contributions sans code, langues africaines, esprit Ubuntu) ; `seed.mjs` de démo versionné pour l'onboarding. Commande globale `/awema-pre-commit-check` posée.
+- **CI — 3/n** : workflow GitHub Actions (`.github/workflows/ci.yml`) — `./run lint` + `./run build` sur push/PR, Postgres de service + `migrate deploy` ; s'activera au 1ᵉʳ push GitHub
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Outillage collaboratif (3/n) : ajouter un workflow CI GitHub Actions (`.github/workflows/ci.yml`) qui lance `./run lint` + `./run build` sur chaque push/PR. Choisi car c'est le filet qualité automatique dès que des contributions externes arrivent — il prolonge `/awema-pre-commit-check` côté serveur. (LICENSE + CODE_OF_CONDUCT à suivre.)
+Outillage collaboratif (4/n) : ajouter `LICENSE` (MIT, déjà recommandé par le README) + `CODE_OF_CONDUCT.md` (esprit Ubuntu, déjà évoqué dans CONTRIBUTING). Choisi car ce sont les deux fichiers attendus d'un repo open source, référencés mais manquants — dernière brique avant d'ouvrir publiquement.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -42,4 +43,5 @@ Outillage collaboratif (3/n) : ajouter un workflow CI GitHub Actions (`.github/w
 - Postgres local **sans démarrage automatique** (session non-admin, pas de service) : après un reboot, lancer `C:\Users\BEJ technologie\PostgreSQL\start-postgres.cmd`
 - Bouton **Signaler** câblé uniquement sur le forum (à généraliser aux autres contenus)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
-- Pas encore de `LICENSE` ni de CI — le README recommande MIT (à finaliser)
+- Pas encore de `LICENSE` — le README recommande MIT (à finaliser)
+- CI invérifiable tant que le repo n'a pas de remote GitHub (le workflow s'activera au 1ᵉʳ push)
