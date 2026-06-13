@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Lanceur portable du runner de projet — délègue à scripts/run.mjs (Node).
+# Usage : ./run <commande>   (voir ./run help)
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec node "$dir/scripts/run.mjs" "$@"

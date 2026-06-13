@@ -1,0 +1,6 @@
+{
+  "name": "afrocodeurs",
+  "deployBranch": "main",
+  "logs": [".next/dev/logs"],
+  "clean": [".next", "coverage", ".turbo", "*.tsbuildinfo"]
+}
