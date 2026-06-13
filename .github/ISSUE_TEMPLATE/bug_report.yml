@@ -1,0 +1,49 @@
+name: 🐛 Signaler un bug
+description: Quelque chose ne marche pas comme prévu ?
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler ce bug 💛
+        Sois aussi précis·e que possible — ça aide énormément. Pas de panique si
+        tu oublies un champ, on complétera ensemble.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que se passe-t-il ?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Aller sur …
+        2. Cliquer sur …
+        3. Observer l'erreur …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+      description: À quoi t'attendais-tu ?
+    validations:
+      required: false
+  - type: textarea
+    id: env
+    attributes:
+      label: Environnement
+      description: "OS, navigateur, version de Node… (astuce : `./run doctor`)"
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Avant d'envoyer
+      options:
+        - label: J'ai vérifié que ce bug n'était pas déjà signalé.
+          required: true

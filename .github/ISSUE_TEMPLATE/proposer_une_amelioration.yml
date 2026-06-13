@@ -1,0 +1,40 @@
+name: 💡 Proposer une amélioration
+description: Une idée pour faire avancer la plateforme ?
+title: "[Idée] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Toutes les idées sont les bienvenues 🌍
+        Rappelle-toi du principe d'AfroCodeurs : **tout se relie à un problème réel**.
+  - type: textarea
+    id: probleme
+    attributes:
+      label: Quel problème cette idée résout-elle ?
+      description: Le « pourquoi » avant le « quoi ».
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: La solution que tu imagines
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Optionnel — d'autres pistes auxquelles tu as pensé.
+    validations:
+      required: false
+  - type: dropdown
+    id: aide
+    attributes:
+      label: Veux-tu participer à la construire ?
+      options:
+        - "Oui, je veux la coder 💪"
+        - "Oui, mais j'aurai besoin d'aide / d'un mentorat"
+        - "Je propose seulement l'idée pour l'instant"
+    validations:
+      required: false

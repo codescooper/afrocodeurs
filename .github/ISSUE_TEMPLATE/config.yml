@@ -1,0 +1,7 @@
+# Garde la possibilité d'ouvrir une issue vierge (accueillant pour les débutant·e·s).
+blank_issues_enabled: true
+# Une fois le repo sur GitHub, ajoute ici des liens de contact, par exemple :
+# contact_links:
+#   - name: 💬 Discussions & entraide
+#     url: https://github.com/<org>/<repo>/discussions
+#     about: Pour les questions et l'entraide (plutôt qu'une issue).
