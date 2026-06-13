@@ -32,10 +32,11 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Fix auth** : une session dont l'utilisateur n'existe plus est invalidée (revalidation du JWT à chaque résolution) — corrige les 500 sur clé étrangère (ex. Signaler après reseed) et propage aussitôt les changements de rôle
 - **Modération complète + notifications** : page de traitement `/admin/reports/[id]` (aperçu du contenu signalé + actions Rejeter / Masquer / Supprimer qui agissent sur l'élément), et **notification au signaleur** de la décision (`/dashboard/notifications` + badge de non-lus dans la sidebar). Nouveau modèle `Notification` (migration)
 - **Notifications sur tous les événements** (helper `notify()` centralisé, anti-auto-notification) : réponse à ta question, réponse acceptée, commentaire, ressource publiée/refusée, solution/ressource liée à ton problème, rôle modifié, contenu modéré, **nouveau membre dans ta communauté**
-- **Cloche temps réel** : icône dans le header (connecté) avec compteur de non-lues, panneau déroulant et **toasts « push up »** (polling 15 s, `/api/notifications`). Web Push (service worker) reste une suite possible
+- **Cloche temps réel** : icône dans le header (connecté) avec compteur de non-lues, panneau déroulant et **toasts « push up »** (polling 15 s, `/api/notifications`)
+- **Préférences + Web Push** : opt-out par catégorie (respecté par `notify()`) et **vraies notifications navigateur** (service worker, clés VAPID, abonnement, `web-push`) — réglages sur `/dashboard/notifications`. Au passage : `.env.example` corrigé (était masqué par `.env*`), échafaudage `embedded-postgres` retiré
 
 ## 🚧 En cours
-- [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
+- [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
 Rendre le dépôt public sur GitHub : créer l'organisation/dépôt, ajouter le remote, `git push`. Ça active la CI, les templates et les docs. Action côté mainteneur (compte GitHub) — l'outillage collaboratif est complet. Pré-vol : vérifier le détenteur du copyright (`LICENSE`) et que `conduct@afrocodeurs.org` route vers une vraie boîte.
