@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   FileText,
   Users,
+  Bell,
   User,
   Settings,
   Shield,
@@ -17,12 +18,19 @@ const DASHBOARD_NAV = [
   { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
   { label: "Mes contributions", href: "/dashboard/contributions", icon: FileText },
   { label: "Mes communautés", href: "/dashboard/communities", icon: Users },
+  { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   { label: "Profil", href: "/dashboard/profile", icon: User },
   { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
 ];
 
 /** Sidebar du dashboard. Le lien Admin n'apparaît que pour les admins. */
-export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
+export function DashboardSidebar({
+  isAdmin = false,
+  unreadCount = 0,
+}: {
+  isAdmin?: boolean;
+  unreadCount?: number;
+}) {
   const pathname = usePathname();
   const items = isAdmin
     ? [...DASHBOARD_NAV, { label: "Administration", href: "/admin", icon: Shield }]
@@ -49,7 +57,12 @@ export function DashboardSidebar({ isAdmin = false }: { isAdmin?: boolean }) {
               )}
             >
               <Icon className="size-4" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.href === "/dashboard/notifications" && unreadCount > 0 && (
+                <span className="rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}

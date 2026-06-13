@@ -151,6 +151,7 @@ model User {
   reports       Report[] @relation("ReporterReports")
   reputation    ReputationEvent[]
   relations     EntityRelation[] @relation("RelationCreator")
+  notifications Notification[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -461,6 +462,7 @@ model Report {
   reason      ReportReason
   details     String?
   status      ReportStatus @default(OPEN)
+  resolution  String?
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -468,4 +470,21 @@ model Report {
   @@index([reporterId])
   @@index([targetType, targetId])
   @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String
+  title     String
+  body      String
+  link      String?
+  read      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
 }

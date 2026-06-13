@@ -6,7 +6,6 @@ import { can } from "@/lib/permissions";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { moderateKnowledgeAction } from "@/features/knowledge/actions";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
-import { resolveReportAction } from "@/features/admin/actions";
 import { REPORT_REASON_LABELS } from "@/features/admin/constants";
 
 export const metadata = { title: "Administration" };
@@ -139,22 +138,12 @@ export default async function AdminPage() {
                     signalé par @{report.reporter.username}
                   </span>
                 </span>
-                <span className="flex gap-2">
-                  <form action={resolveReportAction}>
-                    <input type="hidden" name="id" value={report.id} />
-                    <input type="hidden" name="decision" value="resolve" />
-                    <Button type="submit" size="sm">
-                      Résoudre
-                    </Button>
-                  </form>
-                  <form action={resolveReportAction}>
-                    <input type="hidden" name="id" value={report.id} />
-                    <input type="hidden" name="decision" value="reject" />
-                    <Button type="submit" size="sm" variant="outline">
-                      Rejeter
-                    </Button>
-                  </form>
-                </span>
+                <Link
+                  href={`/admin/reports/${report.id}`}
+                  className={buttonVariants({ size: "sm" })}
+                >
+                  Traiter
+                </Link>
               </li>
             ))}
           </ul>

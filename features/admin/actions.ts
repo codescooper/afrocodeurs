@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 import { reportSchema } from "@/lib/validators";
+import { deleteTarget, hideTarget } from "./report-target";
 
 export type ReportFormState = { error?: string; success?: boolean } | undefined;
 
@@ -19,25 +20,69 @@ const REPORTABLE: EntityType[] = [
   "SOLUTION",
 ];
 
-/** Traiter un signalement (Sprint 8) : résolu ou rejeté. */
-export async function resolveReportAction(formData: FormData): Promise<void> {
+/**
+ * Traiter un signalement (Sprint 8) en agissant sur le contenu signalé, et
+ * notifier l'auteur du signalement de la décision.
+ * decision : "delete" (supprimer), "hide" (masquer), "dismiss" (rejeter).
+ */
+export async function moderateReportAction(formData: FormData): Promise<void> {
   const session = await auth();
   if (!session?.user) return;
   if (!can(session.user.role, "report:handle")) return;
 
-  const id = formData.get("id");
+  const reportId = formData.get("reportId");
   const decision = formData.get("decision");
-  if (typeof id !== "string") return;
-  const status =
-    decision === "resolve"
-      ? "RESOLVED"
-      : decision === "reject"
-        ? "REJECTED"
-        : null;
-  if (!status) return;
+  if (typeof reportId !== "string") return;
+  if (decision !== "delete" && decision !== "hide" && decision !== "dismiss") {
+    return;
+  }
 
-  await db.report.update({ where: { id }, data: { status } });
+  const report = await db.report.findUnique({ where: { id: reportId } });
+  if (!report || report.status !== "OPEN") return; // déjà traité
+
+  let resolution: string;
+  let notifBody: string;
+
+  if (decision === "dismiss") {
+    resolution = "Signalement rejeté — contenu conservé.";
+    notifBody =
+      "Après examen, le contenu que tu as signalé a été jugé conforme à nos règles et conservé. Merci de ta vigilance. 💛";
+    await db.report.update({
+      where: { id: reportId },
+      data: { status: "REJECTED", resolution },
+    });
+  } else {
+    if (decision === "hide") {
+      await hideTarget(report.targetType, report.targetId);
+      resolution = "Contenu masqué.";
+      notifBody =
+        "Le contenu que tu as signalé a été masqué par la modération. Merci de ta vigilance. 💛";
+    } else {
+      await deleteTarget(report.targetType, report.targetId);
+      resolution = "Contenu supprimé.";
+      notifBody =
+        "Le contenu que tu as signalé a été supprimé par la modération. Merci de ta vigilance. 💛";
+    }
+    await db.report.update({
+      where: { id: reportId },
+      data: { status: "RESOLVED", resolution },
+    });
+  }
+
+  // Notifier la personne qui a signalé.
+  await db.notification.create({
+    data: {
+      userId: report.reporterId,
+      type: "REPORT_HANDLED",
+      title: "Ton signalement a été traité",
+      body: notifBody,
+      link: "/dashboard/notifications",
+    },
+  });
+
   revalidatePath("/admin");
+  revalidatePath(`/admin/reports/${reportId}`);
+  revalidatePath("/dashboard/notifications");
 }
 
 /** Modifier le rôle d'un utilisateur (Sprint 8). Réservé aux ADMIN. */
