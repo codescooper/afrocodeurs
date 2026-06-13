@@ -31,6 +31,7 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **« Signaler » généralisé** : le contrôle de signalement couvre désormais ressources, problèmes, solutions et communautés (plus seulement le forum) — modération sur tous les contenus publics
 - **Fix auth** : une session dont l'utilisateur n'existe plus est invalidée (revalidation du JWT à chaque résolution) — corrige les 500 sur clé étrangère (ex. Signaler après reseed) et propage aussitôt les changements de rôle
 - **Modération complète + notifications** : page de traitement `/admin/reports/[id]` (aperçu du contenu signalé + actions Rejeter / Masquer / Supprimer qui agissent sur l'élément), et **notification au signaleur** de la décision (`/dashboard/notifications` + badge de non-lus dans la sidebar). Nouveau modèle `Notification` (migration)
+- **Notifications sur tous les événements** (helper `notify()` centralisé, anti-auto-notification) : réponse à ta question, réponse acceptée, commentaire, ressource publiée/refusée, solution/ressource liée à ton problème, rôle modifié, contenu modéré
 
 ## 🚧 En cours
 - [ ] Retirer l'échafaudage DB jetable devenu inutile (`dev-db.mjs`, dép `embedded-postgres`, `.devdb/`) — `seed.mjs` reste utile (il a seedé la vraie base)
