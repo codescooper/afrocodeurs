@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { answerSchema, commentSchema, questionSchema } from "@/lib/validators";
+import { notify } from "@/features/notifications/notify";
 
 export type ForumFormState = { error?: string } | undefined;
 
@@ -90,6 +91,21 @@ export async function createAnswerAction(
     data: { status: "ANSWERED" },
   });
 
+  const question = await db.question.findUnique({
+    where: { id: questionId },
+    select: { authorId: true, title: true },
+  });
+  await notify({
+    userId: question?.authorId,
+    actorId: session.user.id,
+    type: "ANSWER",
+    title: "Nouvelle réponse à ta question",
+    body: question
+      ? `Quelqu'un a répondu à « ${question.title} ».`
+      : "Quelqu'un a répondu à ta question.",
+    link: typeof slug === "string" ? `/forum/${slug}` : null,
+  });
+
   if (typeof slug === "string") revalidatePath(`/forum/${slug}`);
   return undefined;
 }
@@ -143,7 +159,11 @@ export async function acceptAnswerAction(formData: FormData): Promise<void> {
 
   const answer = await db.answer.findUnique({
     where: { id: answerId },
-    select: { questionId: true, question: { select: { authorId: true } } },
+    select: {
+      questionId: true,
+      authorId: true,
+      question: { select: { authorId: true } },
+    },
   });
   if (!answer) return;
   if (answer.question.authorId !== session.user.id) return;
@@ -159,6 +179,15 @@ export async function acceptAnswerAction(formData: FormData): Promise<void> {
       data: { status: "SOLVED" },
     }),
   ]);
+
+  await notify({
+    userId: answer.authorId,
+    actorId: session.user.id,
+    type: "ANSWER_ACCEPTED",
+    title: "Ta réponse a été acceptée 🎉",
+    body: "L'auteur de la question a retenu ta réponse comme solution.",
+    link: typeof slug === "string" ? `/forum/${slug}` : null,
+  });
 
   if (typeof slug === "string") revalidatePath(`/forum/${slug}`);
 }
@@ -190,6 +219,32 @@ export async function addCommentAction(
   const targetType: EntityType = rawType;
   await db.comment.create({
     data: { body: parsed.data.body, authorId: session.user.id, targetType, targetId },
+  });
+
+  const recipientId =
+    targetType === "QUESTION"
+      ? (
+          await db.question.findUnique({
+            where: { id: targetId },
+            select: { authorId: true },
+          })
+        )?.authorId
+      : (
+          await db.answer.findUnique({
+            where: { id: targetId },
+            select: { authorId: true },
+          })
+        )?.authorId;
+  await notify({
+    userId: recipientId,
+    actorId: session.user.id,
+    type: "COMMENT",
+    title:
+      targetType === "QUESTION"
+        ? "Nouveau commentaire sur ta question"
+        : "Nouveau commentaire sur ta réponse",
+    body: "Quelqu'un a commenté ton contenu sur le forum.",
+    link: typeof slug === "string" ? `/forum/${slug}` : null,
   });
 
   if (typeof slug === "string") revalidatePath(`/forum/${slug}`);

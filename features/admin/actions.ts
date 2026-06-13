@@ -7,7 +7,9 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 import { reportSchema } from "@/lib/validators";
-import { deleteTarget, hideTarget } from "./report-target";
+import { deleteTarget, hideTarget, resolveReportTarget } from "./report-target";
+import { notify } from "@/features/notifications/notify";
+import { USER_ROLE_LABELS } from "./constants";
 
 export type ReportFormState = { error?: string; success?: boolean } | undefined;
 
@@ -40,6 +42,9 @@ export async function moderateReportAction(formData: FormData): Promise<void> {
   const report = await db.report.findUnique({ where: { id: reportId } });
   if (!report || report.status !== "OPEN") return; // déjà traité
 
+  // Résoudre la cible AVANT toute suppression (pour notifier son auteur).
+  const target = await resolveReportTarget(report.targetType, report.targetId);
+
   let resolution: string;
   let notifBody: string;
 
@@ -70,15 +75,27 @@ export async function moderateReportAction(formData: FormData): Promise<void> {
   }
 
   // Notifier la personne qui a signalé.
-  await db.notification.create({
-    data: {
-      userId: report.reporterId,
-      type: "REPORT_HANDLED",
-      title: "Ton signalement a été traité",
-      body: notifBody,
-      link: "/dashboard/notifications",
-    },
+  await notify({
+    userId: report.reporterId,
+    actorId: session.user.id,
+    type: "REPORT_HANDLED",
+    title: "Ton signalement a été traité",
+    body: notifBody,
+    link: "/dashboard/notifications",
   });
+
+  // Notifier l'auteur du contenu s'il a été modéré (masqué / supprimé).
+  if (decision !== "dismiss" && target?.authorId) {
+    await notify({
+      userId: target.authorId,
+      actorId: session.user.id,
+      type: "CONTENT_MODERATED",
+      title: "Un de tes contenus a été modéré",
+      body: `Ton contenu « ${target.title} » a été ${
+        decision === "delete" ? "supprimé" : "masqué"
+      } par la modération suite à un signalement.`,
+    });
+  }
 
   revalidatePath("/admin");
   revalidatePath(`/admin/reports/${reportId}`);
@@ -107,6 +124,14 @@ export async function updateUserRoleAction(formData: FormData): Promise<void> {
 
   const role: UserRole = rawRole;
   await db.user.update({ where: { id: userId }, data: { role } });
+  await notify({
+    userId,
+    actorId: session.user.id,
+    type: "ROLE_CHANGED",
+    title: "Ton rôle a évolué",
+    body: `Tu es désormais ${USER_ROLE_LABELS[role]} sur AfroCodeurs.`,
+    link: "/dashboard",
+  });
   revalidatePath("/admin/users");
 }
 

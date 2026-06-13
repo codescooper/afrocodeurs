@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { can } from "@/lib/permissions";
 import { knowledgeSchema } from "@/lib/validators";
+import { notify } from "@/features/notifications/notify";
 
 export type KnowledgeFormState = { error?: string } | undefined;
 
@@ -93,12 +94,36 @@ export async function moderateKnowledgeAction(
   if (typeof id !== "string") return;
 
   if (decision === "publish") {
-    await db.knowledge.update({
+    const k = await db.knowledge.update({
       where: { id },
       data: { status: "PUBLISHED", publishedAt: new Date() },
+      select: { authorId: true, title: true },
+    });
+    await notify({
+      userId: k.authorId,
+      actorId: session.user.id,
+      type: "KNOWLEDGE_PUBLISHED",
+      title: "Ta ressource a été publiée 🎉",
+      body: `« ${k.title} » est désormais visible par la communauté.`,
+      link:
+        typeof slug === "string"
+          ? `/knowledge/${slug}`
+          : "/dashboard/contributions",
     });
   } else if (decision === "reject") {
-    await db.knowledge.update({ where: { id }, data: { status: "REJECTED" } });
+    const k = await db.knowledge.update({
+      where: { id },
+      data: { status: "REJECTED" },
+      select: { authorId: true, title: true },
+    });
+    await notify({
+      userId: k.authorId,
+      actorId: session.user.id,
+      type: "KNOWLEDGE_REJECTED",
+      title: "Ta ressource n'a pas été retenue",
+      body: `« ${k.title} » n'a pas été publiée. Tu peux la retravailler et la soumettre à nouveau.`,
+      link: "/dashboard/contributions",
+    });
   } else {
     return;
   }

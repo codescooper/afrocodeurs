@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can, hasRank } from "@/lib/permissions";
+import { notify } from "@/features/notifications/notify";
 
 export type LinkFormState = { error?: string } | undefined;
 
@@ -36,7 +37,7 @@ export async function linkToProblemAction(
 
   const problem = await db.problem.findUnique({
     where: { id: problemId },
-    select: { id: true },
+    select: { id: true, createdById: true, title: true },
   });
   if (!problem) return { error: "Problème introuvable." };
 
@@ -75,6 +76,17 @@ export async function linkToProblemAction(
       targetId: problemId,
       createdById: session.user.id,
     },
+  });
+
+  await notify({
+    userId: problem.createdById,
+    actorId: session.user.id,
+    type: "PROBLEM_LINK",
+    title: "Une piste a été liée à ton problème",
+    body: `Quelqu'un a lié une ${
+      rawType === "SOLUTION" ? "solution" : "ressource"
+    } à « ${problem.title} ».`,
+    link: typeof slug === "string" ? `/explorer/${slug}` : null,
   });
 
   if (typeof slug === "string") revalidatePath(`/explorer/${slug}`);

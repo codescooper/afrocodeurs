@@ -10,7 +10,8 @@ export type ReportTarget = {
   href: string; // lien public pour consulter le contenu
   snippet: string | null;
   canHide: boolean; // le type supporte-t-il le masquage (archive / fermeture) ?
-  authorLabel: string | null; // auteur du contenu, si applicable
+  authorLabel: string | null; // auteur du contenu (affichage), si applicable
+  authorId: string | null; // auteur du contenu (pour le notifier)
 };
 
 /** Résout la cible polymorphe d'un signalement en aperçu affichable. */
@@ -26,7 +27,7 @@ export async function resolveReportTarget(
           title: true,
           slug: true,
           summary: true,
-          author: { select: { username: true } },
+          author: { select: { id: true, username: true } },
         },
       });
       if (!k) return null;
@@ -37,6 +38,7 @@ export async function resolveReportTarget(
         snippet: k.summary,
         canHide: true,
         authorLabel: `@${k.author.username}`,
+        authorId: k.author.id,
       };
     }
     case "PROBLEM": {
@@ -46,7 +48,7 @@ export async function resolveReportTarget(
           title: true,
           slug: true,
           summary: true,
-          createdBy: { select: { username: true } },
+          createdBy: { select: { id: true, username: true } },
         },
       });
       if (!p) return null;
@@ -57,6 +59,7 @@ export async function resolveReportTarget(
         snippet: p.summary,
         canHide: true,
         authorLabel: `@${p.createdBy.username}`,
+        authorId: p.createdBy.id,
       };
     }
     case "SOLUTION": {
@@ -66,7 +69,7 @@ export async function resolveReportTarget(
           name: true,
           slug: true,
           description: true,
-          createdBy: { select: { username: true } },
+          createdBy: { select: { id: true, username: true } },
         },
       });
       if (!s) return null;
@@ -77,6 +80,7 @@ export async function resolveReportTarget(
         snippet: s.description.slice(0, 240),
         canHide: false,
         authorLabel: `@${s.createdBy.username}`,
+        authorId: s.createdBy.id,
       };
     }
     case "COMMUNITY": {
@@ -92,6 +96,7 @@ export async function resolveReportTarget(
         snippet: c.description,
         canHide: false,
         authorLabel: null,
+        authorId: null,
       };
     }
     case "QUESTION": {
@@ -101,7 +106,7 @@ export async function resolveReportTarget(
           title: true,
           slug: true,
           body: true,
-          author: { select: { username: true } },
+          author: { select: { id: true, username: true } },
         },
       });
       if (!q) return null;
@@ -112,6 +117,7 @@ export async function resolveReportTarget(
         snippet: q.body.slice(0, 240),
         canHide: true,
         authorLabel: `@${q.author.username}`,
+        authorId: q.author.id,
       };
     }
     case "ANSWER": {
@@ -119,7 +125,7 @@ export async function resolveReportTarget(
         where: { id },
         select: {
           body: true,
-          author: { select: { username: true } },
+          author: { select: { id: true, username: true } },
           question: { select: { slug: true, title: true } },
         },
       });
@@ -131,6 +137,7 @@ export async function resolveReportTarget(
         snippet: a.body.slice(0, 240),
         canHide: false,
         authorLabel: `@${a.author.username}`,
+        authorId: a.author.id,
       };
     }
     default:
