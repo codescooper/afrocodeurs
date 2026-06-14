@@ -6,7 +6,7 @@ import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
 
 import { db } from "@/lib/db";
-import { signIn } from "@/lib/auth";
+import { auth, signIn } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import {
   signInSchema,
@@ -16,6 +16,32 @@ import {
 } from "@/lib/validators";
 
 export type AuthFormState = { error?: string } | undefined;
+
+/** Envoie (ou renvoie) l'email de confirmation d'adresse (valable 24 h). */
+async function sendVerificationEmail(
+  email: string,
+  name: string | null,
+): Promise<void> {
+  const token = randomBytes(32).toString("hex");
+  const identifier = `verify:${email}`;
+  await db.verificationToken.deleteMany({ where: { identifier } });
+  await db.verificationToken.create({
+    data: {
+      identifier,
+      token,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
+  });
+
+  const base = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const url = `${base}/verify-email?token=${token}`;
+  await sendEmail({
+    to: email,
+    subject: "Confirme ton adresse email AfroCodeurs",
+    text: `Bonjour${name ? " " + name : ""},\n\nConfirme ton adresse email (lien valable 24 h) :\n${url}`,
+    html: `<p>Bonjour${name ? " " + name : ""},</p><p>Confirme ton adresse email (lien valable 24&nbsp;h) :</p><p><a href="${url}">${url}</a></p>`,
+  });
+}
 
 /** Inscription email (Sprint 1). Crée l'utilisateur puis ouvre la session. */
 export async function registerAction(
@@ -47,6 +73,8 @@ export async function registerAction(
   await db.user.create({
     data: { email, username, name, passwordHash },
   });
+
+  await sendVerificationEmail(email, name ?? null);
 
   await signIn("credentials", {
     email,
@@ -154,5 +182,21 @@ export async function resetPasswordAction(
     where: { identifier: record.identifier },
   });
 
+  return { done: true };
+}
+
+/** Renvoie l'email de confirmation à l'utilisateur connecté. */
+export async function resendVerificationAction(): Promise<PasswordResetState> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Tu n'es pas connecté." };
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { email: true, name: true, emailVerified: true },
+  });
+  if (!user) return { error: "Compte introuvable." };
+  if (user.emailVerified) return { done: true };
+
+  await sendVerificationEmail(user.email, user.name);
   return { done: true };
 }

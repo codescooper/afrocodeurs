@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { getReputation } from "@/features/reputation/queries";
+import { VerifyEmailBanner } from "@/features/auth/verify-email-banner";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -15,6 +17,10 @@ export default async function DashboardPage() {
   const session = await auth();
   const user = session!.user;
   const rep = await getReputation(user.id);
+  const account = await db.user.findUnique({
+    where: { id: user.id },
+    select: { emailVerified: true },
+  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -41,6 +47,8 @@ export default async function DashboardPage() {
           Classement AfroMakers →
         </Link>
       </div>
+
+      {!account?.emailVerified && <VerifyEmailBanner />}
 
       <div className="grid gap-4 md:grid-cols-3">
         {BLOCKS.map((b) => (
