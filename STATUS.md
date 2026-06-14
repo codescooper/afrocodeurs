@@ -35,6 +35,7 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Cloche temps réel** : icône dans le header (connecté) avec compteur de non-lues, panneau déroulant et **toasts « push up »** (polling 15 s, `/api/notifications`)
 - **Préférences + Web Push** : opt-out par catégorie (respecté par `notify()`) et **vraies notifications navigateur** (service worker, clés VAPID, abonnement, `web-push`) — réglages sur `/dashboard/notifications`. Au passage : `.env.example` corrigé (était masqué par `.env*`), échafaudage `embedded-postgres` retiré
 - **Système de réputation** (« Build Before Consume ») : barème + niveaux (Curieux·se → Légende), attribution de points dans toutes les actions (question, réponse, réponse acceptée, commentaire, ressource publiée, problème, solution, relation, join, **upvotes reçus**), carte sur le profil, niveau sur le dashboard, **classement public `/afromakers`**
+- **Infrastructure email** : transport pluggable (`lib/email.ts` — Resend si `RESEND_API_KEY`, sinon **log console en mode dev** avec le lien magique). **Mot de passe oublié** (`/forgot-password` → `/reset-password`, token 1 h) et **vérification d'email** (envoi à l'inscription, page `/verify-email`, renvoi depuis le dashboard) — tokens à usage unique dans `VerificationToken` (préfixes `reset:` / `verify:`)
 
 ## 🚧 En cours
 - [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
