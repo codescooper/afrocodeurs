@@ -143,6 +143,14 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(8, "Au moins 8 caractères"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Email invalide"),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Au moins 8 caractères"),
+});
+
 export type QuestionInput = z.infer<typeof questionSchema>;
 export type AnswerInput = z.infer<typeof answerSchema>;
 export type CommentInput = z.infer<typeof commentSchema>;

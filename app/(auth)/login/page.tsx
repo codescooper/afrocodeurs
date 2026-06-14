@@ -40,6 +40,13 @@ export default function LoginPage() {
           />
         </label>
 
+        <Link
+          href="/forgot-password"
+          className="-mt-1 self-end text-xs text-muted-foreground underline hover:text-foreground"
+        >
+          Mot de passe oublié ?
+        </Link>
+
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>
         )}
