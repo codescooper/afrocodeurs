@@ -2,7 +2,7 @@
 > Dernière MAJ : 2026-06-14
 
 ## 🎯 Objectif de la phase actuelle
-Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai Postgres ; on outille la collaboration (commandes, docs, CI) avant le passage en open source.
+Projet **ouvert en open source** : dépôt public + CI verte. Phase suivante — enrichir les fonctionnalités manquantes (médias, i18n, mentorat) et accueillir les premières contributions.
 
 ## ✅ Fait (cette semaine)
 - Socle Next.js 16 + Auth.js v5 + Prisma 7 (driver adapter Postgres), incluant le correctif bloquant Prisma 7
@@ -36,12 +36,13 @@ Ouvrir le projet à la contribution : le MVP est complet et tourne sur un vrai P
 - **Préférences + Web Push** : opt-out par catégorie (respecté par `notify()`) et **vraies notifications navigateur** (service worker, clés VAPID, abonnement, `web-push`) — réglages sur `/dashboard/notifications`. Au passage : `.env.example` corrigé (était masqué par `.env*`), échafaudage `embedded-postgres` retiré
 - **Système de réputation** (« Build Before Consume ») : barème + niveaux (Curieux·se → Légende), attribution de points dans toutes les actions (question, réponse, réponse acceptée, commentaire, ressource publiée, problème, solution, relation, join, **upvotes reçus**), carte sur le profil, niveau sur le dashboard, **classement public `/afromakers`**
 - **Infrastructure email** : transport pluggable (`lib/email.ts` — Resend si `RESEND_API_KEY`, sinon **log console en mode dev** avec le lien magique). **Mot de passe oublié** (`/forgot-password` → `/reset-password`, token 1 h) et **vérification d'email** (envoi à l'inscription, page `/verify-email`, renvoi depuis le dashboard) — tokens à usage unique dans `VerificationToken` (préfixes `reset:` / `verify:`)
+- **Dépôt public sur GitHub** : https://github.com/codescooper/afrocodeurs (branche `main`) — **CI verte au 1ᵉʳ run** (lint + build + `migrate deploy` sur Postgres, ~1m20). Actions `checkout`/`setup-node` bumpées `@v5` (Node 24) + build CI sur Node 22
 
 ## 🚧 En cours
 - [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-Rendre le dépôt public sur GitHub : créer l'organisation/dépôt, ajouter le remote, `git push`. Ça active la CI, les templates et les docs. Action côté mainteneur (compte GitHub) — l'outillage collaboratif est complet. Pré-vol : vérifier le détenteur du copyright (`LICENSE`) et que `conduct@afrocodeurs.org` route vers une vraie boîte.
+**Upload d'avatars** : rendre `User.image` éditable (champ présent mais jamais renseignable ; config S3 dans `.env.example` non branchée). Premier manque visible côté UX. À défaut de bucket, stockage local en dev.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -53,5 +54,4 @@ Rendre le dépôt public sur GitHub : créer l'organisation/dépôt, ajouter le 
 ## ⚠️ Dettes / risques connus
 - Postgres local : **conflit de port** — un autre Postgres (`C:\dev\pgsql`) reprend le 5432 au reboot, donc AfroCodeurs tourne sur **5433** (`.env` pointe dessus). Pas de démarrage auto : après un reboot, relancer le mien sur 5433 (`pg_ctl -D "…\PostgreSQL\data" -o "-p 5433" start`)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
-- CI invérifiable tant que le repo n'a pas de remote GitHub (le workflow s'activera au 1ᵉʳ push)
-- `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — s'assurer que cette adresse route vers une vraie boîte avant l'ouverture publique
+- `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — le repo est **public**, s'assurer que cette adresse route vers une vraie boîte
