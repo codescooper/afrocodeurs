@@ -2,15 +2,34 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { db } from "@/lib/db";
+import { getLeaderboard } from "@/features/reputation/queries";
 
-const SECTIONS = [
-  { title: "Problèmes populaires", hint: "Quel problème puis-je résoudre ?" },
-  { title: "Solutions récentes", hint: "Que puis-je construire ?" },
-  { title: "Communautés actives", hint: "Qui peut m'aider ?" },
-  { title: "AfroMakers à suivre", hint: "Qui peut m'aider ?" },
-];
+type Item = { label: string; href: string; meta?: string };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [problems, knowledge, communities, makers, counts] = await Promise.all([
+    db.problem.findMany({
+      select: { title: true, slug: true, sector: true },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    db.knowledge.findMany({
+      where: { status: "PUBLISHED" },
+      select: { title: true, slug: true },
+      orderBy: { publishedAt: "desc" },
+      take: 5,
+    }),
+    db.community.findMany({
+      select: { name: true, slug: true, _count: { select: { members: true } } },
+      orderBy: { members: { _count: "desc" } },
+      take: 5,
+    }),
+    getLeaderboard(5),
+    Promise.all([db.problem.count(), db.solution.count(), db.user.count()]),
+  ]);
+  const [problemCount, solutionCount, userCount] = counts;
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4">
       {/* Hero */}
@@ -35,10 +54,7 @@ export default function HomePage() {
             placeholder="Quel problème souhaitez-vous résoudre ?"
             className="flex-1 bg-transparent py-2 text-sm outline-none"
           />
-          <button
-            type="submit"
-            className={buttonVariants({ size: "sm" })}
-          >
+          <button type="submit" className={buttonVariants({ size: "sm" })}>
             Rechercher
           </button>
         </form>
@@ -56,35 +72,118 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Sections de découverte */}
+      {/* Découverte — alimentée en temps réel */}
       <div className="grid gap-6 pb-16 md:grid-cols-2">
-        {SECTIONS.map((s) => (
-          <section
-            key={s.title}
-            className="rounded-lg border border-border bg-background p-6"
-          >
-            <h2 className="text-xl font-semibold">{s.title}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{s.hint}</p>
-            <p className="mt-6 text-sm text-muted-foreground">
-              Bientôt disponible — contenu alimenté par la communauté.
-            </p>
-          </section>
-        ))}
+        <DiscoveryCard
+          title="Problèmes à résoudre"
+          subtitle="Quel problème puis-je résoudre ?"
+          href="/explorer"
+          empty="Sois le premier à proposer un problème."
+          items={problems.map((p) => ({
+            label: p.title,
+            href: `/explorer/${p.slug}`,
+            meta: p.sector,
+          }))}
+        />
+        <DiscoveryCard
+          title="Savoir récent"
+          subtitle="Qu'est-ce que je peux apprendre ?"
+          href="/knowledge"
+          empty="Aucune ressource publiée pour l'instant."
+          items={knowledge.map((k) => ({
+            label: k.title,
+            href: `/knowledge/${k.slug}`,
+          }))}
+        />
+        <DiscoveryCard
+          title="Communautés actives"
+          subtitle="Qui peut m'aider ?"
+          href="/communities"
+          empty="Aucune communauté pour l'instant."
+          items={communities.map((c) => ({
+            label: c.name,
+            href: `/communities/${c.slug}`,
+            meta: `${c._count.members} membre${c._count.members > 1 ? "s" : ""}`,
+          }))}
+        />
+        <DiscoveryCard
+          title="AfroMakers à suivre"
+          subtitle="Build Before Consume"
+          href="/afromakers"
+          empty="Le classement se remplit avec les contributions."
+          items={makers.map((m) => ({
+            label: m.user.name ?? `@${m.user.username}`,
+            href: `/u/${m.user.username}`,
+            meta: `${m.points} pts`,
+          }))}
+        />
       </div>
 
-      {/* Statistiques */}
+      {/* Statistiques réelles */}
       <section className="mb-20 grid grid-cols-3 gap-4 rounded-lg border border-border bg-muted/40 p-6 text-center">
-        {[
-          ["Problèmes", "—"],
-          ["Solutions", "—"],
-          ["AfroMakers", "—"],
-        ].map(([label, value]) => (
-          <div key={label}>
-            <div className="text-2xl font-bold text-primary">{value}</div>
-            <div className="text-sm text-muted-foreground">{label}</div>
-          </div>
-        ))}
+        <Stat label="Problèmes" value={problemCount} />
+        <Stat label="Solutions" value={solutionCount} />
+        <Stat label="Membres" value={userCount} />
       </section>
+    </div>
+  );
+}
+
+function DiscoveryCard({
+  title,
+  subtitle,
+  href,
+  items,
+  empty,
+}: {
+  title: string;
+  subtitle: string;
+  href: string;
+  items: Item[];
+  empty: string;
+}) {
+  return (
+    <section className="flex flex-col rounded-lg border border-border bg-background p-6">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <Link
+          href={href}
+          className="shrink-0 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Tout voir →
+        </Link>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+      {items.length === 0 ? (
+        <p className="mt-6 text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <ul className="mt-4 flex flex-col divide-y divide-border">
+          {items.map((it) => (
+            <li key={it.href}>
+              <Link
+                href={it.href}
+                className="flex items-center justify-between gap-3 py-2.5 text-sm transition-colors hover:text-primary"
+              >
+                <span className="line-clamp-1">{it.label}</span>
+                {it.meta && (
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {it.meta}
+                  </span>
+                )}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <div className="text-2xl font-bold text-primary">{value}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
     </div>
   );
 }
