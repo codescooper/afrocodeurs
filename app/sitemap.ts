@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
 
+// Généré à l'exécution (interroge la base) — jamais prérendu au build.
+export const dynamic = "force-dynamic";
+
 const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
