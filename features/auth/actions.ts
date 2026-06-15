@@ -8,6 +8,8 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { auth, signIn } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 import {
   signInSchema,
   signUpSchema,
@@ -48,6 +50,11 @@ export async function registerAction(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const ip = await clientIp();
+  if (!rateLimit(`register:${ip}`, 5, 60 * 60 * 1000).ok) {
+    return { error: "Trop de tentatives d'inscription. Réessaie plus tard." };
+  }
+
   const parsed = signUpSchema.safeParse({
     email: formData.get("email"),
     username: formData.get("username"),
@@ -57,6 +64,13 @@ export async function registerAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+
+  const captcha = formData.get("cf-turnstile-response");
+  if (
+    !(await verifyTurnstile(typeof captcha === "string" ? captcha : null, ip))
+  ) {
+    return { error: "Validation anti-robot échouée. Réessaie." };
   }
 
   const { email, username, password, name } = parsed.data;
@@ -88,6 +102,11 @@ export async function loginAction(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const ip = await clientIp();
+  if (!rateLimit(`login:${ip}`, 10, 5 * 60 * 1000).ok) {
+    return { error: "Trop de tentatives. Patiente quelques minutes." };
+  }
+
   const parsed = signInSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -120,6 +139,11 @@ export async function requestPasswordResetAction(
   _prev: PasswordResetState,
   formData: FormData,
 ): Promise<PasswordResetState> {
+  const ip = await clientIp();
+  if (!rateLimit(`pwreset:${ip}`, 5, 60 * 60 * 1000).ok) {
+    return { error: "Trop de demandes. Réessaie plus tard." };
+  }
+
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") });
   if (!parsed.success) return { error: "Email invalide." };
   const email = parsed.data.email.toLowerCase();

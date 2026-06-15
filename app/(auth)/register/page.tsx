@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 
 import { registerAction } from "@/features/auth/actions";
+import { TurnstileWidget } from "@/features/auth/turnstile-widget";
 import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
@@ -60,6 +61,8 @@ export default function RegisterPage() {
             className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
+
+        <TurnstileWidget />
 
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>
