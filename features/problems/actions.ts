@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
-import { can } from "@/lib/permissions";
+import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
 import { problemSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
 
@@ -46,6 +46,7 @@ export async function createProblemAction(
 ): Promise<ProblemFormState> {
   const session = await auth();
   if (!session?.user) return { error: "Vous devez être connecté." };
+  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
   if (!can(session.user.role, "problem:propose")) {
     return { error: "Action non autorisée." };
   }

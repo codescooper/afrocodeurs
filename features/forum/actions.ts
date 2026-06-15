@@ -7,7 +7,7 @@ import type { EntityType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/utils";
-import { can } from "@/lib/permissions";
+import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
 import { answerSchema, commentSchema, questionSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
@@ -34,6 +34,7 @@ export async function createQuestionAction(
 ): Promise<ForumFormState> {
   const session = await auth();
   if (!session?.user) return { error: "Vous devez être connecté." };
+  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
   if (!can(session.user.role, "question:create")) {
     return { error: "Action non autorisée." };
   }
@@ -71,6 +72,7 @@ export async function createAnswerAction(
 ): Promise<ForumFormState> {
   const session = await auth();
   if (!session?.user) return { error: "Vous devez être connecté." };
+  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
   if (!can(session.user.role, "answer:create")) {
     return { error: "Action non autorisée." };
   }
@@ -240,6 +242,7 @@ export async function addCommentAction(
 ): Promise<ForumFormState> {
   const session = await auth();
   if (!session?.user) return { error: "Vous devez être connecté." };
+  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
   if (!can(session.user.role, "content:comment")) {
     return { error: "Action non autorisée." };
   }

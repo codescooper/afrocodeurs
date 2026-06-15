@@ -20,8 +20,9 @@ async function main() {
 
   const admin = await db.user.upsert({
     where: { email: "admin@afrocodeurs.org" },
-    update: {},
+    update: { emailVerified: new Date() },
     create: {
+      emailVerified: new Date(),
       email: "admin@afrocodeurs.org",
       username: "admin",
       name: "Admin AfroCodeurs",
@@ -31,8 +32,9 @@ async function main() {
   });
   const amina = await db.user.upsert({
     where: { email: "amina@afrocodeurs.org" },
-    update: {},
+    update: { emailVerified: new Date() },
     create: {
+      emailVerified: new Date(),
       email: "amina@afrocodeurs.org",
       username: "amina",
       name: "Amina Diop",
@@ -51,8 +53,9 @@ async function main() {
   });
   const kwame = await db.user.upsert({
     where: { email: "kwame@afrocodeurs.org" },
-    update: {},
+    update: { emailVerified: new Date() },
     create: {
+      emailVerified: new Date(),
       email: "kwame@afrocodeurs.org",
       username: "kwame",
       name: "Kwame Mensah",

@@ -56,3 +56,7 @@ export function hasRank(role: Role, required: Role): boolean {
 export function can(role: Role | null | undefined, permission: Permission): boolean {
   return hasRank(role ?? "VISITOR", PERMISSIONS[permission]);
 }
+
+/** Message renvoyé quand un compte non vérifié tente de publier. */
+export const VERIFY_EMAIL_MESSAGE =
+  "Confirme ton adresse email pour publier — un bandeau sur ton tableau de bord permet de renvoyer l'email.";
