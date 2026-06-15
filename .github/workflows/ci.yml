@@ -61,5 +61,8 @@ jobs:
       - name: Lint
         run: ./run lint
 
+      - name: Test
+        run: npm test
+
       - name: Build
         run: ./run build
