@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
 /** Layout public : en-tête, contenu, navigation basse mobile. */
@@ -12,6 +13,7 @@ export default function PublicLayout({
       <SiteHeader />
       {/* pb-20 : laisse la place à la barre mobile basse */}
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <SiteFooter />
       <MobileNav />
     </div>
   );
