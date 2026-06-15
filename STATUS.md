@@ -2,7 +2,7 @@
 > Dernière MAJ : 2026-06-14
 
 ## 🎯 Objectif de la phase actuelle
-Projet **ouvert en open source** : dépôt public + CI verte. Phase suivante — enrichir les fonctionnalités manquantes (médias, i18n, mentorat) et accueillir les premières contributions.
+Projet **ouvert en open source** et **durci pour la production** (sécurité, légal/RGPD, SEO, tests). Reste : le **déploiement réel**, puis les fonctionnalités manquantes (médias, i18n, mentorat).
 
 ## ✅ Fait (cette semaine)
 - Socle Next.js 16 + Auth.js v5 + Prisma 7 (driver adapter Postgres), incluant le correctif bloquant Prisma 7
@@ -37,12 +37,13 @@ Projet **ouvert en open source** : dépôt public + CI verte. Phase suivante —
 - **Système de réputation** (« Build Before Consume ») : barème + niveaux (Curieux·se → Légende), attribution de points dans toutes les actions (question, réponse, réponse acceptée, commentaire, ressource publiée, problème, solution, relation, join, **upvotes reçus**), carte sur le profil, niveau sur le dashboard, **classement public `/afromakers`**
 - **Infrastructure email** : transport pluggable (`lib/email.ts` — Resend si `RESEND_API_KEY`, sinon **log console en mode dev** avec le lien magique). **Mot de passe oublié** (`/forgot-password` → `/reset-password`, token 1 h) et **vérification d'email** (envoi à l'inscription, page `/verify-email`, renvoi depuis le dashboard) — tokens à usage unique dans `VerificationToken` (préfixes `reset:` / `verify:`)
 - **Dépôt public sur GitHub** : https://github.com/codescooper/afrocodeurs (branche `main`) — **CI verte au 1ᵉʳ run** (lint + build + `migrate deploy` sur Postgres, ~1m20). Actions `checkout`/`setup-node` bumpées `@v5` (Node 24) + build CI sur Node 22
+- **Durcissement avant lancement** : pages d'erreur 404/500 + `robots`/`sitemap`/OpenGraph ; **pages légales** (confidentialité/CGU/mentions) + bannière cookies + footer ; **anti-abus** (rate-limiting + CAPTCHA Turnstile, pluggables, no-op en dev) ; **email vérifié imposé** pour publier ; capture d'erreurs (`lib/observability`, Sentry-ready) ; **13 tests Vitest** ajoutés à la CI ; config de déploiement (`vercel.json` + `docs/DEPLOYMENT.md`)
 
 ## 🚧 En cours
 - [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-**Upload d'avatars** : rendre `User.image` éditable (champ présent mais jamais renseignable ; config S3 dans `.env.example` non branchée). Premier manque visible côté UX. À défaut de bucket, stockage local en dev.
+**Déployer en staging** : suivre `docs/DEPLOYMENT.md` — créer une Postgres managée (Neon/Supabase), régénérer les secrets, brancher Resend (domaine vérifié) + Turnstile, `prisma migrate deploy`, déployer sur Vercel. Action mainteneur (comptes externes). Ensuite : upload d'avatars.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -54,4 +55,7 @@ Projet **ouvert en open source** : dépôt public + CI verte. Phase suivante —
 ## ⚠️ Dettes / risques connus
 - Postgres local : **conflit de port** — un autre Postgres (`C:\dev\pgsql`) reprend le 5432 au reboot, donc AfroCodeurs tourne sur **5433** (`.env` pointe dessus). Pas de démarrage auto : après un reboot, relancer le mien sur 5433 (`pg_ctl -D "…\PostgreSQL\data" -o "-p 5433" start`)
 - OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive
+- **Rate-limiting en mémoire** : OK en mono-instance ; en serverless (Vercel) brancher un store partagé (Upstash) — cf. `docs/DEPLOYMENT.md`
+- **Pages légales** : contenu de départ à faire relire + placeholders `[à compléter]` (éditeur, hébergeur)
+- **Sentry** : hook prêt (`lib/observability`) mais `@sentry/nextjs` pas encore installé
 - `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — le repo est **public**, s'assurer que cette adresse route vers une vraie boîte
