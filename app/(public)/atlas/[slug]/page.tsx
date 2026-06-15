@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, Globe, MapPin, Scale } from "lucide-react";
+import { BookOpen, Eye, Globe, MapPin, Scale } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -22,6 +22,11 @@ export default async function SolutionDetailPage({
   });
 
   if (!solution) notFound();
+
+  await db.solution.update({
+    where: { id: solution.id },
+    data: { views: { increment: 1 } },
+  });
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
@@ -53,6 +58,10 @@ export default async function SolutionDetailPage({
       </div>
 
       <dl className="mt-8 flex flex-col gap-3 text-sm">
+        <div className="flex items-center gap-2">
+          <Eye className="size-4 text-muted-foreground" />
+          {solution.views} vue{solution.views > 1 ? "s" : ""}
+        </div>
         {solution.country && (
           <div className="flex items-center gap-2">
             <MapPin className="size-4 text-muted-foreground" />

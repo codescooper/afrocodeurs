@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, CheckCircle2 } from "lucide-react";
+import { Check, CheckCircle2, Eye } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -35,6 +35,11 @@ export default async function QuestionDetailPage({
     },
   });
   if (!question) notFound();
+
+  await db.question.update({
+    where: { id: question.id },
+    data: { views: { increment: 1 } },
+  });
 
   const comments = await db.comment.findMany({
     where: { targetType: "QUESTION", targetId: question.id },
@@ -89,6 +94,10 @@ export default async function QuestionDetailPage({
             >
               {question.author.name ?? `@${question.author.username}`}
             </Link>
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Eye className="size-3.5" />
+            {question.views} vue{question.views > 1 ? "s" : ""}
           </p>
           <article className="mt-4">
             <Markdown>{question.body}</Markdown>

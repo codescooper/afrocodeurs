@@ -264,6 +264,7 @@ model Problem {
   impactLevel     Int           @default(1)
   difficultyLevel Int           @default(1)
   status          ProblemStatus @default(PROPOSED)
+  views           Int           @default(0)
 
   createdById     String
   createdBy       User          @relation(fields: [createdById], references: [id])
@@ -287,6 +288,7 @@ model Knowledge {
   language    String        @default("fr")
   level       String?
   status      ContentStatus @default(DRAFT)
+  views       Int           @default(0)
 
   authorId    String
   author      User          @relation(fields: [authorId], references: [id])
@@ -312,6 +314,7 @@ model Question {
   slug      String         @unique
   body      String
   status    QuestionStatus @default(OPEN)
+  views     Int            @default(0)
 
   authorId  String
   author    User           @relation(fields: [authorId], references: [id])
@@ -388,6 +391,7 @@ model Solution {
   websiteUrl       String?
   documentationUrl String?
   license          String?
+  views            Int          @default(0)
 
   createdById      String
   createdBy        User         @relation(fields: [createdById], references: [id])

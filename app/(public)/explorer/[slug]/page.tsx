@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Globe, TrendingUp } from "lucide-react";
+import { Eye, Globe, TrendingUp } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -29,6 +29,11 @@ export default async function ProblemDetailPage({
   });
 
   if (!problem) notFound();
+
+  await db.problem.update({
+    where: { id: problem.id },
+    data: { views: { increment: 1 } },
+  });
 
   const linked = await getProblemRelations(problem.id);
   const canLink = can(session?.user?.role, "relation:create");
@@ -78,6 +83,10 @@ export default async function ProblemDetailPage({
           <TrendingUp className="size-4" />
           Impact {problem.impactLevel}/5 · Difficulté {problem.difficultyLevel}
           /5
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Eye className="size-4" />
+          {problem.views} vue{problem.views > 1 ? "s" : ""}
         </span>
         {problem.countries.length > 0 && (
           <span className="flex items-center gap-1.5">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock } from "lucide-react";
+import { Clock, Eye } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -38,6 +38,13 @@ export default async function KnowledgeDetailPage({
 
   // Une ressource non publiée n'est visible que par son auteur ou le staff.
   if (item.status !== "PUBLISHED" && !isAuthor && !isStaff) notFound();
+
+  if (item.status === "PUBLISHED") {
+    await db.knowledge.update({
+      where: { id: item.id },
+      data: { views: { increment: 1 } },
+    });
+  }
 
   const canModerate =
     item.status === "SUBMITTED" && can(session?.user?.role, "content:validate");
@@ -77,6 +84,10 @@ export default async function KnowledgeDetailPage({
         <span className="flex items-center gap-1.5">
           <Clock className="size-4" />
           {readingTimeMinutes(item.content)} min de lecture
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Eye className="size-4" />
+          {item.views} vue{item.views > 1 ? "s" : ""}
         </span>
       </div>
 
