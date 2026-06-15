@@ -12,13 +12,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "AfroCodeurs — Des problèmes aux solutions, ensemble.",
     template: "%s · AfroCodeurs",
   },
   description:
     "La communauté panafricaine où les passionnés de technologie apprennent, collaborent et construisent des solutions adaptées aux réalités du continent.",
+  applicationName: "AfroCodeurs",
+  openGraph: {
+    type: "website",
+    siteName: "AfroCodeurs",
+    locale: "fr_FR",
+    title: "AfroCodeurs — Des problèmes aux solutions, ensemble.",
+    description:
+      "La communauté panafricaine des makers tech. Build Before Consume.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AfroCodeurs",
+    description:
+      "La communauté panafricaine des makers tech. Build Before Consume.",
+  },
 };
 
 export default function RootLayout({
