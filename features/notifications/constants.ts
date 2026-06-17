@@ -5,7 +5,8 @@ export type NotificationCategory =
   | "COMMUNITY"
   | "SOCIAL"
   | "ACCOUNT"
-  | "MODERATION";
+  | "MODERATION"
+  | "DIGEST";
 
 /** Catégories réglables par l'utilisateur (préférences de notification). */
 export const NOTIFICATION_CATEGORIES: {
@@ -43,6 +44,11 @@ export const NOTIFICATION_CATEGORIES: {
     key: "MODERATION",
     label: "Modération",
     description: "Suites données à tes signalements",
+  },
+  {
+    key: "DIGEST",
+    label: "Digest hebdomadaire",
+    description: "Résumé de la semaine par email",
   },
 ];
 
