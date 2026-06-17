@@ -155,6 +155,7 @@ model User {
   pushSubscriptions PushSubscription[]
   following     Follow[] @relation("Following")
   followers     Follow[] @relation("Followers")
+  bookmarks     Bookmark[]
   notificationOptOut String[] @default([])
 
   createdAt     DateTime @default(now())
@@ -174,6 +175,18 @@ model Follow {
 
   @@unique([followerId, followingId])
   @@index([followingId])
+}
+
+model Bookmark {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType EntityType
+  targetId   String
+  createdAt  DateTime   @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId])
 }
 
 model Profile {

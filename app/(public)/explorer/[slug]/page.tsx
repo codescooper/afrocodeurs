@@ -13,6 +13,8 @@ import {
 import { unlinkFromProblemAction } from "@/features/relations/actions";
 import { LinkForm } from "@/features/relations/link-form";
 import { ReportForm } from "@/features/admin/report-form";
+import { SaveButton } from "@/features/bookmarks/save-button";
+import { isBookmarked } from "@/features/bookmarks/queries";
 
 /** Page détail d'un problème (Sprint 3). */
 export default async function ProblemDetailPage({
@@ -46,6 +48,12 @@ export default async function ProblemDetailPage({
         linked.filter((i) => i.kind === "KNOWLEDGE").map((i) => i.sourceId),
       )
     : { solutions: [], knowledge: [] };
+
+  const savedProblem = await isBookmarked(
+    session?.user?.id,
+    "PROBLEM",
+    problem.id,
+  );
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
@@ -95,6 +103,16 @@ export default async function ProblemDetailPage({
           </span>
         )}
       </div>
+
+      {session?.user && (
+        <div className="mt-4">
+          <SaveButton
+            targetType="PROBLEM"
+            targetId={problem.id}
+            initialSaved={savedProblem}
+          />
+        </div>
+      )}
 
       {problem.summary && (
         <p className="mt-6 text-lg text-muted-foreground">{problem.summary}</p>

@@ -14,6 +14,8 @@ import {
   KNOWLEDGE_TYPE_LABELS,
 } from "@/features/knowledge/constants";
 import { ReportForm } from "@/features/admin/report-form";
+import { SaveButton } from "@/features/bookmarks/save-button";
+import { isBookmarked } from "@/features/bookmarks/queries";
 
 /** Page détail d'une ressource (Sprint 4) : rendu Markdown + modération. */
 export default async function KnowledgeDetailPage({
@@ -48,6 +50,12 @@ export default async function KnowledgeDetailPage({
 
   const canModerate =
     item.status === "SUBMITTED" && can(session?.user?.role, "content:validate");
+
+  const savedKnowledge = await isBookmarked(
+    session?.user?.id,
+    "KNOWLEDGE",
+    item.id,
+  );
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
@@ -89,6 +97,13 @@ export default async function KnowledgeDetailPage({
           <Eye className="size-4" />
           {item.views} vue{item.views > 1 ? "s" : ""}
         </span>
+        {session?.user && (
+          <SaveButton
+            targetType="KNOWLEDGE"
+            targetId={item.id}
+            initialSaved={savedKnowledge}
+          />
+        )}
       </div>
 
       {item.summary && (
