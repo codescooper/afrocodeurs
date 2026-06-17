@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
-import { orNull, parseList } from "@/lib/utils";
+import { githubLoginFromUrl, orNull, parseList } from "@/lib/utils";
 import { guard, invalidMessage } from "@/lib/guard";
 import { profileSchema } from "@/lib/validators";
 
@@ -32,13 +32,17 @@ export async function updateProfileAction(
   if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const p = parsed.data;
+  const githubUrl = orNull(p.githubUrl);
   const data = {
     bio: orNull(p.bio),
     country: orNull(p.country),
     city: orNull(p.city),
     languages: p.languages,
     skills: p.skills,
-    githubUrl: orNull(p.githubUrl),
+    githubUrl,
+    // Pont d'identité : déduit le login GitHub de l'URL (utilisé pour créditer
+    // la réputation des tâches de roadmap, même sans connexion OAuth GitHub).
+    githubLogin: githubLoginFromUrl(githubUrl),
     linkedinUrl: orNull(p.linkedinUrl),
     websiteUrl: orNull(p.websiteUrl),
     portfolioUrl: orNull(p.portfolioUrl),

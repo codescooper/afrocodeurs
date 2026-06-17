@@ -34,6 +34,8 @@ export const PERMISSIONS = {
   "knowledge:create": "CONTRIBUTOR",
   "knowledge:submit": "CONTRIBUTOR",
   "knowledge:editOwn": "CONTRIBUTOR",
+  "project:create": "CONTRIBUTOR",
+  "roadmap:edit": "CONTRIBUTOR",
   // Moderator
   "content:validate": "MODERATOR",
   "forum:moderate": "MODERATOR",

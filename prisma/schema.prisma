@@ -86,6 +86,25 @@ enum EntityType {
   SOLUTION
   ORGANIZATION
   TAG
+  PROJECT
+}
+
+// Cycle incubateur (cf. PRD fondateur §15) : Idée → Validation → Construction
+// → Prototype → Déploiement → Maintenu.
+enum ProjectStatus {
+  IDEA
+  VALIDATING
+  BUILDING
+  PROTOTYPE
+  DEPLOYED
+  MAINTAINED
+  ARCHIVED
+}
+
+// Reflète l'état d'une issue GitHub (source de vérité des tâches de roadmap).
+enum TaskState {
+  OPEN
+  CLOSED
 }
 
 enum RelationType {
@@ -148,6 +167,7 @@ model User {
   comments      Comment[]
   votes         Vote[]
   solutions     Solution[]
+  projects      Project[]
   reports       Report[] @relation("ReporterReports")
   reputation    ReputationEvent[]
   relations     EntityRelation[] @relation("RelationCreator")
@@ -198,6 +218,7 @@ model Profile {
   languages    String[] @default([])
   skills       String[] @default([])
   githubUrl    String?
+  githubLogin  String?
   linkedinUrl  String?
   websiteUrl   String?
   portfolioUrl String?
@@ -206,6 +227,8 @@ model Profile {
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([githubLogin])
 }
 
 model Account {
@@ -254,6 +277,7 @@ model Community {
   city        String?
 
   members     CommunityMember[]
+  projects    Project[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -295,6 +319,8 @@ model Problem {
 
   createdById     String
   createdBy       User          @relation(fields: [createdById], references: [id])
+
+  projects        Project[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -535,4 +561,111 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// Projet OSS référencé sur la plateforme. Sa roadmap est une vue synchronisée
+// du dépôt GitHub (`githubRepo` = "org/repo"). GitHub reste la source de vérité
+// des tâches ; la plateforme ajoute identité, graphe de dépendances et réputation.
+model Project {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  description  String
+  status       ProjectStatus @default(IDEA)
+  githubRepo   String
+  websiteUrl   String?
+  views        Int           @default(0)
+  lastSyncedAt DateTime?
+
+  problemId    String?
+  problem      Problem?      @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  communityId  String?
+  community    Community?    @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
+  createdById  String
+  createdBy    User          @relation(fields: [createdById], references: [id])
+
+  milestones   RoadmapMilestone[]
+  tasks        RoadmapTask[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([githubRepo])
+  @@index([createdById])
+}
+
+// Milestone GitHub mis en cache = « phase » de la roadmap.
+model RoadmapMilestone {
+  id          String    @id @default(cuid())
+
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  githubId    Int
+  title       String
+  description String?
+  state       String    @default("open")
+  dueOn       DateTime?
+  ordinal     Int       @default(0)
+
+  tasks       RoadmapTask[]
+
+  @@unique([projectId, githubId])
+  @@index([projectId])
+}
+
+// Issue GitHub mise en cache = « tâche » de la roadmap. Les arêtes de
+// dépendance (DAG) sont curatées via RoadmapDependency ; le statut dérivé
+// (Prête / Bloquée / En cours / Fait) est calculé à la lecture.
+model RoadmapTask {
+  id              String     @id @default(cuid())
+
+  projectId       String
+  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  githubNumber    Int
+  title           String
+  url             String
+  state           TaskState  @default(OPEN)
+  labels          String[]   @default([])
+  assignees       String[]   @default([])
+  isGoodFirst     Boolean    @default(false)
+  githubUpdatedAt DateTime?
+  completionAwarded Boolean  @default(false)
+
+  milestoneId     String?
+  milestone       RoadmapMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  dependencies    RoadmapDependency[] @relation("dependent")
+  dependents      RoadmapDependency[] @relation("prerequisite")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([projectId, githubNumber])
+  @@index([projectId])
+  @@index([milestoneId])
+}
+
+// Arête du DAG : `task` dépend de `dependsOn` (prérequis). Curatée sur la
+// plateforme (GitHub n'expose pas proprement les dépendances).
+model RoadmapDependency {
+  id          String      @id @default(cuid())
+
+  taskId      String
+  task        RoadmapTask @relation("dependent", fields: [taskId], references: [id], onDelete: Cascade)
+
+  dependsOnId String
+  dependsOn   RoadmapTask @relation("prerequisite", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  createdById String?
+
+  createdAt   DateTime @default(now())
+
+  @@unique([taskId, dependsOnId])
+  @@index([taskId])
+  @@index([dependsOnId])
 }

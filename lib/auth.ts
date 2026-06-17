@@ -53,6 +53,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    // À la connexion GitHub, on mémorise le login GitHub sur le profil
+    // AfroMaker (pont d'identité pour la réputation des tâches de roadmap).
+    // Best-effort : n'empêche jamais la connexion.
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "github" && user?.id) {
+        const login = (profile as { login?: string } | null)?.login;
+        if (login) {
+          try {
+            await db.profile.upsert({
+              where: { userId: user.id },
+              create: { userId: user.id, githubLogin: login },
+              update: { githubLogin: login },
+            });
+          } catch {
+            /* le pont d'identité ne doit pas bloquer la connexion */
+          }
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;

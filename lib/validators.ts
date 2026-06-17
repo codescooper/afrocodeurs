@@ -93,6 +93,43 @@ export const solutionSchema = z.object({
   license: z.string().max(80).optional(),
 });
 
+export const projectSchema = z.object({
+  name: z
+    .string()
+    .min(5, "Au moins 5 caractères")
+    .max(120, "120 caractères maximum"),
+  description: z
+    .string()
+    .min(20, "Décrivez le projet (20 caractères minimum)"),
+  githubRepo: z
+    .string()
+    .regex(/^[\w.-]+\/[\w.-]+$/, "Format attendu : org/depot"),
+  websiteUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  status: z
+    .enum([
+      "IDEA",
+      "VALIDATING",
+      "BUILDING",
+      "PROTOTYPE",
+      "DEPLOYED",
+      "MAINTAINED",
+      "ARCHIVED",
+    ])
+    .default("IDEA"),
+  problemId: z.string().optional().or(z.literal("")),
+  communityId: z.string().optional().or(z.literal("")),
+});
+
+export const dependencySchema = z
+  .object({
+    taskId: z.string().min(1),
+    dependsOnId: z.string().min(1),
+  })
+  .refine((d) => d.taskId !== d.dependsOnId, {
+    message: "Une tâche ne peut pas dépendre d'elle-même.",
+    path: ["dependsOnId"],
+  });
+
 export const questionSchema = z.object({
   title: z
     .string()
@@ -121,6 +158,8 @@ export type CommunityInput = z.infer<typeof communitySchema>;
 export type ProblemInput = z.infer<typeof problemSchema>;
 export type KnowledgeInput = z.infer<typeof knowledgeSchema>;
 export type SolutionInput = z.infer<typeof solutionSchema>;
+export type ProjectInput = z.infer<typeof projectSchema>;
+export type DependencyInput = z.infer<typeof dependencySchema>;
 export const reportSchema = z.object({
   reason: z.enum([
     "SPAM",

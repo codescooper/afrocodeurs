@@ -31,6 +31,13 @@ export function parseList(value: FormDataEntryValue | null): string[] {
     .filter(Boolean);
 }
 
+/** Extrait le login GitHub d'une URL de profil (`github.com/<login>`), sinon null. */
+export function githubLoginFromUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const m = url.match(/github\.com\/([A-Za-z0-9-]+)/);
+  return m ? m[1] : null;
+}
+
 /**
  * Génère un slug unique : slugifie `base` (ou `fallback` si vide), puis ajoute
  * un suffixe -2, -3… tant que `exists(slug)` renvoie vrai.
