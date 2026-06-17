@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CookieBanner } from "@/components/layout/cookie-banner";
@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   description:
     "La communauté panafricaine où les passionnés de technologie apprennent, collaborent et construisent des solutions adaptées aux réalités du continent.",
   applicationName: "AfroCodeurs",
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
   openGraph: {
     type: "website",
     siteName: "AfroCodeurs",
@@ -38,6 +39,10 @@ export const metadata: Metadata = {
     description:
       "La communauté panafricaine des makers tech. Build Before Consume.",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#111111",
 };
 
 export default function RootLayout({
