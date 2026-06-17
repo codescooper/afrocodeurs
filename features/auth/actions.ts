@@ -6,7 +6,8 @@ import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
 
 import { db } from "@/lib/db";
-import { auth, signIn } from "@/lib/auth";
+import { signIn } from "@/lib/auth";
+import { guard, invalidMessage } from "@/lib/guard";
 import { sendEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -62,9 +63,7 @@ export async function registerAction(
     name: formData.get("name") || undefined,
   });
 
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const captcha = formData.get("cf-turnstile-response");
   if (
@@ -187,7 +186,7 @@ export async function resetPasswordAction(
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Mot de passe invalide." };
+    return { error: invalidMessage(parsed.error, "Mot de passe invalide.") };
   }
 
   const record = await db.verificationToken.findUnique({ where: { token } });
@@ -211,11 +210,11 @@ export async function resetPasswordAction(
 
 /** Renvoie l'email de confirmation à l'utilisateur connecté. */
 export async function resendVerificationAction(): Promise<PasswordResetState> {
-  const session = await auth();
-  if (!session?.user?.id) return { error: "Tu n'es pas connecté." };
+  const g = await guard({ messages: { unauthenticated: "Tu n'es pas connecté." } });
+  if (!g.ok) return { error: g.error };
 
   const user = await db.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: g.user.id },
     select: { email: true, name: true, emailVerified: true },
   });
   if (!user) return { error: "Compte introuvable." };

@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { can, hasRank, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
+import { hasRank } from "@/lib/permissions";
+import { guard } from "@/lib/guard";
 import { notify } from "@/features/notifications/notify";
 import { award } from "@/features/reputation/award";
 
@@ -18,12 +18,8 @@ export async function linkToProblemAction(
   _prev: LinkFormState,
   formData: FormData,
 ): Promise<LinkFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "relation:create")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "relation:create", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const problemId = formData.get("problemId");
   const slug = formData.get("slug");
@@ -76,13 +72,13 @@ export async function linkToProblemAction(
       relationType,
       targetType: "PROBLEM",
       targetId: problemId,
-      createdById: session.user.id,
+      createdById: g.user.id,
     },
   });
 
   await notify({
     userId: problem.createdById,
-    actorId: session.user.id,
+    actorId: g.user.id,
     type: "PROBLEM_LINK",
     title: "Une piste a été liée à ton problème",
     body: `Quelqu'un a lié une ${
@@ -90,7 +86,7 @@ export async function linkToProblemAction(
     } à « ${problem.title} ».`,
     link: typeof slug === "string" ? `/explorer/${slug}` : null,
   });
-  await award(session.user.id, "RELATION_ADDED", {
+  await award(g.user.id, "RELATION_ADDED", {
     type: "PROBLEM",
     id: problemId,
   });
@@ -103,8 +99,8 @@ export async function linkToProblemAction(
 export async function unlinkFromProblemAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
+  const g = await guard();
+  if (!g.ok) return;
 
   const relationId = formData.get("relationId");
   const slug = formData.get("slug");
@@ -117,8 +113,8 @@ export async function unlinkFromProblemAction(
   if (!relation) return;
 
   const allowed =
-    relation.createdById === session.user.id ||
-    hasRank(session.user.role, "MODERATOR");
+    relation.createdById === g.user.id ||
+    hasRank(g.user.role, "MODERATOR");
   if (!allowed) return;
 
   await db.entityRelation.delete({ where: { id: relationId } });

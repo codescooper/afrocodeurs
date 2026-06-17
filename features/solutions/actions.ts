@@ -3,44 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { slugify } from "@/lib/utils";
-import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
+import { orNull, uniqueSlug } from "@/lib/utils";
+import { guard, invalidMessage } from "@/lib/guard";
 import { solutionSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
 
 export type SolutionFormState = { error?: string } | undefined;
-
-/** Normalise une chaîne optionnelle : "" → null. */
-function orNull(value: string | undefined): string | null {
-  return value && value.length > 0 ? value : null;
-}
-
-/** Génère un slug unique à partir du nom. */
-async function uniqueSlug(base: string): Promise<string> {
-  const root = slugify(base) || "solution";
-  let slug = root;
-  let n = 2;
-  while (
-    await db.solution.findUnique({ where: { slug }, select: { id: true } })
-  ) {
-    slug = `${root}-${n++}`;
-  }
-  return slug;
-}
 
 /** Proposition d'une solution à l'AfroAtlas (Sprint 6). */
 export async function createSolutionAction(
   _prev: SolutionFormState,
   formData: FormData,
 ): Promise<SolutionFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "solution:propose")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "solution:propose", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const parsed = solutionSchema.safeParse({
     name: formData.get("name"),
@@ -52,12 +29,14 @@ export async function createSolutionAction(
     license: formData.get("license") || undefined,
   });
 
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const d = parsed.data;
-  const slug = await uniqueSlug(d.name);
+  const slug = await uniqueSlug(d.name, "solution", async (s) =>
+    Boolean(
+      await db.solution.findUnique({ where: { slug: s }, select: { id: true } }),
+    ),
+  );
 
   const solution = await db.solution.create({
     data: {
@@ -69,10 +48,10 @@ export async function createSolutionAction(
       websiteUrl: orNull(d.websiteUrl),
       documentationUrl: orNull(d.documentationUrl),
       license: orNull(d.license),
-      createdById: session.user.id,
+      createdById: g.user.id,
     },
   });
-  await award(session.user.id, "SOLUTION_ADDED", {
+  await award(g.user.id, "SOLUTION_ADDED", {
     type: "SOLUTION",
     id: solution.id,
   });

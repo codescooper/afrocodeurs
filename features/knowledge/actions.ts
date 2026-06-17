@@ -3,33 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { slugify } from "@/lib/utils";
-import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
+import { orNull, uniqueSlug } from "@/lib/utils";
+import { guard, invalidMessage } from "@/lib/guard";
 import { knowledgeSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award } from "@/features/reputation/award";
 
 export type KnowledgeFormState = { error?: string } | undefined;
-
-/** Normalise une chaîne optionnelle : "" → null. */
-function orNull(value: string | undefined): string | null {
-  return value && value.length > 0 ? value : null;
-}
-
-/** Génère un slug unique à partir du titre. */
-async function uniqueSlug(base: string): Promise<string> {
-  const root = slugify(base) || "ressource";
-  let slug = root;
-  let n = 2;
-  while (
-    await db.knowledge.findUnique({ where: { slug }, select: { id: true } })
-  ) {
-    slug = `${root}-${n++}`;
-  }
-  return slug;
-}
 
 /**
  * Création d'une ressource (Sprint 4). Selon le bouton : brouillon (DRAFT)
@@ -39,12 +20,12 @@ export async function createKnowledgeAction(
   _prev: KnowledgeFormState,
   formData: FormData,
 ): Promise<KnowledgeFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "knowledge:create")) {
-    return { error: "Réservé aux contributeurs." };
-  }
+  const g = await guard({
+    permission: "knowledge:create",
+    verified: true,
+    messages: { forbidden: "Réservé aux contributeurs." },
+  });
+  if (!g.ok) return { error: g.error };
 
   const parsed = knowledgeSchema.safeParse({
     title: formData.get("title"),
@@ -55,13 +36,15 @@ export async function createKnowledgeAction(
     level: formData.get("level") || undefined,
   });
 
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const submit = formData.get("intent") === "submit";
   const d = parsed.data;
-  const slug = await uniqueSlug(d.title);
+  const slug = await uniqueSlug(d.title, "ressource", async (s) =>
+    Boolean(
+      await db.knowledge.findUnique({ where: { slug: s }, select: { id: true } }),
+    ),
+  );
 
   await db.knowledge.create({
     data: {
@@ -73,7 +56,7 @@ export async function createKnowledgeAction(
       language: d.language,
       level: orNull(d.level),
       status: submit ? "SUBMITTED" : "DRAFT",
-      authorId: session.user.id,
+      authorId: g.user.id,
     },
   });
 
@@ -86,9 +69,8 @@ export async function createKnowledgeAction(
 export async function moderateKnowledgeAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
-  if (!can(session.user.role, "content:validate")) return;
+  const g = await guard({ permission: "content:validate" });
+  if (!g.ok) return;
 
   const id = formData.get("id");
   const decision = formData.get("decision");
@@ -103,7 +85,7 @@ export async function moderateKnowledgeAction(
     });
     await notify({
       userId: k.authorId,
-      actorId: session.user.id,
+      actorId: g.user.id,
       type: "KNOWLEDGE_PUBLISHED",
       title: "Ta ressource a été publiée 🎉",
       body: `« ${k.title} » est désormais visible par la communauté.`,
@@ -121,7 +103,7 @@ export async function moderateKnowledgeAction(
     });
     await notify({
       userId: k.authorId,
-      actorId: session.user.id,
+      actorId: g.user.id,
       type: "KNOWLEDGE_REJECTED",
       title: "Ta ressource n'a pas été retenue",
       body: `« ${k.title} » n'a pas été publiée. Tu peux la retravailler et la soumettre à nouveau.`,

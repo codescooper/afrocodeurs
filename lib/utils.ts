@@ -16,3 +16,33 @@ export function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/** Normalise une chaîne optionnelle : "" / undefined → null (base propre). */
+export function orNull(value: string | undefined): string | null {
+  return value && value.length > 0 ? value : null;
+}
+
+/** Transforme une saisie « a, b, c » en tableau nettoyé (sans entrées vides). */
+export function parseList(value: FormDataEntryValue | null): string[] {
+  if (typeof value !== "string") return [];
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Génère un slug unique : slugifie `base` (ou `fallback` si vide), puis ajoute
+ * un suffixe -2, -3… tant que `exists(slug)` renvoie vrai.
+ */
+export async function uniqueSlug(
+  base: string,
+  fallback: string,
+  exists: (slug: string) => Promise<boolean>,
+): Promise<string> {
+  const root = slugify(base) || fallback;
+  let slug = root;
+  let n = 2;
+  while (await exists(slug)) slug = `${root}-${n++}`;
+  return slug;
+}

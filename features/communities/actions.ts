@@ -3,45 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { slugify } from "@/lib/utils";
-import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
+import { orNull, uniqueSlug } from "@/lib/utils";
+import { guard, invalidMessage } from "@/lib/guard";
 import { communitySchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award } from "@/features/reputation/award";
 
 export type CommunityFormState = { error?: string } | undefined;
 
-/** Normalise une chaîne optionnelle : "" → null. */
-function orNull(value: string | undefined): string | null {
-  return value && value.length > 0 ? value : null;
-}
-
-/** Génère un slug unique à partir du nom (suffixe -2, -3… en cas de collision). */
-async function uniqueSlug(base: string): Promise<string> {
-  const root = slugify(base) || "communaute";
-  let slug = root;
-  let n = 2;
-  while (
-    await db.community.findUnique({ where: { slug }, select: { id: true } })
-  ) {
-    slug = `${root}-${n++}`;
-  }
-  return slug;
-}
-
 /** Création d'une communauté (Sprint 2). Le créateur en devient ADMIN. */
 export async function createCommunityAction(
   _prev: CommunityFormState,
   formData: FormData,
 ): Promise<CommunityFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "community:create")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "community:create", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const parsed = communitySchema.safeParse({
     name: formData.get("name"),
@@ -51,12 +28,14 @@ export async function createCommunityAction(
     city: formData.get("city") || undefined,
   });
 
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const { name, description, type, country, city } = parsed.data;
-  const slug = await uniqueSlug(name);
+  const slug = await uniqueSlug(name, "communaute", async (s) =>
+    Boolean(
+      await db.community.findUnique({ where: { slug: s }, select: { id: true } }),
+    ),
+  );
 
   await db.community.create({
     data: {
@@ -66,7 +45,7 @@ export async function createCommunityAction(
       type,
       country: orNull(country),
       city: orNull(city),
-      members: { create: { userId: session.user.id, role: "ADMIN" } },
+      members: { create: { userId: g.user.id, role: "ADMIN" } },
     },
   });
 
@@ -76,23 +55,23 @@ export async function createCommunityAction(
 
 /** Rejoindre une communauté (idempotent). */
 export async function joinCommunityAction(formData: FormData): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
+  const g = await guard();
+  if (!g.ok) return;
 
   const communityId = formData.get("communityId");
   const slug = formData.get("slug");
   if (typeof communityId !== "string") return;
 
   const existing = await db.communityMember.findUnique({
-    where: { userId_communityId: { userId: session.user.id, communityId } },
+    where: { userId_communityId: { userId: g.user.id, communityId } },
     select: { id: true },
   });
 
   if (!existing) {
     await db.communityMember.create({
-      data: { userId: session.user.id, communityId, role: "MEMBER" },
+      data: { userId: g.user.id, communityId, role: "MEMBER" },
     });
-    await award(session.user.id, "COMMUNITY_JOINED", {
+    await award(g.user.id, "COMMUNITY_JOINED", {
       type: "COMMUNITY",
       id: communityId,
     });
@@ -111,7 +90,7 @@ export async function joinCommunityAction(formData: FormData): Promise<void> {
     for (const admin of admins) {
       await notify({
         userId: admin.userId,
-        actorId: session.user.id,
+        actorId: g.user.id,
         type: "COMMUNITY_JOIN",
         title: "Nouveau membre dans ta communauté",
         body: `Quelqu'un a rejoint « ${community?.name ?? "ta communauté"} ».`,
@@ -126,15 +105,15 @@ export async function joinCommunityAction(formData: FormData): Promise<void> {
 
 /** Quitter une communauté (idempotent). */
 export async function leaveCommunityAction(formData: FormData): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
+  const g = await guard();
+  if (!g.ok) return;
 
   const communityId = formData.get("communityId");
   const slug = formData.get("slug");
   if (typeof communityId !== "string") return;
 
   await db.communityMember.deleteMany({
-    where: { userId: session.user.id, communityId },
+    where: { userId: g.user.id, communityId },
   });
 
   if (typeof slug === "string") revalidatePath(`/communities/${slug}`);

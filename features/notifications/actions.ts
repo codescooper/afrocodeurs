@@ -2,17 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { guard } from "@/lib/guard";
 import { NOTIFICATION_CATEGORIES } from "./constants";
 
 /** Marque toutes les notifications non lues de l'utilisateur comme lues. */
 export async function markNotificationsReadAction(): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
+  const g = await guard();
+  if (!g.ok) return;
 
   await db.notification.updateMany({
-    where: { userId: session.user.id, read: false },
+    where: { userId: g.user.id, read: false },
     data: { read: true },
   });
 
@@ -24,8 +24,8 @@ export async function markNotificationsReadAction(): Promise<void> {
 export async function updateNotificationPrefsAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
+  const g = await guard();
+  if (!g.ok) return;
 
   const enabled = new Set(formData.getAll("category").map(String));
   const optOut = NOTIFICATION_CATEGORIES.map((c) => c.key).filter(
@@ -33,7 +33,7 @@ export async function updateNotificationPrefsAction(
   );
 
   await db.user.update({
-    where: { id: session.user.id },
+    where: { id: g.user.id },
     data: { notificationOptOut: optOut },
   });
   revalidatePath("/dashboard/notifications");

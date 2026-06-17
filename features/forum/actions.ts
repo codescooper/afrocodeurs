@@ -4,59 +4,43 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { EntityType } from "@prisma/client";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { slugify } from "@/lib/utils";
-import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
+import { uniqueSlug } from "@/lib/utils";
+import { guard, invalidMessage } from "@/lib/guard";
 import { answerSchema, commentSchema, questionSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
 
 export type ForumFormState = { error?: string } | undefined;
 
-/** Génère un slug unique de question. */
-async function uniqueSlug(base: string): Promise<string> {
-  const root = slugify(base) || "question";
-  let slug = root;
-  let n = 2;
-  while (
-    await db.question.findUnique({ where: { slug }, select: { id: true } })
-  ) {
-    slug = `${root}-${n++}`;
-  }
-  return slug;
-}
-
 /** Poser une question (Sprint 5). Statut initial : OPEN. */
 export async function createQuestionAction(
   _prev: ForumFormState,
   formData: FormData,
 ): Promise<ForumFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "question:create")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "question:create", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const parsed = questionSchema.safeParse({
     title: formData.get("title"),
     body: formData.get("body"),
   });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
-  const slug = await uniqueSlug(parsed.data.title);
+  const slug = await uniqueSlug(parsed.data.title, "question", async (s) =>
+    Boolean(
+      await db.question.findUnique({ where: { slug: s }, select: { id: true } }),
+    ),
+  );
   const question = await db.question.create({
     data: {
       title: parsed.data.title,
       slug,
       body: parsed.data.body,
-      authorId: session.user.id,
+      authorId: g.user.id,
     },
   });
-  await award(session.user.id, "QUESTION_ASKED", {
+  await award(g.user.id, "QUESTION_ASKED", {
     type: "QUESTION",
     id: question.id,
   });
@@ -70,17 +54,11 @@ export async function createAnswerAction(
   _prev: ForumFormState,
   formData: FormData,
 ): Promise<ForumFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "answer:create")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "answer:create", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const parsed = answerSchema.safeParse({ body: formData.get("body") });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const questionId = formData.get("questionId");
   const slug = formData.get("slug");
@@ -90,10 +68,10 @@ export async function createAnswerAction(
     data: {
       questionId,
       body: parsed.data.body,
-      authorId: session.user.id,
+      authorId: g.user.id,
     },
   });
-  await award(session.user.id, "ANSWER_POSTED", {
+  await award(g.user.id, "ANSWER_POSTED", {
     type: "ANSWER",
     id: answer.id,
   });
@@ -108,7 +86,7 @@ export async function createAnswerAction(
   });
   await notify({
     userId: question?.authorId,
-    actorId: session.user.id,
+    actorId: g.user.id,
     type: "ANSWER",
     title: "Nouvelle réponse à ta question",
     body: question
@@ -123,9 +101,8 @@ export async function createAnswerAction(
 
 /** Voter (UP/DOWN) sur une question ou une réponse — togglable (Sprint 5). */
 export async function voteAction(formData: FormData): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
-  if (!can(session.user.role, "content:vote")) return;
+  const g = await guard({ permission: "content:vote" });
+  if (!g.ok) return;
 
   const rawType = formData.get("targetType");
   const targetId = formData.get("targetId");
@@ -139,7 +116,7 @@ export async function voteAction(formData: FormData): Promise<void> {
   const existing = await db.vote.findUnique({
     where: {
       userId_targetType_targetId: {
-        userId: session.user.id,
+        userId: g.user.id,
         targetType,
         targetId,
       },
@@ -148,7 +125,7 @@ export async function voteAction(formData: FormData): Promise<void> {
 
   if (!existing) {
     await db.vote.create({
-      data: { userId: session.user.id, targetType, targetId, value },
+      data: { userId: g.user.id, targetType, targetId, value },
     });
   } else if (existing.value === value) {
     await db.vote.delete({ where: { id: existing.id } });
@@ -176,7 +153,7 @@ export async function voteAction(formData: FormData): Promise<void> {
               select: { authorId: true },
             })
           )?.authorId;
-    if (author && author !== session.user.id) {
+    if (author && author !== g.user.id) {
       await awardVote(author, delta, { type: targetType, id: targetId });
     }
   }
@@ -186,8 +163,8 @@ export async function voteAction(formData: FormData): Promise<void> {
 
 /** Accepter une réponse (Sprint 5). Réservé à l'auteur de la question. */
 export async function acceptAnswerAction(formData: FormData): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
+  const g = await guard();
+  if (!g.ok) return;
 
   const answerId = formData.get("answerId");
   const slug = formData.get("slug");
@@ -202,7 +179,7 @@ export async function acceptAnswerAction(formData: FormData): Promise<void> {
     },
   });
   if (!answer) return;
-  if (answer.question.authorId !== session.user.id) return;
+  if (answer.question.authorId !== g.user.id) return;
 
   await db.$transaction([
     db.answer.updateMany({
@@ -216,7 +193,7 @@ export async function acceptAnswerAction(formData: FormData): Promise<void> {
     }),
   ]);
 
-  if (answer.authorId !== session.user.id) {
+  if (answer.authorId !== g.user.id) {
     await award(answer.authorId, "ANSWER_ACCEPTED", {
       type: "ANSWER",
       id: answerId,
@@ -225,7 +202,7 @@ export async function acceptAnswerAction(formData: FormData): Promise<void> {
 
   await notify({
     userId: answer.authorId,
-    actorId: session.user.id,
+    actorId: g.user.id,
     type: "ANSWER_ACCEPTED",
     title: "Ta réponse a été acceptée 🎉",
     body: "L'auteur de la question a retenu ta réponse comme solution.",
@@ -240,17 +217,11 @@ export async function addCommentAction(
   _prev: ForumFormState,
   formData: FormData,
 ): Promise<ForumFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "content:comment")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "content:comment", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const parsed = commentSchema.safeParse({ body: formData.get("body") });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const rawType = formData.get("targetType");
   const targetId = formData.get("targetId");
@@ -262,7 +233,7 @@ export async function addCommentAction(
 
   const targetType: EntityType = rawType;
   await db.comment.create({
-    data: { body: parsed.data.body, authorId: session.user.id, targetType, targetId },
+    data: { body: parsed.data.body, authorId: g.user.id, targetType, targetId },
   });
 
   const recipientId =
@@ -281,7 +252,7 @@ export async function addCommentAction(
         )?.authorId;
   await notify({
     userId: recipientId,
-    actorId: session.user.id,
+    actorId: g.user.id,
     type: "COMMENT",
     title:
       targetType === "QUESTION"

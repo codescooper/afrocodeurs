@@ -3,53 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { slugify } from "@/lib/utils";
-import { can, VERIFY_EMAIL_MESSAGE } from "@/lib/permissions";
+import { orNull, parseList, uniqueSlug } from "@/lib/utils";
+import { guard, invalidMessage } from "@/lib/guard";
 import { problemSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
 
 export type ProblemFormState = { error?: string } | undefined;
-
-/** Normalise une chaîne optionnelle : "" → null. */
-function orNull(value: string | undefined): string | null {
-  return value && value.length > 0 ? value : null;
-}
-
-/** Transforme une saisie « a, b, c » en tableau nettoyé. */
-function parseList(value: FormDataEntryValue | null): string[] {
-  if (typeof value !== "string") return [];
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-/** Génère un slug unique à partir du titre (suffixe -2, -3… si collision). */
-async function uniqueSlug(base: string): Promise<string> {
-  const root = slugify(base) || "probleme";
-  let slug = root;
-  let n = 2;
-  while (
-    await db.problem.findUnique({ where: { slug }, select: { id: true } })
-  ) {
-    slug = `${root}-${n++}`;
-  }
-  return slug;
-}
 
 /** Proposition d'un problème (Sprint 3). Statut initial : PROPOSED. */
 export async function createProblemAction(
   _prev: ProblemFormState,
   formData: FormData,
 ): Promise<ProblemFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
-  if (!session.user.isEmailVerified) return { error: VERIFY_EMAIL_MESSAGE };
-  if (!can(session.user.role, "problem:propose")) {
-    return { error: "Action non autorisée." };
-  }
+  const g = await guard({ permission: "problem:propose", verified: true });
+  if (!g.ok) return { error: g.error };
 
   const parsed = problemSchema.safeParse({
     title: formData.get("title"),
@@ -61,12 +29,14 @@ export async function createProblemAction(
     difficultyLevel: formData.get("difficultyLevel"),
   });
 
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const d = parsed.data;
-  const slug = await uniqueSlug(d.title);
+  const slug = await uniqueSlug(d.title, "probleme", async (s) =>
+    Boolean(
+      await db.problem.findUnique({ where: { slug: s }, select: { id: true } }),
+    ),
+  );
 
   const problem = await db.problem.create({
     data: {
@@ -78,10 +48,10 @@ export async function createProblemAction(
       countries: d.countries,
       impactLevel: d.impactLevel,
       difficultyLevel: d.difficultyLevel,
-      createdById: session.user.id,
+      createdById: g.user.id,
     },
   });
-  await award(session.user.id, "PROBLEM_PROPOSED", {
+  await award(g.user.id, "PROBLEM_PROPOSED", {
     type: "PROBLEM",
     id: problem.id,
   });

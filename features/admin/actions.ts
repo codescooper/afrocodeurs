@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import type { EntityType, UserRole } from "@prisma/client";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { can } from "@/lib/permissions";
+import { guard, invalidMessage } from "@/lib/guard";
 import { reportSchema } from "@/lib/validators";
 import { deleteTarget, hideTarget, resolveReportTarget } from "./report-target";
 import { notify } from "@/features/notifications/notify";
@@ -28,9 +27,8 @@ const REPORTABLE: EntityType[] = [
  * decision : "delete" (supprimer), "hide" (masquer), "dismiss" (rejeter).
  */
 export async function moderateReportAction(formData: FormData): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
-  if (!can(session.user.role, "report:handle")) return;
+  const g = await guard({ permission: "report:handle" });
+  if (!g.ok) return;
 
   const reportId = formData.get("reportId");
   const decision = formData.get("decision");
@@ -77,7 +75,7 @@ export async function moderateReportAction(formData: FormData): Promise<void> {
   // Notifier la personne qui a signalé.
   await notify({
     userId: report.reporterId,
-    actorId: session.user.id,
+    actorId: g.user.id,
     type: "REPORT_HANDLED",
     title: "Ton signalement a été traité",
     body: notifBody,
@@ -88,7 +86,7 @@ export async function moderateReportAction(formData: FormData): Promise<void> {
   if (decision !== "dismiss" && target?.authorId) {
     await notify({
       userId: target.authorId,
-      actorId: session.user.id,
+      actorId: g.user.id,
       type: "CONTENT_MODERATED",
       title: "Un de tes contenus a été modéré",
       body: `Ton contenu « ${target.title} » a été ${
@@ -104,15 +102,14 @@ export async function moderateReportAction(formData: FormData): Promise<void> {
 
 /** Modifier le rôle d'un utilisateur (Sprint 8). Réservé aux ADMIN. */
 export async function updateUserRoleAction(formData: FormData): Promise<void> {
-  const session = await auth();
-  if (!session?.user) return;
-  if (!can(session.user.role, "user:manage")) return;
+  const g = await guard({ permission: "user:manage" });
+  if (!g.ok) return;
 
   const userId = formData.get("userId");
   const rawRole = formData.get("role");
   if (typeof userId !== "string") return;
   // On ne modifie pas son propre rôle (évite un auto-verrouillage).
-  if (userId === session.user.id) return;
+  if (userId === g.user.id) return;
   if (
     rawRole !== "USER" &&
     rawRole !== "CONTRIBUTOR" &&
@@ -126,7 +123,7 @@ export async function updateUserRoleAction(formData: FormData): Promise<void> {
   await db.user.update({ where: { id: userId }, data: { role } });
   await notify({
     userId,
-    actorId: session.user.id,
+    actorId: g.user.id,
     type: "ROLE_CHANGED",
     title: "Ton rôle a évolué",
     body: `Tu es désormais ${USER_ROLE_LABELS[role]} sur AfroCodeurs.`,
@@ -140,16 +137,14 @@ export async function createReportAction(
   _prev: ReportFormState,
   formData: FormData,
 ): Promise<ReportFormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Vous devez être connecté." };
+  const g = await guard();
+  if (!g.ok) return { error: g.error };
 
   const parsed = reportSchema.safeParse({
     reason: formData.get("reason"),
     details: formData.get("details") || undefined,
   });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
+  if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const rawType = formData.get("targetType");
   const targetId = formData.get("targetId");
@@ -163,7 +158,7 @@ export async function createReportAction(
 
   await db.report.create({
     data: {
-      reporterId: session.user.id,
+      reporterId: g.user.id,
       targetType: rawType as EntityType,
       targetId,
       reason: parsed.data.reason,
