@@ -153,6 +153,8 @@ model User {
   relations     EntityRelation[] @relation("RelationCreator")
   notifications Notification[]
   pushSubscriptions PushSubscription[]
+  following     Follow[] @relation("Following")
+  followers     Follow[] @relation("Followers")
   notificationOptOut String[] @default([])
 
   createdAt     DateTime @default(now())
@@ -160,6 +162,18 @@ model User {
 
   @@index([username])
   @@index([role])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
 }
 
 model Profile {

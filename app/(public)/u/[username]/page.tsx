@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { getReputation } from "@/features/reputation/queries";
+import { FollowButton } from "@/features/follow/follow-button";
 import { USER_ROLE_LABELS } from "@/features/admin/constants";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
@@ -61,12 +63,31 @@ export default async function PublicProfilePage({
           answers: true,
           problems: true,
           solutions: true,
+          followers: true,
+          following: true,
         },
       },
     },
   });
 
   if (!user) notFound();
+
+  const session = await auth();
+  const isSelf = session?.user?.id === user.id;
+  const isFollowing =
+    session?.user?.id && !isSelf
+      ? Boolean(
+          await db.follow.findUnique({
+            where: {
+              followerId_followingId: {
+                followerId: session.user.id,
+                followingId: user.id,
+              },
+            },
+            select: { id: true },
+          }),
+        )
+      : false;
 
   const rep = await getReputation(user.id);
 
@@ -102,8 +123,23 @@ export default async function PublicProfilePage({
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
             {USER_ROLE_LABELS[user.role]}
           </span>
+          {session?.user && !isSelf && (
+            <span className="ml-auto">
+              <FollowButton userId={user.id} initialFollowing={isFollowing} />
+            </span>
+          )}
         </div>
         <p className="text-sm text-muted-foreground">@{user.username}</p>
+        <div className="flex gap-4 text-sm">
+          <span>
+            <b className="text-foreground">{user._count.followers}</b>{" "}
+            <span className="text-muted-foreground">abonné·e·s</span>
+          </span>
+          <span>
+            <b className="text-foreground">{user._count.following}</b>{" "}
+            <span className="text-muted-foreground">abonnements</span>
+          </span>
+        </div>
 
         {p?.bio && <p className="max-w-2xl text-muted-foreground">{p.bio}</p>}
 

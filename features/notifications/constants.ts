@@ -3,6 +3,7 @@ export type NotificationCategory =
   | "CONTRIBUTIONS"
   | "PROBLEMS"
   | "COMMUNITY"
+  | "SOCIAL"
   | "ACCOUNT"
   | "MODERATION";
 
@@ -32,6 +33,11 @@ export const NOTIFICATION_CATEGORIES: {
     label: "Communautés",
     description: "Nouveaux membres de tes communautés",
   },
+  {
+    key: "SOCIAL",
+    label: "Social",
+    description: "Nouveaux abonnés à ton profil",
+  },
   { key: "ACCOUNT", label: "Compte", description: "Changements de rôle" },
   {
     key: "MODERATION",
@@ -49,6 +55,7 @@ const TYPE_TO_CATEGORY: Record<string, NotificationCategory> = {
   CONTENT_MODERATED: "CONTRIBUTIONS",
   PROBLEM_LINK: "PROBLEMS",
   COMMUNITY_JOIN: "COMMUNITY",
+  FOLLOW: "SOCIAL",
   ROLE_CHANGED: "ACCOUNT",
   REPORT_HANDLED: "MODERATION",
 };

@@ -74,6 +74,46 @@ export default async function DashboardPage() {
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .slice(0, 6);
 
+  const followingIds = (
+    await db.follow.findMany({
+      where: { followerId: user.id },
+      select: { followingId: true },
+    })
+  ).map((f) => f.followingId);
+
+  let followedFeed: { title: string; href: string }[] = [];
+  if (followingIds.length > 0) {
+    const [fk, fp] = await Promise.all([
+      db.knowledge.findMany({
+        where: { authorId: { in: followingIds }, status: "PUBLISHED" },
+        select: { title: true, slug: true, publishedAt: true },
+        orderBy: { publishedAt: "desc" },
+        take: 4,
+      }),
+      db.problem.findMany({
+        where: { createdById: { in: followingIds } },
+        select: { title: true, slug: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      }),
+    ]);
+    followedFeed = [
+      ...fk.map((k) => ({
+        title: k.title,
+        href: `/knowledge/${k.slug}`,
+        date: k.publishedAt ?? new Date(0),
+      })),
+      ...fp.map((p) => ({
+        title: p.title,
+        href: `/explorer/${p.slug}`,
+        date: p.createdAt,
+      })),
+    ]
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 5)
+      .map((x) => ({ title: x.title, href: x.href }));
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -131,6 +171,34 @@ export default async function DashboardPage() {
 
         {/* Toi : questions + communautés */}
         <aside className="flex flex-col gap-6">
+          <section className="rounded-lg border border-border bg-background p-5">
+            <h2 className="font-semibold">Tes abonnements</h2>
+            {followingIds.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                <Link href="/afromakers" className="underline">
+                  Suis des AfroMakers
+                </Link>{" "}
+                pour voir leur activité ici.
+              </p>
+            ) : followedFeed.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Rien de neuf chez les personnes que tu suis.
+              </p>
+            ) : (
+              <ul className="mt-3 flex flex-col gap-2">
+                {followedFeed.map((it) => (
+                  <li key={it.href}>
+                    <Link
+                      href={it.href}
+                      className="line-clamp-1 text-sm hover:text-primary"
+                    >
+                      {it.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
           <section className="rounded-lg border border-border bg-background p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Tes questions</h2>
