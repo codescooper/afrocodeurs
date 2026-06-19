@@ -1,16 +1,18 @@
+import * as Sentry from "@sentry/nextjs";
+
 type ErrorContext = Record<string, unknown>;
 
 /**
  * Capture une erreur applicative.
  *
- * Aujourd'hui : log structuré (visible dans les logs serveur en prod et dans
- * la console navigateur). Isomorphe (client + serveur) — pas de `server-only`.
- *
- * Prêt pour Sentry : l'activation se fait par config env (cf. docs/DEPLOYMENT.md),
- * sans changer les appelants — on garde le module dépendance-free tant qu'aucune
- * clé n'est fournie.
+ * - Envoyée à **Sentry** si configuré (`Sentry.init` est désactivé sans DSN →
+ *   l'appel est alors un no-op, aucune donnée ne part).
+ * - **Toujours** journalisée (logs serveur Railway / console navigateur), même
+ *   sans Sentry. Isomorphe (client + serveur) — pas de `server-only`.
  */
 export function captureException(error: unknown, context?: ErrorContext): void {
+  Sentry.captureException(error, context ? { extra: context } : undefined);
+
   try {
     const payload = {
       level: "error",

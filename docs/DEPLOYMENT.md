@@ -52,12 +52,24 @@ pas. Le CAPTCHA Turnstile, lui, protège quel que soit l'hébergement.
 
 ## 6. Observabilité (Sentry)
 
-`lib/observability.ts` journalise déjà les erreurs (branché dans les error
-boundaries `app/error.tsx` et `app/global-error.tsx`). Pour activer Sentry :
+`@sentry/nextjs` est **installé et câblé** : instrumentation serveur + edge
+(`instrumentation.ts` → `sentry.server/edge.config.ts`), client
+(`instrumentation-client.ts`), `onRequestError`, et `captureException()`
+(`lib/observability.ts`) forwarde vers Sentry. Branché dans les error boundaries
+`app/error.tsx` et `app/global-error.tsx`. **No-op tant qu'aucun DSN n'est
+défini** — rien n'est envoyé en dev.
 
-1. `npm i @sentry/nextjs`
-2. Définis `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN`.
-3. Forwarde dans `captureException()` — **un seul point à modifier**.
+Pour activer en production, définis :
+
+1. `NEXT_PUBLIC_SENTRY_DSN` — DSN du projet Sentry (lisible côté navigateur,
+   c'est normal). Suffit pour capturer les erreurs **client et serveur**.
+2. *(optionnel)* `SENTRY_DSN` si tu veux un DSN serveur distinct.
+3. *(optionnel, traces lisibles)* `SENTRY_ORG`, `SENTRY_PROJECT`,
+   `SENTRY_AUTH_TOKEN` — sans le token, l'upload des source maps est ignoré (les
+   stack traces restent minifiées).
+
+Les erreurs restent journalisées dans les logs serveur Railway, avec ou sans
+Sentry.
 
 ## 7. Checklist post-déploiement
 
