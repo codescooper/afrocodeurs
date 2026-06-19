@@ -15,6 +15,7 @@ import {
   DERIVED_STATUS_META,
   PROJECT_STATUS_LABELS,
 } from "@/features/projects/constants";
+import { DependencyGraph } from "@/features/projects/dependency-graph";
 import { DependencyForm } from "@/features/projects/dependency-form";
 import { RefreshButton } from "@/features/projects/refresh-button";
 import { removeDependencyAction } from "@/features/projects/actions";
@@ -396,6 +397,29 @@ export default async function ProjectDetailPage({
                 })}
               </div>
             </div>
+
+            {/* Carte des dépendances (DAG) */}
+            {tasks.some((t) => t.prerequisites.length > 0) && (
+              <div className="mt-10">
+                <h3 className="text-base font-bold">🔗 Carte des dépendances</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Qui débloque quoi : les flèches vont du prérequis vers la tâche
+                  qu&apos;il rend possible.
+                </p>
+                <div className="mt-4">
+                  <DependencyGraph
+                    tasks={tasks.map((t) => ({
+                      id: t.id,
+                      githubNumber: t.githubNumber,
+                      title: t.title,
+                      url: t.url,
+                      derived: t.derived,
+                      prerequisiteIds: t.prerequisites.map((p) => p.id),
+                    }))}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Appel à contribuer */}
             <div className="mt-4 flex flex-col items-center gap-3 rounded-2xl border border-border bg-muted/30 p-6 text-center">
