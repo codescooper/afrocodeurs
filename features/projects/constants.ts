@@ -18,13 +18,33 @@ export const PROJECT_STATUSES = Object.keys(
   PROJECT_STATUS_LABELS,
 ) as ProjectStatus[];
 
-/** Libellé + pastille du statut dérivé d'une tâche de roadmap. */
+/** Libellé, icône et couleurs (Tailwind) du statut dérivé d'une tâche. */
 export const DERIVED_STATUS_META: Record<
   DerivedStatus,
-  { label: string; icon: string }
+  { label: string; icon: string; dot: string; chip: string }
 > = {
-  DONE: { label: "Fait", icon: "✅" },
-  READY: { label: "Prête", icon: "🟢" },
-  CLAIMED: { label: "En cours", icon: "👤" },
-  BLOCKED: { label: "Bloquée", icon: "🔒" },
+  DONE: {
+    label: "Fait",
+    icon: "✅",
+    dot: "bg-emerald-500",
+    chip: "bg-emerald-500/10 text-emerald-700",
+  },
+  READY: {
+    label: "Prête",
+    icon: "🟢",
+    dot: "bg-amber-400",
+    chip: "bg-amber-400/15 text-amber-700",
+  },
+  CLAIMED: {
+    label: "En cours",
+    icon: "👤",
+    dot: "bg-sky-500",
+    chip: "bg-sky-500/10 text-sky-700",
+  },
+  BLOCKED: {
+    label: "Bloquée",
+    icon: "🔒",
+    dot: "bg-zinc-300",
+    chip: "bg-muted text-muted-foreground",
+  },
 };
