@@ -57,3 +57,26 @@ export async function updateProfileAction(
   revalidatePath("/dashboard/profile");
   return { success: true };
 }
+
+/** Met à jour (ou retire) la photo de profil — data URL redimensionnée côté client. */
+export async function updateAvatarAction(
+  dataUrl: string | null,
+): Promise<ProfileFormState> {
+  const g = await guard();
+  if (!g.ok) return { error: g.error };
+
+  if (dataUrl !== null) {
+    if (!dataUrl.startsWith("data:image/") || dataUrl.length > 200_000) {
+      return { error: "Image invalide ou trop lourde." };
+    }
+  }
+
+  await db.user.update({
+    where: { id: g.user.id },
+    data: { image: dataUrl },
+  });
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath(`/u/${g.user.username}`);
+  return { success: true };
+}

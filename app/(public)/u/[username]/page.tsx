@@ -15,6 +15,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getReputation } from "@/features/reputation/queries";
 import { FollowButton } from "@/features/follow/follow-button";
+import { Avatar } from "@/components/shared/avatar";
 import { USER_ROLE_LABELS } from "@/features/admin/constants";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
@@ -116,18 +117,25 @@ export default async function PublicProfilePage({
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
       {/* En-tête */}
       <header className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">
-            {user.name ?? `@${user.username}`}
-          </h1>
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-            {USER_ROLE_LABELS[user.role]}
-          </span>
-          {session?.user && !isSelf && (
-            <span className="ml-auto">
-              <FollowButton userId={user.id} initialFollowing={isFollowing} />
+        <div className="flex items-start gap-4">
+          <Avatar
+            image={user.image}
+            name={user.name ?? user.username}
+            size={64}
+          />
+          <div className="flex flex-1 flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {user.name ?? `@${user.username}`}
+            </h1>
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {USER_ROLE_LABELS[user.role]}
             </span>
-          )}
+            {session?.user && !isSelf && (
+              <span className="ml-auto">
+                <FollowButton userId={user.id} initialFollowing={isFollowing} />
+              </span>
+            )}
+          </div>
         </div>
         <p className="text-sm text-muted-foreground">@{user.username}</p>
         <div className="flex gap-4 text-sm">

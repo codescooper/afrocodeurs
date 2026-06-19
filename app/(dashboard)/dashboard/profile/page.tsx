@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ProfileForm } from "@/features/profile/profile-form";
+import { AvatarUpload } from "@/features/profile/avatar-upload";
 
 export const metadata = { title: "Mon profil" };
 
@@ -33,6 +34,11 @@ export default async function ProfilePage() {
           @{user?.username} · Renseignez votre profil public AfroMaker.
         </p>
       </header>
+
+      <AvatarUpload
+        initialImage={user?.image ?? null}
+        name={user?.name ?? user?.username ?? "?"}
+      />
 
       <ProfileForm defaultValues={defaultValues} />
     </div>
