@@ -2,7 +2,7 @@
 > Dernière MAJ : 2026-06-19
 
 ## 🎯 Objectif de la phase actuelle
-Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, crons planifiés). Reste : la **rétention** et les fonctionnalités manquantes (médias, i18n, mentorat, OAuth).
+Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, crons, Sentry, médias, graphe de dépendances). Reste : la **rétention** et les fonctionnalités manquantes (i18n, mentorat, OAuth).
 
 ## ✅ Fait (cette semaine)
 - Socle Next.js 16 + Auth.js v5 + Prisma 7 (driver adapter Postgres), incluant le correctif bloquant Prisma 7
@@ -46,13 +46,17 @@ Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, cro
 - **Roadmaps de projets synchronisées GitHub** : nouvelle entité `Project` (un dépôt `org/repo` par projet → hub OSS), pages `/projects` (liste, détail, création). La roadmap est une **vue synchronisée** des issues GitHub (= tâches), milestones (= phases), assignees (= qui fait quoi), issue fermée (= fait) — via `lib/github.ts` (fetch natif, zéro dépendance) + `features/projects/sync.ts` + cron `/api/cron/roadmap-sync` (calqué sur digest) + bouton « Rafraîchir » mainteneur. **DAG curaté** sur la plateforme (`RoadmapDependency`, anti-cycle) ; statut dérivé Prête 🟢 / Bloquée 🔒 / En cours 👤 / Fait ✅ calculé à la lecture (fonction pure testée). **Hybride** : contributions non-code in-app inchangées ; pont d'identité AfroMaker ↔ GitHub (`Profile.githubLogin`, capté à la connexion OAuth + repli depuis `githubUrl`) → réputation `TASK_COMPLETED`/`PROJECT_CREATED`. Vérifié : migration, `tsc`, `eslint`, **18/18** Vitest, API GitHub réelle (200), `next build` vert
 - **Avatars** (#24) : upload de photo de profil (recadrage carré 256px côté client → data URL JPEG en base, sans stockage externe ni migration) ; composant `Avatar` réutilisé partout (profil, `/u/[username]`, en-têtes)
 - **Vue projet refondue** (ludique/UX) : anneau de progression, **parcours vertical** des phases, section « À toi de jouer » (tâches prêtes en cartes ambre), CTA contribuer sur GitHub ; **vraie roadmap GitHub** d'AfroCodeurs dogfoodée (4 milestones, 32 issues) ; projets intégrés à la **recherche globale** + **sitemap**
-- **🔓 Prod activée** : clés **Resend**, **Turnstile** et `CRON_SECRET` posées sur Railway ; **CAPTCHA Turnstile vérifié actif** sur l'inscription ; email branché (Resend) ; **crons planifiés via GitHub Actions** (`.github/workflows/cron.yml` — digest hebdo lundi 08:00 UTC + roadmap-sync quotidien 04:00 UTC, auth `Authorization: Bearer <CRON_SECRET>`, `workflow_dispatch` manuel) → **PR #33 à merger + secret `CRON_SECRET` à poser** dans le dépôt
+- **🔓 Prod activée** : clés **Resend**, **Turnstile** et `CRON_SECRET` posées sur Railway ; **CAPTCHA Turnstile vérifié actif** sur l'inscription ; email branché (Resend) ; **crons planifiés via GitHub Actions** (`.github/workflows/cron.yml` — digest hebdo lundi 08:00 UTC + roadmap-sync quotidien 04:00 UTC, auth `Authorization: Bearer <CRON_SECRET>`, `workflow_dispatch` manuel) → **mergé (#33)** ; reste à poser le secret `CRON_SECRET` dans le dépôt pour que les runs aboutissent
+- **Observabilité Sentry** (#29 → #34) : `@sentry/nextjs` installé et câblé (instrumentation serveur/edge/client, `onRequestError`, `captureException()` forwarde vers Sentry, `withSentryConfig`). **No-op sans DSN** — activer via `NEXT_PUBLIC_SENTRY_DSN`. Vérifié tsc/eslint/Vitest/build + CI
+- **Upload de médias** (#31 → #37) : `lib/storage.ts` pluggable (S3-compatible via `aws4fetch`, repli local `public/uploads` en dev), `POST /api/upload` (auth + email vérifié, ≤ 5 Mo, anti-CSRF), bouton réutilisable dans l'éditeur knowledge. Activer via `S3_*`. Vérifié + CI
+- **Graphe de dépendances** (#30 → #36) : la page projet **dessine** le DAG (colonnes = niveaux topologiques, flèches prérequis → tâche, nœuds colorés cliquables) — `features/projects/graph.ts` (layout pur testé) + rendu SVG serveur. Visible dès qu'il existe des dépendances. Vérifié + CI
+- **4 PR mergées + `main` vérifié intégré** : `tsc` OK, **27/27** Vitest, `next build` vert avec les 4 features ensemble. Railway redéploie automatiquement depuis `main`
 
 ## 🚧 En cours
 - [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-**Finaliser l'activation prod** : (1) merger la **PR #33** + poser le secret `CRON_SECRET` dans le dépôt GitHub (active les crons) ; (2) **vérifier un domaine Resend** + ajuster `EMAIL_FROM` pour que l'email atteigne **tous** les utilisateurs (aujourd'hui limité au propriétaire du compte Resend) ; (3) **roter** les clés exposées dans le chat. Ensuite : réclamer `@afrocodeurs` (mot de passe via « mot de passe oublié » une fois l'email livrable).
+**Activer en prod ce qui est mergé** : (1) poser le secret **`CRON_SECRET`** dans le dépôt GitHub (Settings → Secrets and variables → Actions) pour que les crons aboutissent ; (2) *(optionnel)* `NEXT_PUBLIC_SENTRY_DSN` (Sentry) et `S3_*` (médias durables) sur Railway ; (3) **vérifier un domaine Resend** + `EMAIL_FROM` pour livrer l'email à **tous** ; (4) **roter** les clés exposées dans le chat. Ensuite : réclamer `@afrocodeurs`.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
@@ -68,5 +72,5 @@ Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, cro
 - **Email prod limité** : Turnstile (CAPTCHA) **actif** ; Resend **actif mais sans domaine vérifié** → l'email ne part que vers le propriétaire du compte Resend (vérifier un domaine + `EMAIL_FROM` pour livrer à tous). Web Push toujours inactif (clés VAPID non définies en prod). **Clés Resend / Turnstile / `CRON_SECRET` exposées dans le chat → à roter**
 - **Rate-limiting en mémoire** : OK en mono-instance ; en serverless (Vercel) brancher un store partagé (Upstash) — cf. `docs/DEPLOYMENT.md`
 - **Pages légales** : contenu de départ à faire relire + placeholders `[à compléter]` (éditeur, hébergeur)
-- **Sentry** : hook prêt (`lib/observability`) mais `@sentry/nextjs` pas encore installé
+- **Sentry installé et câblé** mais **inactif sans `NEXT_PUBLIC_SENTRY_DSN`** (créer un projet Sentry + poser le DSN sur Railway). **Médias** : stockage **local éphémère** sur Railway tant que `S3_*` n'est pas configuré (bucket objet recommandé)
 - `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — le repo est **public**, s'assurer que cette adresse route vers une vraie boîte
