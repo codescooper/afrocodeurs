@@ -1,0 +1,54 @@
+name: Crons de production
+
+# Déclenche les tâches planifiées d'AfroCodeurs en production.
+# Les routes /api/cron/* acceptent l'en-tête « Authorization: Bearer <CRON_SECRET> ».
+# CRON_SECRET est stocké dans les secrets du dépôt
+# (Settings → Secrets and variables → Actions).
+#
+# Notes GitHub Actions :
+#  - le planificateur est « best-effort » : un retard de quelques minutes est normal ;
+#  - les workflows planifiés se mettent en pause après 60 jours sans nouveau commit
+#    sur la branche par défaut ;
+#  - « schedule » ne s'exécute que depuis la branche par défaut (main).
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Digest hebdomadaire — lundi 08:00 UTC
+    - cron: "0 4 * * *" # Sync des roadmaps GitHub — chaque jour 04:00 UTC
+  workflow_dispatch: {} # Déclenchement manuel (lance les deux tâches)
+
+concurrency:
+  group: prod-crons
+  cancel-in-progress: false
+
+env:
+  BASE_URL: https://web-production-2b204.up.railway.app
+
+jobs:
+  digest:
+    name: Digest hebdomadaire
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 8 * * 1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/digest
+        run: |
+          code=$(curl -sS --max-time 600 -o /tmp/out -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "$BASE_URL/api/cron/digest")
+          echo "HTTP $code"
+          cat /tmp/out; echo
+          test "$code" = "200"
+
+  roadmap-sync:
+    name: Sync des roadmaps
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 4 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler /api/cron/roadmap-sync
+        run: |
+          code=$(curl -sS --max-time 600 -o /tmp/out -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "$BASE_URL/api/cron/roadmap-sync")
+          echo "HTTP $code"
+          cat /tmp/out; echo
+          test "$code" = "200"
