@@ -12,6 +12,7 @@ const GROUPS: { key: keyof Omit<Awaited<ReturnType<typeof globalSearch>>, "total
     { key: "questions", label: "Forum" },
     { key: "communities", label: "Communautés" },
     { key: "solutions", label: "Atlas" },
+    { key: "projects", label: "Projets" },
     { key: "users", label: "Membres" },
   ];
 

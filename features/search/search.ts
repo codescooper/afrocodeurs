@@ -14,6 +14,7 @@ export type SearchResults = {
   questions: SearchHit[];
   communities: SearchHit[];
   solutions: SearchHit[];
+  projects: SearchHit[];
   users: SearchHit[];
   total: number;
 };
@@ -24,6 +25,7 @@ const EMPTY: SearchResults = {
   questions: [],
   communities: [],
   solutions: [],
+  projects: [],
   users: [],
   total: 0,
 };
@@ -43,7 +45,7 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
   const match = { contains: q, mode: "insensitive" as const };
   const take = 10;
 
-  const [problems, knowledge, questions, communities, solutions, users] =
+  const [problems, knowledge, questions, communities, solutions, projects, users] =
     await Promise.all([
       db.problem.findMany({
         where: { OR: [{ title: match }, { summary: match }, { sector: match }] },
@@ -72,6 +74,11 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
         where: { OR: [{ name: match }, { description: match }] },
         take,
         select: { name: true, slug: true, type: true },
+      }),
+      db.project.findMany({
+        where: { OR: [{ name: match }, { description: match }] },
+        take,
+        select: { name: true, slug: true },
       }),
       db.user.findMany({
         where: { OR: [{ username: match }, { name: match }] },
@@ -104,6 +111,10 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
       title: s.name,
       href: `/atlas/${s.slug}`,
     })),
+    projects: projects.map((p) => ({
+      title: p.name,
+      href: `/projects/${p.slug}`,
+    })),
     users: users.map((u) => ({
       title: u.name ?? u.username,
       href: `/u/${u.username}`,
@@ -118,6 +129,7 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
     results.questions.length +
     results.communities.length +
     results.solutions.length +
+    results.projects.length +
     results.users.length;
 
   return results;
