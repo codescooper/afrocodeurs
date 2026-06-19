@@ -20,6 +20,9 @@
 # production
 /build
 
+# uploads (stockage local en dev — la prod utilise un stockage objet S3)
+/public/uploads/
+
 # misc
 .DS_Store
 *.pem

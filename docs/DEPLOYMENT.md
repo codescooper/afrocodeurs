@@ -71,7 +71,18 @@ Pour activer en production, définis :
 Les erreurs restent journalisées dans les logs serveur Railway, avec ou sans
 Sentry.
 
-## 7. Checklist post-déploiement
+## 7. Stockage des médias (images)
+
+`lib/storage.ts` est **pluggable** : si `S3_ENDPOINT` / `S3_ACCESS_KEY` /
+`S3_SECRET_KEY` / `S3_BUCKET` sont définis, les images uploadées (`POST
+/api/upload`) vont dans un **stockage objet S3-compatible** (Railway, Cloudflare
+R2, MinIO, AWS…) ; sinon, repli sur `public/uploads/` (**dev uniquement** — le
+disque d'un conteneur est éphémère). Le bucket doit autoriser la **lecture
+publique** (ou définis `S3_PUBLIC_URL` vers un CDN / domaine public). `S3_REGION`
+vaut `auto` par défaut (R2). Upload réservé aux comptes avec **email vérifié**,
+images ≤ 5 Mo (JPEG/PNG/WebP/GIF).
+
+## 8. Checklist post-déploiement
 
 - [ ] Connexion / inscription (avec CAPTCHA actif).
 - [ ] Mot de passe oublié → email **réellement reçu**.

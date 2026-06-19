@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 
 import { createKnowledgeAction } from "./actions";
 import {
@@ -9,6 +9,7 @@ import {
   KNOWLEDGE_TYPES,
 } from "./constants";
 import { Markdown } from "@/components/shared/markdown";
+import { ImageUploadButton } from "@/features/media/image-upload";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,25 @@ export function KnowledgeForm() {
   );
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Insère le Markdown d'une image uploadée à la position du curseur. */
+  function insertImage(url: string, name: string) {
+    const snippet = `![${name}](${url})\n`;
+    const el = textareaRef.current;
+    if (!el) {
+      setContent((c) => c + snippet);
+      return;
+    }
+    const start = el.selectionStart ?? content.length;
+    const end = el.selectionEnd ?? content.length;
+    setContent(content.slice(0, start) + snippet + content.slice(end));
+    requestAnimationFrame(() => {
+      el.focus();
+      const caret = start + snippet.length;
+      el.setSelectionRange(caret, caret);
+    });
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -83,15 +103,22 @@ export function KnowledgeForm() {
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Contenu (Markdown)</span>
-          <button
-            type="button"
-            onClick={() => setPreview((p) => !p)}
-            className="text-xs font-medium text-muted-foreground underline"
-          >
-            {preview ? "Éditer" : "Aperçu"}
-          </button>
+          <span className="flex items-center gap-4">
+            <ImageUploadButton
+              onUploaded={insertImage}
+              label="Insérer une image"
+            />
+            <button
+              type="button"
+              onClick={() => setPreview((p) => !p)}
+              className="text-xs font-medium text-muted-foreground underline"
+            >
+              {preview ? "Éditer" : "Aperçu"}
+            </button>
+          </span>
         </div>
         <textarea
+          ref={textareaRef}
           name="content"
           required
           minLength={50}
@@ -126,12 +153,7 @@ export function KnowledgeForm() {
         >
           Enregistrer le brouillon
         </Button>
-        <Button
-          type="submit"
-          name="intent"
-          value="submit"
-          disabled={pending}
-        >
+        <Button type="submit" name="intent" value="submit" disabled={pending}>
           Soumettre à validation
         </Button>
       </div>
