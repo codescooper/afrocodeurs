@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { registerAction } from "@/features/auth/actions";
 import { TurnstileWidget } from "@/features/auth/turnstile-widget";
+import { PowWidget } from "@/features/auth/pow-widget";
 import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
@@ -63,6 +64,7 @@ export default function RegisterPage() {
         </label>
 
         <TurnstileWidget />
+        <PowWidget />
 
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>

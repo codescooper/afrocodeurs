@@ -11,6 +11,7 @@ import { guard, invalidMessage } from "@/lib/guard";
 import { sendEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { verifyPoW } from "@/lib/pow";
 import {
   signInSchema,
   signUpSchema,
@@ -70,6 +71,20 @@ export async function registerAction(
     !(await verifyTurnstile(typeof captcha === "string" ? captcha : null, ip))
   ) {
     return { error: "Validation anti-robot échouée. Réessaie." };
+  }
+
+  // Preuve de travail (Hashcash) — vérifiée AVANT toute opération coûteuse
+  // (hachage bcrypt, écriture DB, envoi d'email). No-op si POW_ENABLED absent.
+  const pow = verifyPoW(
+    typeof formData.get("pow-challenge") === "string"
+      ? (formData.get("pow-challenge") as string)
+      : null,
+    typeof formData.get("pow-nonce") === "string"
+      ? (formData.get("pow-nonce") as string)
+      : null,
+  );
+  if (!pow.ok) {
+    return { error: "Vérification anti-robot échouée. Recharge la page et réessaie." };
   }
 
   const { email, username, password, name } = parsed.data;

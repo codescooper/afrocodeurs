@@ -1,5 +1,5 @@
 # STATUS — AfroCodeurs
-> Dernière MAJ : 2026-06-19
+> Dernière MAJ : 2026-06-22
 
 ## 🎯 Objectif de la phase actuelle
 Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, crons, Sentry, médias, graphe de dépendances). Reste : la **rétention** et les fonctionnalités manquantes (i18n, mentorat, OAuth).
@@ -51,12 +51,13 @@ Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, cro
 - **Upload de médias** (#31 → #37) : `lib/storage.ts` pluggable (S3-compatible via `aws4fetch`, repli local `public/uploads` en dev), `POST /api/upload` (auth + email vérifié, ≤ 5 Mo, anti-CSRF), bouton réutilisable dans l'éditeur knowledge. Activer via `S3_*`. Vérifié + CI
 - **Graphe de dépendances** (#30 → #36) : la page projet **dessine** le DAG (colonnes = niveaux topologiques, flèches prérequis → tâche, nœuds colorés cliquables) — `features/projects/graph.ts` (layout pur testé) + rendu SVG serveur. Visible dès qu'il existe des dépendances. Vérifié + CI
 - **4 PR mergées + `main` vérifié intégré** : `tsc` OK, **27/27** Vitest, `next build` vert avec les 4 features ensemble. Railway redéploie automatiquement depuis `main`
+- **Anti-bot par preuve de travail (Hashcash, Adam Back)** — *(local, pas encore committé/mergé)* : couche anti-spam **auto-hébergée, sans tiers**, complément souverain du CAPTCHA Turnstile. Noyau `lib/pow.ts` (challenge signé HMAC sans état via `AUTH_SECRET`, `verifyPoW` O(1), anti-rejeu mémoire, anti-downgrade), émission `GET /api/pow`, solveur navigateur `public/pow-worker.js` (SHA-256 pur en Web Worker), widget `features/auth/pow-widget.tsx`, branché sur l'**inscription** avant bcrypt/DB/email (anti denial-of-wallet). **Gated/no-op** : inactif tant que `POW_ENABLED`/`NEXT_PUBLIC_POW_ENABLED` ≠ "true" → merge sans risque. Démo interactive **`/labs/pow`** + tutoriel **`docs/antibot-pow.md`** (recherche→code pour vibe codeurs). Vérifié : `tsc`, `eslint`, **36/36** Vitest (dont contrat client↔serveur SHA-256), `next build` vert. Empaqueté en commande globale réutilisable `/awema-antibot-pow` (détecte→implémente-ou-explique, stack-agnostique)
 
 ## 🚧 En cours
 - [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
 
 ## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-**Activer en prod ce qui est mergé** : (1) poser le secret **`CRON_SECRET`** dans le dépôt GitHub (Settings → Secrets and variables → Actions) pour que les crons aboutissent ; (2) *(optionnel)* `NEXT_PUBLIC_SENTRY_DSN` (Sentry) et `S3_*` (médias durables) sur Railway ; (3) **vérifier un domaine Resend** + `EMAIL_FROM` pour livrer l'email à **tous** ; (4) **roter** les clés exposées dans le chat. Ensuite : réclamer `@afrocodeurs`.
+**Committer + ouvrir la PR de la feature PoW anti-bot** (locale, vérifiée tsc/eslint/36 tests/build). Une fois mergée, l'activer en prod via `POW_ENABLED="true"` + `NEXT_PUBLIC_POW_ENABLED="true"` (+ `POW_DIFFICULTY=20`) sur Railway — en même temps que les activations déjà en attente : poser **`CRON_SECRET`** dans le dépôt GitHub (crons), *(optionnel)* `NEXT_PUBLIC_SENTRY_DSN` + `S3_*` sur Railway, **vérifier un domaine Resend** + `EMAIL_FROM`, et **roter** les clés exposées dans le chat. Ensuite : réclamer `@afrocodeurs`.
 
 ## 🧱 Décisions verrouillées
 - Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
