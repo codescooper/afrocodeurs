@@ -16,6 +16,7 @@ import { auth } from "@/lib/auth";
 import { getReputation } from "@/features/reputation/queries";
 import { FollowButton } from "@/features/follow/follow-button";
 import { Avatar } from "@/components/shared/avatar";
+import { Badge } from "@/components/ui/badge";
 import { USER_ROLE_LABELS } from "@/features/admin/constants";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
@@ -29,7 +30,7 @@ export async function generateMetadata({
   return { title: `@${username}` };
 }
 
-/** Profil public AfroMaker (v1) : identité, compétences, liens, contributions. */
+/** Profil public AfroMaker façon GitHub : sidebar identité sticky + contributions. */
 export default async function PublicProfilePage({
   params,
 }: {
@@ -114,44 +115,30 @@ export default async function PublicProfilePage({
   ] as const;
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-12">
-      {/* En-tête */}
-      <header className="flex flex-col gap-3">
-        <div className="flex items-start gap-4">
-          <Avatar
-            image={user.image}
-            name={user.name ?? user.username}
-            size={64}
-          />
-          <div className="flex flex-1 flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {user.name ?? `@${user.username}`}
-            </h1>
-            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              {USER_ROLE_LABELS[user.role]}
-            </span>
-            {session?.user && !isSelf && (
-              <span className="ml-auto">
-                <FollowButton userId={user.id} initialFollowing={isFollowing} />
-              </span>
-            )}
-          </div>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-12 md:flex-row">
+      {/* Sidebar identité — sticky, façon profil GitHub */}
+      <aside className="flex w-full shrink-0 flex-col gap-4 md:w-64 md:sticky md:top-20 md:self-start">
+        <Avatar image={user.image} name={user.name ?? user.username} size={128} />
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">
+            {user.name ?? `@${user.username}`}
+          </h1>
+          <p className="text-sm text-muted-foreground">@{user.username}</p>
         </div>
-        <p className="text-sm text-muted-foreground">@{user.username}</p>
-        <div className="flex gap-4 text-sm">
+
+        {session?.user && !isSelf && (
+          <FollowButton userId={user.id} initialFollowing={isFollowing} />
+        )}
+
+        {p?.bio && <p className="text-sm text-muted-foreground">{p.bio}</p>}
+
+        <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
           <span>
-            <b className="text-foreground">{user._count.followers}</b>{" "}
-            <span className="text-muted-foreground">abonné·e·s</span>
-          </span>
-          <span>
+            <b className="text-foreground">{user._count.followers}</b> abonné·e·s
+            {" · "}
             <b className="text-foreground">{user._count.following}</b>{" "}
-            <span className="text-muted-foreground">abonnements</span>
+            abonnements
           </span>
-        </div>
-
-        {p?.bio && <p className="max-w-2xl text-muted-foreground">{p.bio}</p>}
-
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           {location && (
             <span className="flex items-center gap-1.5">
               <MapPin className="size-4" />
@@ -165,7 +152,7 @@ export default async function PublicProfilePage({
         </div>
 
         {links.length > 0 && (
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col gap-1.5">
             {links.map((l) => {
               const Icon = l.icon;
               return (
@@ -183,144 +170,142 @@ export default async function PublicProfilePage({
             })}
           </div>
         )}
-      </header>
 
-      {/* Réputation */}
-      <section className="mt-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-muted/40 p-5">
-        <div className="flex flex-col">
-          <span className="text-3xl font-bold text-primary">{rep.total}</span>
-          <span className="text-xs text-muted-foreground">
-            points de réputation
-          </span>
-        </div>
-        <div className="h-10 w-px bg-border" />
-        <div className="flex flex-col">
-          <span className="font-semibold">{rep.level.label}</span>
-          {rep.next && (
-            <span className="text-xs text-muted-foreground">
-              {rep.next.min - rep.total} pts vers {rep.next.label}
-            </span>
-          )}
-        </div>
-        <div className="ml-auto flex gap-4 text-sm text-muted-foreground">
-          <span>
-            Contribution <b className="text-foreground">{rep.contribution}</b>
-          </span>
-          <span>
-            Participation <b className="text-foreground">{rep.participation}</b>
-          </span>
-        </div>
-      </section>
-
-      {/* Langues & compétences */}
-      {(p?.languages.length || p?.skills.length) ? (
-        <section className="mt-8 flex flex-col gap-3">
-          {p!.skills.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              {p!.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )}
-          {p!.languages.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              Langues : {p!.languages.join(", ")}
-            </p>
-          )}
-        </section>
-      ) : null}
-
-      {/* Statistiques */}
-      <section className="mt-8 grid grid-cols-5 gap-2 rounded-lg border border-border bg-muted/40 p-4 text-center">
-        {stats.map(([label, value]) => (
-          <div key={label}>
-            <div className="text-xl font-bold text-primary">{value}</div>
-            <div className="text-xs text-muted-foreground">{label}</div>
-          </div>
-        ))}
-      </section>
-
-      {/* Contributions */}
-      <div className="mt-10 grid gap-10 md:grid-cols-2">
-        <section>
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <BookOpen className="size-5 text-primary" />
-            Ressources publiées
-          </h2>
-          {user.knowledge.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              Aucune ressource publiée.
-            </p>
-          ) : (
-            <ul className="mt-3 flex flex-col gap-2">
-              {user.knowledge.map((k) => (
-                <li key={k.id}>
-                  <Link
-                    href={`/knowledge/${k.slug}`}
-                    className="flex flex-col rounded-md border border-border px-4 py-2 transition-colors hover:bg-muted/40"
-                  >
-                    <span className="font-medium">{k.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {KNOWLEDGE_TYPE_LABELS[k.type]}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section>
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <MessageSquare className="size-5 text-primary" />
-            Questions récentes
-          </h2>
-          {user.questions.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              Aucune question posée.
-            </p>
-          ) : (
-            <ul className="mt-3 flex flex-col gap-2">
-              {user.questions.map((q) => (
-                <li key={q.id}>
-                  <Link
-                    href={`/forum/${q.slug}`}
-                    className="flex flex-col rounded-md border border-border px-4 py-2 transition-colors hover:bg-muted/40"
-                  >
-                    <span className="font-medium">{q.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {QUESTION_STATUS_LABELS[q.status]}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-
-      {/* Communautés */}
-      {user.communities.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-lg font-semibold">Communautés</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {user.communities.map((m) => (
-              <Link
-                key={m.id}
-                href={`/communities/${m.community.slug}`}
-                className="rounded-full border border-border px-3 py-1 text-sm transition-colors hover:bg-muted/40"
-              >
-                {m.community.name}
-              </Link>
+        {(p?.skills.length ?? 0) > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {p!.skills.map((skill) => (
+              <Badge key={skill} variant="outline">
+                {skill}
+              </Badge>
             ))}
           </div>
+        )}
+        {(p?.languages.length ?? 0) > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Langues : {p!.languages.join(", ")}
+          </p>
+        )}
+        <Badge variant="secondary" className="w-fit">
+          {USER_ROLE_LABELS[user.role]}
+        </Badge>
+      </aside>
+
+      {/* Contenu principal */}
+      <div className="min-w-0 flex-1">
+        {/* Réputation */}
+        <section className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-muted/40 p-5">
+          <div className="flex flex-col">
+            <span className="text-3xl font-bold text-primary">{rep.total}</span>
+            <span className="text-xs text-muted-foreground">
+              points de réputation
+            </span>
+          </div>
+          <div className="h-10 w-px bg-border" />
+          <div className="flex flex-col">
+            <span className="font-semibold">{rep.level.label}</span>
+            {rep.next && (
+              <span className="text-xs text-muted-foreground">
+                {rep.next.min - rep.total} pts vers {rep.next.label}
+              </span>
+            )}
+          </div>
+          <div className="ml-auto flex gap-4 text-sm text-muted-foreground">
+            <span>
+              Contribution <b className="text-foreground">{rep.contribution}</b>
+            </span>
+            <span>
+              Participation <b className="text-foreground">{rep.participation}</b>
+            </span>
+          </div>
         </section>
-      )}
+
+        {/* Statistiques */}
+        <section className="mt-6 grid grid-cols-5 gap-2 rounded-lg border border-border bg-muted/40 p-4 text-center">
+          {stats.map(([label, value]) => (
+            <div key={label}>
+              <div className="text-xl font-bold text-primary">{value}</div>
+              <div className="text-xs text-muted-foreground">{label}</div>
+            </div>
+          ))}
+        </section>
+
+        {/* Contributions */}
+        <div className="mt-10 grid gap-10 sm:grid-cols-2">
+          <section>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <BookOpen className="size-5 text-primary" />
+              Ressources publiées
+            </h2>
+            {user.knowledge.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Aucune ressource publiée.
+              </p>
+            ) : (
+              <ul className="mt-3 flex flex-col gap-2">
+                {user.knowledge.map((k) => (
+                  <li key={k.id}>
+                    <Link
+                      href={`/knowledge/${k.slug}`}
+                      className="flex flex-col rounded-md border border-border px-4 py-2 transition-colors hover:bg-muted/40"
+                    >
+                      <span className="font-medium">{k.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {KNOWLEDGE_TYPE_LABELS[k.type]}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section>
+            <h2 className="flex items-center gap-2 text-lg font-semibold">
+              <MessageSquare className="size-5 text-primary" />
+              Questions récentes
+            </h2>
+            {user.questions.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Aucune question posée.
+              </p>
+            ) : (
+              <ul className="mt-3 flex flex-col gap-2">
+                {user.questions.map((q) => (
+                  <li key={q.id}>
+                    <Link
+                      href={`/forum/${q.slug}`}
+                      className="flex flex-col rounded-md border border-border px-4 py-2 transition-colors hover:bg-muted/40"
+                    >
+                      <span className="font-medium">{q.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {QUESTION_STATUS_LABELS[q.status]}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {/* Communautés */}
+        {user.communities.length > 0 && (
+          <section className="mt-10">
+            <h2 className="text-lg font-semibold">Communautés</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {user.communities.map((m) => (
+                <Link
+                  key={m.id}
+                  href={`/communities/${m.community.slug}`}
+                  className="rounded-full border border-border px-3 py-1 text-sm transition-colors hover:bg-muted/40"
+                >
+                  {m.community.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
