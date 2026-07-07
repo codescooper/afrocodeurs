@@ -79,7 +79,11 @@ export default async function CommunityDetailPage({
           <form action={isMember ? leaveCommunityAction : joinCommunityAction}>
             <input type="hidden" name="communityId" value={community.id} />
             <input type="hidden" name="slug" value={community.slug} />
-            <Button type="submit" variant={isMember ? "outline" : "primary"}>
+            <Button
+              type="submit"
+              variant={isMember ? "outline" : "primary"}
+              shape="pill"
+            >
               {isMember ? "Quitter" : "Rejoindre"}
             </Button>
           </form>

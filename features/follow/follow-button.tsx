@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { toggleFollowAction } from "./actions";
 
 export function FollowButton({
@@ -25,11 +27,14 @@ export function FollowButton({
       type="button"
       onClick={toggle}
       disabled={pending}
-      className={
-        following
-          ? "rounded-md border border-border px-4 py-1.5 text-sm font-medium transition-colors hover:bg-muted/60 disabled:opacity-50"
-          : "rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 disabled:opacity-50"
-      }
+      className={cn(
+        buttonVariants({
+          variant: following ? "outline" : "primary",
+          size: "sm",
+          shape: "pill",
+        }),
+        "disabled:opacity-50",
+      )}
     >
       {following ? "Suivi·e ✓" : "Suivre"}
     </button>
