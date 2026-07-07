@@ -7,7 +7,11 @@ Chaque module encapsule un domaine métier et expose typiquement :
 - `actions.ts` — Server Actions (formulaires, mutations)
 - `queries.ts` — lectures Prisma (Server Components)
 - `schema.ts` — schémas Zod spécifiques au module
-- `components/` — composants UI du module
+- `components/` — composants UI **spécifiques à ce domaine** (assemblent des
+  atomes/molécules partagés de `components/atoms|molecules`). Un composant
+  générique sans logique métier (carte de liste, champ de formulaire, état
+  vide…) vit dans `components/` à la racine, pas ici — cf.
+  `.claude/skills/atomic-components`.
 
 | Module        | Domaine                          | Sprint   |
 | ------------- | -------------------------------- | -------- |
