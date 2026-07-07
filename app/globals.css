@@ -13,9 +13,57 @@
   --muted: #f1f0ec;
   --muted-foreground: #5c5c54;
   --border: #e6e4dd;
+  --input: #e6e4dd;
+  --ring: #f5b800; /* jaune-or africain, cf. --primary */
+  --card: #ffffff;
+  --card-foreground: #111111;
   --destructive: #dc2626; /* rouge doux */
   --destructive-foreground: #ffffff;
   --radius: 0.75rem;
+}
+
+/* Mode sombre — mêmes accents or/vert, surface quasi-noire (cf. PRD UX/UI §2).
+   Système (prefers-color-scheme) par défaut ; [data-theme] force un choix manuel. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #0d0c0a;
+    --foreground: #fafaf8;
+    --primary: #f5b800;
+    --primary-foreground: #111111;
+    --secondary: #1f1e1a;
+    --secondary-foreground: #fafaf8;
+    --accent: #22c55e;
+    --accent-foreground: #ffffff;
+    --muted: #1a1917;
+    --muted-foreground: #a3a29c;
+    --border: #2a2924;
+    --input: #2a2924;
+    --ring: #f5b800;
+    --card: #141310;
+    --card-foreground: #fafaf8;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #0d0c0a;
+  --foreground: #fafaf8;
+  --primary: #f5b800;
+  --primary-foreground: #111111;
+  --secondary: #1f1e1a;
+  --secondary-foreground: #fafaf8;
+  --accent: #22c55e;
+  --accent-foreground: #ffffff;
+  --muted: #1a1917;
+  --muted-foreground: #a3a29c;
+  --border: #2a2924;
+  --input: #2a2924;
+  --ring: #f5b800;
+  --card: #141310;
+  --card-foreground: #fafaf8;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 }
 
 @theme inline {
@@ -30,10 +78,14 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-sans: var(--font-display), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 
   --radius-lg: var(--radius);

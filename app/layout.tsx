@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CookieBanner } from "@/components/layout/cookie-banner";
+import { ThemeScript } from "@/components/layout/theme-script";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const displaySans = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -42,7 +43,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#111111",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafaf8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0c0a" },
+  ],
 };
 
 export default function RootLayout({
@@ -53,8 +57,12 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${displaySans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <CookieBanner />
