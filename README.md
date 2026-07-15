@@ -100,6 +100,10 @@ documentation… tout compte.
 ➡️ **Lis le guide : [CONTRIBUTING.md](CONTRIBUTING.md)** — mise en route,
 workflow, et tes premières contributions faciles.
 
+Pour organiser l'ouverture progressive de la plateforme, suis le
+**[guide de bêta contrôlée](docs/BETA-CONTROLEE.md)** : cohortes, parcours de
+test, métriques, gestion des incidents et critères de lancement public.
+
 ## 🌍 Un projet panafricain, par nature
 
 Le continent est pluriel : ce projet l'est aussi. Le code et la doc principale
