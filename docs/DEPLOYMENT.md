@@ -88,7 +88,8 @@ images ≤ 5 Mo (JPEG/PNG/WebP/GIF).
 - [ ] Mot de passe oublié → email **réellement reçu**.
 - [ ] Email de vérification reçu à l'inscription.
 - [ ] `https://domaine/robots.txt` et `/sitemap.xml` répondent.
-- [ ] Pages légales : `/confidentialite`, `/conditions`, `/mentions-legales`.
-- [ ] Compléter les `[à compléter]` des mentions légales (éditeur, hébergeur, directeur de publication).
+- [x] Pages légales : `/confidentialite`, `/conditions`, `/mentions-legales`.
+- [x] Renseigner l'hébergeur Railway dans les mentions légales.
+- [ ] Compléter l'identité de l'éditeur et du directeur de publication.
 - [ ] `conduct@` / `privacy@` / `contact@` / `abuse@afrocodeurs.org` routent vers de vraies boîtes.
 - [ ] Sauvegardes automatiques activées sur la base managée.

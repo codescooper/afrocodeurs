@@ -1,77 +1,48 @@
 # STATUS — AfroCodeurs
-> Dernière MAJ : 2026-06-22
 
-## 🎯 Objectif de la phase actuelle
-Projet **déployé en production** (Railway) et **activé** (CAPTCHA, email, crons, Sentry, médias, graphe de dépendances). Reste : la **rétention** et les fonctionnalités manquantes (i18n, mentorat, OAuth).
+**Dernière MAJ : 2026-07-15**
+> Statut actualisé à partir du dépôt, de Railway, de GitHub Actions, de Resend et de contrôles HTTP réels.
 
-## ✅ Fait (cette semaine)
-- Socle Next.js 16 + Auth.js v5 + Prisma 7 (driver adapter Postgres), incluant le correctif bloquant Prisma 7
-- Sprint 1 — Profil AfroMaker éditable (`/dashboard/profile`)
-- Sprint 2 — Communautés : liste, détail, création, rejoindre/quitter (`/communities`)
-- Sprint 3 — Problem Hub : problèmes liste/détail/proposition (`/explorer`)
-- Sprint 4 — Knowledge Hub : éditeur Markdown, brouillon → soumission → validation (`/knowledge`)
-- Sprint 5 — Forum : questions/réponses, votes, réponse acceptée, commentaires (`/forum`)
-- Sprint 6 — AfroAtlas : annuaire de solutions (`/atlas`)
-- Sprint 7 — Recherche globale multi-entités (`/search`, Postgres)
-- Sprint 8 — Admin & modération : validation, signalements, gestion des rôles (`/admin`)
-- Page Paramètres du compte (`/dashboard/settings`) + correctif du lien de sidebar mort
-- Lancement local vérifié : base autonome (`embedded-postgres`) + jeu de données de démo
-- Migration initiale Prisma versionnée (`prisma/migrations/…_init`)
-- **PostgreSQL 18.4 réel installé** (binaires officiels EDB, espace utilisateur, sans admin) : `C:\Users\BEJ technologie\PostgreSQL`, port 5432, rôle/base `afrocodeurs` — app migrée (`migrate deploy`), seedée et vérifiée dessus (base jetable :5433 arrêtée)
-- **Build de production validé** : `next build` vert (TS OK, 25 pages statiques, 28 routes) + `next start` vérifié sur :3001 (toutes pages 200 avec données réelles)
-- `/opportunities` tranché : placeholder v1 **conforme au PRD produit V1**, texte aligné sur AfroOpportunities (emplois, stages, concours, bourses, financements) — module complet reporté en v2
-- **Profil public `/u/[username]`** : identité, skills, liens, stats, contributions — et membres cliquables partout (recherche, forum, ressources, problèmes, atlas, communautés)
-- **Relations problème ↔ solutions/ressources** (cœur du pitch) : la page problème liste les solutions (SOLVES) et ressources (EXPLAINS) liées, liaison/retrait par la communauté (`EntityRelation` enfin servi par l'UI)
-- **Outillage collaboratif (OSS) — 1/n** : runner de commandes portable `./run` (start/build/test/lint/format/logs/deploy/clean/doctor, réutilisable toute stack, auto-détection + `run.config.json`) + `.gitattributes` (normalisation LF/CRLF)
-- **Accueil open source — 2/n** : README **bilingue FR/EN** + CONTRIBUTING panafricains et accueillants (Build Before Consume, contributions sans code, langues africaines, esprit Ubuntu) ; `seed.mjs` de démo versionné pour l'onboarding. Commande globale `/awema-pre-commit-check` posée.
-- **CI — 3/n** : workflow GitHub Actions (`.github/workflows/ci.yml`) — `./run lint` + `./run build` sur push/PR, Postgres de service + `migrate deploy` ; s'activera au 1ᵉʳ push GitHub
-- **LICENSE (MIT) + CODE_OF_CONDUCT (Contributor Covenant 2.1) — 4/n** : repo prêt à être rendu public ; liés depuis README (FR/EN) et CONTRIBUTING
-- **Templates GitHub — 5/n** : formulaires d'issue (bug, amélioration) + template de PR (rappelle de relier à un problème, checklist `./run`) → **outillage collaboratif complet**
-- **Bonus OSS** : `SECURITY.md`, `SUPPORT.md`, `.github/FUNDING.yml`, et `docs/good-first-issues.md` (idées de démarrage tirées du backlog, liées depuis CONTRIBUTING)
-- **« Signaler » généralisé** : le contrôle de signalement couvre désormais ressources, problèmes, solutions et communautés (plus seulement le forum) — modération sur tous les contenus publics
-- **Fix auth** : une session dont l'utilisateur n'existe plus est invalidée (revalidation du JWT à chaque résolution) — corrige les 500 sur clé étrangère (ex. Signaler après reseed) et propage aussitôt les changements de rôle
-- **Modération complète + notifications** : page de traitement `/admin/reports/[id]` (aperçu du contenu signalé + actions Rejeter / Masquer / Supprimer qui agissent sur l'élément), et **notification au signaleur** de la décision (`/dashboard/notifications` + badge de non-lus dans la sidebar). Nouveau modèle `Notification` (migration)
-- **Notifications sur tous les événements** (helper `notify()` centralisé, anti-auto-notification) : réponse à ta question, réponse acceptée, commentaire, ressource publiée/refusée, solution/ressource liée à ton problème, rôle modifié, contenu modéré, **nouveau membre dans ta communauté**
-- **Cloche temps réel** : icône dans le header (connecté) avec compteur de non-lues, panneau déroulant et **toasts « push up »** (polling 15 s, `/api/notifications`)
-- **Préférences + Web Push** : opt-out par catégorie (respecté par `notify()`) et **vraies notifications navigateur** (service worker, clés VAPID, abonnement, `web-push`) — réglages sur `/dashboard/notifications`. Au passage : `.env.example` corrigé (était masqué par `.env*`), échafaudage `embedded-postgres` retiré
-- **Système de réputation** (« Build Before Consume ») : barème + niveaux (Curieux·se → Légende), attribution de points dans toutes les actions (question, réponse, réponse acceptée, commentaire, ressource publiée, problème, solution, relation, join, **upvotes reçus**), carte sur le profil, niveau sur le dashboard, **classement public `/afromakers`**
-- **Infrastructure email** : transport pluggable (`lib/email.ts` — Resend si `RESEND_API_KEY`, sinon **log console en mode dev** avec le lien magique). **Mot de passe oublié** (`/forgot-password` → `/reset-password`, token 1 h) et **vérification d'email** (envoi à l'inscription, page `/verify-email`, renvoi depuis le dashboard) — tokens à usage unique dans `VerificationToken` (préfixes `reset:` / `verify:`)
-- **Dépôt public sur GitHub** : https://github.com/codescooper/afrocodeurs (branche `main`) — **CI verte au 1ᵉʳ run** (lint + build + `migrate deploy` sur Postgres, ~1m20). Actions `checkout`/`setup-node` bumpées `@v5` (Node 24) + build CI sur Node 22
-- **Durcissement avant lancement** : pages d'erreur 404/500 + `robots`/`sitemap`/OpenGraph ; **pages légales** (confidentialité/CGU/mentions) + bannière cookies + footer ; **anti-abus** (rate-limiting + CAPTCHA Turnstile, pluggables, no-op en dev) ; **email vérifié imposé** pour publier ; capture d'erreurs (`lib/observability`, Sentry-ready) ; **13 tests Vitest** ajoutés à la CI ; config de déploiement (`vercel.json` + `docs/DEPLOYMENT.md`)
-- **Rétention — Tier 1 (plateforme vivante)** : **accueil** alimenté en temps réel (derniers problèmes/savoir, communautés actives, top AfroMakers, vraies stats) au lieu de « Bientôt disponible » ; **dashboard = feed personnel** (quoi de neuf, tes questions + nb de réponses, tes communautés) ; **compteurs de vues** sur problèmes/savoir/questions/solutions
-- **🚀 DÉPLOYÉ sur Railway** : https://web-production-2b204.up.railway.app — Postgres managé, schéma migré (`migrate deploy` via proxy public), build Node 22 (`prisma generate && next build`), pages DB en `force-dynamic` (base injoignable au build). App + auth + SEO + légal **vérifiés 200**. Base de prod vierge (pas de seed démo)
-- **Rétention — Tier 2** : **PWA installable** (manifest + icône + theme-color) ; **Follow** (suivre des AfroMakers, compteurs, notif Social, activité au dashboard) ; **Favoris** (enregistrer problèmes/ressources → `/dashboard/saved`) ; **Digest hebdo** email (route cron `/api/cron/digest` protégée + préférence réglable). Migrations Follow + Bookmark appliquées sur Railway
-- **Contenu fondateur en prod** (anti cold-start) : compte officiel `@afrocodeurs` + 8 problèmes, 5 ressources, **4 vraies solutions open-source** (Ushahidi, Mojaloop, Africa's Talking, FrontlineSMS), 5 communautés — `founding-seed.mjs` idempotent. **Le site live n'est plus vide** (vérifié sur accueil + Atlas)
-- **Refactoring Server Actions (sans changement de comportement)** : garde auth/email-vérifié/permission centralisée dans `lib/guard.ts` (`guard()` — une seule source de vérité, plus d'oubli possible du check email/RBAC) + `invalidMessage()` pour les erreurs Zod ; helpers `orNull`/`parseList`/`uniqueSlug` remontés dans `lib/utils.ts`. ~22 blocs de garde et ~12 messages Zod dédupliqués sur 11 fichiers `features/*/actions.ts`. Vérifié : `tsc` OK, `eslint` OK, 13/13 tests Vitest verts
-- **Roadmaps de projets synchronisées GitHub** : nouvelle entité `Project` (un dépôt `org/repo` par projet → hub OSS), pages `/projects` (liste, détail, création). La roadmap est une **vue synchronisée** des issues GitHub (= tâches), milestones (= phases), assignees (= qui fait quoi), issue fermée (= fait) — via `lib/github.ts` (fetch natif, zéro dépendance) + `features/projects/sync.ts` + cron `/api/cron/roadmap-sync` (calqué sur digest) + bouton « Rafraîchir » mainteneur. **DAG curaté** sur la plateforme (`RoadmapDependency`, anti-cycle) ; statut dérivé Prête 🟢 / Bloquée 🔒 / En cours 👤 / Fait ✅ calculé à la lecture (fonction pure testée). **Hybride** : contributions non-code in-app inchangées ; pont d'identité AfroMaker ↔ GitHub (`Profile.githubLogin`, capté à la connexion OAuth + repli depuis `githubUrl`) → réputation `TASK_COMPLETED`/`PROJECT_CREATED`. Vérifié : migration, `tsc`, `eslint`, **18/18** Vitest, API GitHub réelle (200), `next build` vert
-- **Avatars** (#24) : upload de photo de profil (recadrage carré 256px côté client → data URL JPEG en base, sans stockage externe ni migration) ; composant `Avatar` réutilisé partout (profil, `/u/[username]`, en-têtes)
-- **Vue projet refondue** (ludique/UX) : anneau de progression, **parcours vertical** des phases, section « À toi de jouer » (tâches prêtes en cartes ambre), CTA contribuer sur GitHub ; **vraie roadmap GitHub** d'AfroCodeurs dogfoodée (4 milestones, 32 issues) ; projets intégrés à la **recherche globale** + **sitemap**
-- **🔓 Prod activée** : clés **Resend**, **Turnstile** et `CRON_SECRET` posées sur Railway ; **CAPTCHA Turnstile vérifié actif** sur l'inscription ; email branché (Resend) ; **crons planifiés via GitHub Actions** (`.github/workflows/cron.yml` — digest hebdo lundi 08:00 UTC + roadmap-sync quotidien 04:00 UTC, auth `Authorization: Bearer <CRON_SECRET>`, `workflow_dispatch` manuel) → **mergé (#33)** ; reste à poser le secret `CRON_SECRET` dans le dépôt pour que les runs aboutissent
-- **Observabilité Sentry** (#29 → #34) : `@sentry/nextjs` installé et câblé (instrumentation serveur/edge/client, `onRequestError`, `captureException()` forwarde vers Sentry, `withSentryConfig`). **No-op sans DSN** — activer via `NEXT_PUBLIC_SENTRY_DSN`. Vérifié tsc/eslint/Vitest/build + CI
-- **Upload de médias** (#31 → #37) : `lib/storage.ts` pluggable (S3-compatible via `aws4fetch`, repli local `public/uploads` en dev), `POST /api/upload` (auth + email vérifié, ≤ 5 Mo, anti-CSRF), bouton réutilisable dans l'éditeur knowledge. Activer via `S3_*`. Vérifié + CI
-- **Graphe de dépendances** (#30 → #36) : la page projet **dessine** le DAG (colonnes = niveaux topologiques, flèches prérequis → tâche, nœuds colorés cliquables) — `features/projects/graph.ts` (layout pur testé) + rendu SVG serveur. Visible dès qu'il existe des dépendances. Vérifié + CI
-- **4 PR mergées + `main` vérifié intégré** : `tsc` OK, **27/27** Vitest, `next build` vert avec les 4 features ensemble. Railway redéploie automatiquement depuis `main`
-- **Anti-bot par preuve de travail (Hashcash, Adam Back)** — *(mergé sur `main`, [#39](https://github.com/codescooper/afrocodeurs/pull/39) — Railway redéployé, encore gated/off)* : couche anti-spam **auto-hébergée, sans tiers**, complément souverain du CAPTCHA Turnstile. Noyau `lib/pow.ts` (challenge signé HMAC sans état via `AUTH_SECRET`, `verifyPoW` O(1), anti-rejeu mémoire, anti-downgrade), émission `GET /api/pow`, solveur navigateur `public/pow-worker.js` (SHA-256 pur en Web Worker), widget `features/auth/pow-widget.tsx`, branché sur l'**inscription** avant bcrypt/DB/email (anti denial-of-wallet). **Gated/no-op** : inactif tant que `POW_ENABLED`/`NEXT_PUBLIC_POW_ENABLED` ≠ "true" → merge sans risque. Démo interactive **`/labs/pow`** + tutoriel **`docs/antibot-pow.md`** (recherche→code pour vibe codeurs). Vérifié : `tsc`, `eslint`, **36/36** Vitest (dont contrat client↔serveur SHA-256), `next build` vert. Empaqueté en commande globale réutilisable `/awema-antibot-pow` (détecte→implémente-ou-explique, stack-agnostique)
+## 🎯 Phase
 
-## 🚧 En cours
-- [ ] Vérifier le flux **Web Push** de bout en bout dans un vrai navigateur (autorisation + réception app fermée) — le code est en place, seule la partie navigateur reste à tester manuellement
+**Pré-lancement public** : la plateforme est en ligne et techniquement stable, mais l'email transactionnel et l'identité légale de l'éditeur bloquent encore un lancement public sans restriction.
 
-## ⏭️ Prochaine étape (la SEULE chose à faire ensuite)
-**Activer le PoW en prod sur Railway** (`POW_ENABLED="true"` + `NEXT_PUBLIC_POW_ENABLED="true"` + `POW_DIFFICULTY="20"`) — à grouper avec les activations déjà en attente : poser **`CRON_SECRET`** dans le dépôt GitHub (crons), *(optionnel)* `NEXT_PUBLIC_SENTRY_DSN` + `S3_*` sur Railway, **vérifier un domaine Resend** + `EMAIL_FROM`, et **roter** les clés exposées dans le chat. Ensuite : réclamer `@afrocodeurs`.
+## ✅ Fait
 
-## 🧱 Décisions verrouillées
-- Next.js 16 (App Router, Server Actions) + React 19 ; architecture modulaire `features/<domaine>/` (actions + forms)
-- Prisma 7 **avec driver adapter** (`@prisma/adapter-pg`) : `datasource.url` interdit dans le schéma, connexion via `prisma.config.ts` / `lib/db.ts`
-- Auth.js v5, stratégie **JWT** (credentials + Google/GitHub) ; RBAC maison (`lib/permissions.ts`)
-- Markdown First : rendu serveur sanitizé (`components/shared/markdown.tsx`)
-- Recherche en Postgres pour l'instant ; Meilisearch prévu en upgrade
-- Roadmaps : **GitHub = source de vérité** des tâches (issues/milestones/assignees, synchro en cache) ; seules les **arêtes de dépendance** (DAG) et l'identité/réputation vivent sur la plateforme. Tâches créées sur GitHub, pas in-app
+- [x] Production Railway et PostgreSQL en ligne : `https://web-production-2b204.up.railway.app`.
+- [x] Accueil, `robots.txt`, `sitemap.xml`, pages légales et API PoW vérifiés en HTTP 200 le 2026-07-15.
+- [x] PoW actif en production (`POW_ENABLED=true`, widget client actif, difficulté 20) et Turnstile configuré.
+- [x] Secret des crons renouvelé avec 32 octets aléatoires et synchronisé entre Railway et GitHub Actions.
+- [x] Digest hebdomadaire et synchronisation des roadmaps exécutés avec succès via GitHub Actions (run `29426770349`).
+- [x] Validation locale verte : ESLint, build Next.js 16.2.7 et 36/36 tests Vitest.
+- [x] Hébergeur Railway renseigné dans les mentions légales à partir de ses informations officielles.
+- [x] Avertissement de dépréciation Sentry supprimé de la configuration du build.
 
-## ⚠️ Dettes / risques connus
-- Postgres local : **conflit de port** — un autre Postgres (`C:\dev\pgsql`) reprend le 5432 au reboot, donc AfroCodeurs tourne sur **5433** (`.env` pointe dessus). Pas de démarrage auto : après un reboot, relancer le mien sur 5433 (`pg_ctl -D "…\PostgreSQL\data" -o "-p 5433" start`)
-- OAuth Google/GitHub configurés mais **sans clés** → connexion sociale inactive ; en conséquence le pont d'identité roadmap AfroMaker ↔ GitHub via OAuth est inactif → repli sur le `githubUrl` du profil (le login en est déduit) tant que les clés ne sont pas posées
-- **Email prod limité** : Turnstile (CAPTCHA) **actif** ; Resend **actif mais sans domaine vérifié** → l'email ne part que vers le propriétaire du compte Resend (vérifier un domaine + `EMAIL_FROM` pour livrer à tous). Web Push toujours inactif (clés VAPID non définies en prod). **Clés Resend / Turnstile / `CRON_SECRET` exposées dans le chat → à roter**
-- **Rate-limiting en mémoire** : OK en mono-instance ; en serverless (Vercel) brancher un store partagé (Upstash) — cf. `docs/DEPLOYMENT.md`
-- **Pages légales** : contenu de départ à faire relire + placeholders `[à compléter]` (éditeur, hébergeur)
-- **Sentry installé et câblé** mais **inactif sans `NEXT_PUBLIC_SENTRY_DSN`** (créer un projet Sentry + poser le DSN sur Railway). **Médias** : stockage **local éphémère** sur Railway tant que `S3_*` n'est pas configuré (bucket objet recommandé)
-- `CODE_OF_CONDUCT.md` pointe vers `conduct@afrocodeurs.org` — le repo est **public**, s'assurer que cette adresse route vers une vraie boîte
+## 🚧 En cours / À faire
+
+- [ ] Configurer un domaine d'envoi et le vérifier dans Resend ; aucun domaine n'est actuellement enregistré et `EMAIL_FROM` utilise `resend.dev`.
+- [ ] Tester en production la réception de l'email d'inscription, de vérification et de réinitialisation avec une adresse externe.
+- [ ] Renseigner l'identité/statut/adresse de l'éditeur, le directeur de publication et le droit applicable dans les pages légales.
+- [ ] Confirmer que `contact@`, `privacy@`, `abuse@` et `conduct@` routent vers de vraies boîtes ; `afrocodeurs.org` ne résout pas actuellement en DNS.
+- [ ] Confirmer la rotation des clés Resend et Turnstile précédemment exposées ; seule la rotation de `CRON_SECRET` est vérifiée ici.
+- [ ] Configurer VAPID et tester Web Push de bout en bout si cette fonction doit faire partie du lancement.
+- [ ] Configurer un stockage objet S3 avant de promouvoir l'upload de médias en production.
+- [ ] Activer Sentry avant le lancement public, ou formaliser la surveillance des logs Railway comme solution temporaire.
+
+## ⏭️ Prochaine action
+
+**Choisir/configurer le domaine public, puis le vérifier dans Resend et effectuer un test réel de réception d'email.**
+
+## ⚠️ Risques
+
+- Sans domaine Resend vérifié, les emails transactionnels ne sont pas livrables à tous : inscription, vérification et récupération de compte sont dégradées.
+- Les mentions légales restent incomplètes tant que l'identité de l'éditeur et du directeur de publication n'est pas fournie.
+- Le stockage média local est éphémère sur Railway sans S3 ; Web Push, Sentry et OAuth sont inactifs faute de configuration.
+
+## 🚦 Verdict de lancement
+
+**GO pour une bêta contrôlée. NO-GO pour un lancement public large** tant que l'email transactionnel et les mentions légales ne sont pas finalisés.
+
+## 🧱 Stack & structure
+
+Next.js 16.2.7 (App Router) + React 19, Auth.js v5, Prisma 7/PostgreSQL, Vitest, Railway et GitHub Actions. Architecture modulaire `features/<domaine>/`, Server Actions protégées par les gardes centralisées de `lib/guard.ts`.

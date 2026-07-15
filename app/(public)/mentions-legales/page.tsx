@@ -22,8 +22,13 @@ export default function MentionsLegalesPage() {
 
       <h2>Hébergement</h2>
       <p>
-        <em>[hébergeur à compléter — ex. Vercel Inc., 340 S Lemon Ave #4133,
-        Walnut, CA 91789, USA]</em>
+        Railway Corporation
+        <br />
+        548 Market St, Suite 68956, San Francisco, CA 94104, États-Unis
+        <br />
+        <a href="https://railway.com" target="_blank" rel="noreferrer">
+          railway.com
+        </a>
       </p>
 
       <h2>Propriété intellectuelle</h2>
