@@ -269,4 +269,3 @@ Le lancement public devient raisonnable quand :
 - [ ] Observer les tests sans guider prématurément.
 - [ ] Centraliser les retours et attribuer leur priorité.
 - [ ] Envoyer un bilan court à l'équipe en fin de journée.
-
