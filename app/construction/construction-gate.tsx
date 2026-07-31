@@ -1,13 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import styles from "./construction.module.css";
 
-const PASSPHRASE = "afro20";
-const SECRET_TAPS = 5;
 const WHATSAPP_URL = "https://chat.whatsapp.com/BfD3XW8X48ACQN5V8XkBye";
+type RiddleSymbol = "baobab" | "laptop" | "sun" | "logo";
 
 function PixelScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,36 +97,46 @@ function PixelScene() {
 }
 
 export function ConstructionGate() {
-  const keyBuffer = useRef("");
-  const tapTimer = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [opening, setOpening] = useState(false);
-  const [secretTaps, setSecretTaps] = useState(0);
+  const [riddleProgress, setRiddleProgress] = useState(0);
+  const [riddleMessage, setRiddleMessage] = useState("");
+  const [riddleBusy, setRiddleBusy] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [formState, setFormState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
 
-  const unlock = useCallback(async () => {
-    if (opening) return;
-    setOpening(true);
+  async function submitRiddleSymbol(symbol: RiddleSymbol) {
+    if (opening || riddleBusy) return;
+    setRiddleBusy(true);
     const response = await fetch("/api/preview", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ phrase: "build before consume" }),
+      body: JSON.stringify({ symbol }),
     });
-    if (!response.ok) return setOpening(false);
-    window.setTimeout(() => window.location.assign("/"), 650);
-  }, [opening]);
+    const data = (await response.json()) as { status?: string; progress?: number; retryAfter?: number };
+    setRiddleBusy(false);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || event.key.length !== 1) return;
-      keyBuffer.current = `${keyBuffer.current}${event.key.toLowerCase()}`.slice(-PASSPHRASE.length);
-      if (keyBuffer.current === PASSPHRASE) void unlock();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [unlock]);
+    if (data.status === "unlocked") {
+      setOpening(true);
+      setRiddleProgress(4);
+      setRiddleMessage("La porte reconnaît un pionnier.");
+      window.setTimeout(() => window.location.assign("/"), 850);
+      return;
+    }
+    if (data.status === "progress") {
+      setRiddleProgress(data.progress ?? 0);
+      setRiddleMessage("Un fragment s’allume…");
+      return;
+    }
+    if (data.status === "locked") {
+      setRiddleProgress(0);
+      setRiddleMessage("Le désert garde le silence. Revenez plus tard.");
+      return;
+    }
+    setRiddleProgress(0);
+    setRiddleMessage(data.status === "unavailable" ? "La porte dort encore." : "Le vent efface vos traces.");
+  }
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -157,18 +166,6 @@ export function ConstructionGate() {
     }
   }
 
-  function tapSecret() {
-    if (tapTimer.current) window.clearTimeout(tapTimer.current);
-    const next = secretTaps + 1;
-    if (next >= SECRET_TAPS) {
-      setSecretTaps(0);
-      void unlock();
-      return;
-    }
-    setSecretTaps(next);
-    tapTimer.current = window.setTimeout(() => setSecretTaps(0), 1800);
-  }
-
   async function subscribe(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -190,7 +187,7 @@ export function ConstructionGate() {
       <audio ref={audioRef} src="/ancestral-pixel-loop.mp3" autoPlay loop preload="auto" />
       <div className={styles.ambientGrid} aria-hidden="true" />
       <header className={styles.header}>
-        <div className={styles.brand}><span>&lt;</span><button type="button" onClick={tapSecret} aria-label="Logo AfroCodeurs" title="Les pionniers frappent cinq fois.">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
+        <div className={styles.brand}><span>&lt;</span><button type="button" onClick={() => void submitRiddleSymbol("logo")} aria-label="Pixel mystérieux">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
         <div className={styles.headerActions}>
           <button className={styles.sound} type="button" onClick={toggleSound} aria-pressed={soundOn} aria-label={soundOn ? "Couper la musique" : "Activer la musique"}>{soundOn ? "♫ ON" : "♫ OFF"}</button>
           <span className={styles.live}><i /> SITE EN CONSTRUCTION</span>
@@ -201,6 +198,9 @@ export function ConstructionGate() {
         <div className={styles.story}>
           <PixelScene />
           <div className={styles.vignette} />
+          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onClick={() => void submitRiddleSymbol("baobab")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onClick={() => void submitRiddleSymbol("laptop")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onClick={() => void submitRiddleSymbol("sun")} aria-label="Pixel mystérieux" />
           <span className={styles.coordinates}>ABJ 05.3599° N · 04.0083° W</span>
           <div className={styles.copy}>
             <p><span>01</span> COMMUNAUTÉ TECH AFRICAINE</p>
@@ -210,6 +210,10 @@ export function ConstructionGate() {
           <span className={styles.loop}>● BOUCLE EN COURS</span>
           <div className={styles.sceneMeta}>
             <span>DÉSERT</span><i /><span>CODE</span><i /><span>IMPACT</span>
+          </div>
+          <div className={styles.riddleProgress} aria-live="polite">
+            <div>{[0, 1, 2, 3].map((step) => <i key={step} className={step < riddleProgress ? styles.lit : ""} />)}</div>
+            <span>{riddleMessage}</span>
           </div>
         </div>
 
@@ -235,7 +239,7 @@ export function ConstructionGate() {
         </aside>
       </section>
 
-      <footer className={styles.footer}><span>Construit en Afrique, pour l’Afrique.</span><span className={styles.riddle} title="Indice : le nombre des premiers membres.">◆ 20 PIONNIERS, UNE PORTE ◆</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
+      <footer className={styles.footer}><span>Construit en Afrique, pour l’Afrique.</span><span className={styles.riddle}>◆ L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM ◆</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
       <div className={styles.portal}>ACCESS GRANTED</div>
     </main>
   );
