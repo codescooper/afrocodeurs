@@ -267,6 +267,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("construction")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model Community {
   id          String        @id @default(cuid())
   name        String
