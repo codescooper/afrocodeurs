@@ -34,7 +34,16 @@ function PixelScene() {
       sky.addColorStop(1, transformed < .5 ? "#f0a34b" : "#4f9f9c");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, 320, 180);
+      rect(252, 22, 25, 25, transformed < .5 ? "#f2b544" : "#72e8ef");
+      rect(256, 18, 17, 33, transformed < .5 ? "#f2b544" : "#72e8ef");
+      for (let i = 0; i < 18; i += 1) {
+        rect((i * 47 + 11) % 320, (i * 19 + 8) % 84, 1, 1, i % 3 ? "#f7dba0" : "#34d9e8");
+      }
       rect(0, 132, 320, 48, transformed < .5 ? "#9d4c31" : "#214b3b");
+
+      rect(45, 73, 7, 59, "#251715");
+      rect(30, 66, 36, 10, "#251715");
+      rect(35, 57, 25, 12, "#251715");
 
       if (transformed > .08) {
         ctx.globalAlpha = transformed;
@@ -46,6 +55,16 @@ function PixelScene() {
         }
         ctx.globalAlpha = 1;
       }
+
+      ctx.globalAlpha = .55 + transformed * .35;
+      ctx.strokeStyle = transformed > .5 ? "#34d9e8" : "#f2b544";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, 153); ctx.lineTo(320, 153);
+      ctx.moveTo(80, 132); ctx.lineTo(56, 180);
+      ctx.moveTo(240, 132); ctx.lineTo(276, 180);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
 
       const outward = t < .2 ? -24 + t * 650 : t < .76 ? 106 : 106 + (t - .76) * 950;
       const bob = Math.floor(frame / 8) % 2;
@@ -169,6 +188,7 @@ export function ConstructionGate() {
   return (
     <main className={`${styles.page} ${opening ? styles.opening : ""}`}>
       <audio ref={audioRef} src="/ancestral-pixel-loop.mp3" autoPlay loop preload="auto" />
+      <div className={styles.ambientGrid} aria-hidden="true" />
       <header className={styles.header}>
         <div className={styles.brand}><span>&lt;</span><button type="button" onClick={tapSecret} aria-label="Logo AfroCodeurs" title="Les pionniers frappent cinq fois.">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
         <div className={styles.headerActions}>
@@ -181,18 +201,22 @@ export function ConstructionGate() {
         <div className={styles.story}>
           <PixelScene />
           <div className={styles.vignette} />
+          <span className={styles.coordinates}>ABJ 05.3599° N · 04.0083° W</span>
           <div className={styles.copy}>
-            <p>COMMUNAUTÉ TECH AFRICAINE</p>
+            <p><span>01</span> COMMUNAUTÉ TECH AFRICAINE</p>
             <h1><span>AFRO</span>CODEURS</h1>
             <h2>Le code transforme demain.</h2>
           </div>
           <span className={styles.loop}>● BOUCLE EN COURS</span>
+          <div className={styles.sceneMeta}>
+            <span>DÉSERT</span><i /><span>CODE</span><i /><span>IMPACT</span>
+          </div>
         </div>
 
         <aside className={styles.join}>
           <div>
-            <p className={styles.eyebrow}>OUVERTURE PROCHAINE</p>
-            <h2>Soyez parmi les premiers.</h2>
+            <p className={styles.eyebrow}>CERCLE FONDATEUR · 20 PLACES</p>
+            <h2>Entrez avant<br />tout le monde.</h2>
             <p>Recevez l’annonce du lancement, les ressources et la future newsletter AfroCodeurs.</p>
           </div>
           <form onSubmit={subscribe} className={styles.form}>
@@ -205,7 +229,7 @@ export function ConstructionGate() {
             <a className={styles.qrCode} href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="Rejoindre le groupe WhatsApp AfroCodeurs">
               <QRCodeSVG value={WHATSAPP_URL} size={76} level="M" bgColor="#ffffff" fgColor="#080b0f" marginSize={1} />
             </a>
-            <div><strong>Groupe WhatsApp</strong><p>Scannez le QR code ou cliquez pour rejoindre les 20 premiers membres.</p><a href={WHATSAPP_URL} target="_blank" rel="noreferrer">Rejoindre le groupe →</a></div>
+            <div><span className={styles.whatsappDot}>●</span><strong> Salon des pionniers</strong><p>Échangez avec les premiers bâtisseurs de la communauté.</p><a href={WHATSAPP_URL} target="_blank" rel="noreferrer">ENTRER SUR WHATSAPP ↗</a></div>
           </div>
           <a className={styles.mail} href="mailto:info@afrocodeurs.org">info@afrocodeurs.org</a>
         </aside>
