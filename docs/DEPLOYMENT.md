@@ -16,6 +16,7 @@ Mise en production de l'app (Next.js 16 + Prisma 7 driver adapter + Auth.js v5).
 |---|---|---|
 | `DATABASE_URL` | ✅ | URL Postgres managée (souvent `?sslmode=require`) |
 | `AUTH_SECRET` | ✅ | **Régénérer** : `openssl rand -base64 32` |
+| `AUTH_TRUST_HOST` | ✅ sur Railway | `true` — autorise Auth.js à utiliser l'hôte public transmis par le proxy Railway |
 | `NEXTAUTH_URL` | ✅ | `https://ton-domaine` |
 | `NEXT_PUBLIC_SITE_URL` | ✅ | `https://ton-domaine` (SEO, sitemap, liens des emails) |
 | `RESEND_API_KEY` + `EMAIL_FROM` | ✅\* | **Indispensable** pour mot de passe oublié / vérification. Domaine expéditeur vérifié sur Resend |

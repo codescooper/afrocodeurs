@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const STORAGE_KEY = "ac-cookie-consent";
 
 export function CookieBanner() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export function CookieBanner() {
     return () => clearTimeout(t);
   }, []);
 
-  if (!visible) return null;
+  if (!visible || pathname.startsWith("/construction")) return null;
 
   function accept() {
     try {
