@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
 
 import styles from "./construction.module.css";
 
@@ -227,7 +227,7 @@ export function ConstructionGate() {
 
           <div className={styles.community}>
             <a className={styles.qrCode} href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="Rejoindre le groupe WhatsApp AfroCodeurs">
-              <QRCodeSVG value={WHATSAPP_URL} size={76} level="M" bgColor="#ffffff" fgColor="#080b0f" marginSize={1} />
+              <Image src="/whatsapp-community-qr.png" width={376} height={376} alt="QR code du groupe WhatsApp AfroCodeurs" priority />
             </a>
             <div><span className={styles.whatsappDot}>●</span><strong> Salon des pionniers</strong><p>Échangez avec les premiers bâtisseurs de la communauté.</p><a href={WHATSAPP_URL} target="_blank" rel="noreferrer">ENTRER SUR WHATSAPP ↗</a></div>
           </div>
