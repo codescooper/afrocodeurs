@@ -5,7 +5,8 @@ import { QRCodeSVG } from "qrcode.react";
 
 import styles from "./construction.module.css";
 
-const PASSPHRASE = "buildbeforeconsume";
+const PASSPHRASE = "afro20";
+const SECRET_TAPS = 5;
 const WHATSAPP_URL = "https://chat.whatsapp.com/BfD3XW8X48ACQN5V8XkBye";
 
 function PixelScene() {
@@ -79,8 +80,10 @@ function PixelScene() {
 
 export function ConstructionGate() {
   const keyBuffer = useRef("");
+  const tapTimer = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [opening, setOpening] = useState(false);
+  const [secretTaps, setSecretTaps] = useState(0);
   const [soundOn, setSoundOn] = useState(false);
   const [formState, setFormState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
@@ -135,6 +138,18 @@ export function ConstructionGate() {
     }
   }
 
+  function tapSecret() {
+    if (tapTimer.current) window.clearTimeout(tapTimer.current);
+    const next = secretTaps + 1;
+    if (next >= SECRET_TAPS) {
+      setSecretTaps(0);
+      void unlock();
+      return;
+    }
+    setSecretTaps(next);
+    tapTimer.current = window.setTimeout(() => setSecretTaps(0), 1800);
+  }
+
   async function subscribe(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -155,7 +170,7 @@ export function ConstructionGate() {
     <main className={`${styles.page} ${opening ? styles.opening : ""}`}>
       <audio ref={audioRef} src="/ancestral-pixel-loop.mp3" autoPlay loop preload="auto" />
       <header className={styles.header}>
-        <a className={styles.brand} href="/construction"><span>&lt;</span><b>A</b><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></a>
+        <div className={styles.brand}><span>&lt;</span><button type="button" onClick={tapSecret} aria-label="Logo AfroCodeurs" title="Les pionniers frappent cinq fois.">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
         <div className={styles.headerActions}>
           <button className={styles.sound} type="button" onClick={toggleSound} aria-pressed={soundOn} aria-label={soundOn ? "Couper la musique" : "Activer la musique"}>{soundOn ? "♫ ON" : "♫ OFF"}</button>
           <span className={styles.live}><i /> SITE EN CONSTRUCTION</span>
@@ -196,7 +211,7 @@ export function ConstructionGate() {
         </aside>
       </section>
 
-      <footer className={styles.footer}><span>Construit en Afrique, pour l’Afrique.</span><button onClick={() => void unlock()} title="Les bâtisseurs connaissent l’ordre des mots." aria-label="Passage secret">◆</button><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
+      <footer className={styles.footer}><span>Construit en Afrique, pour l’Afrique.</span><span className={styles.riddle} title="Indice : le nombre des premiers membres.">◆ 20 PIONNIERS, UNE PORTE ◆</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
       <div className={styles.portal}>ACCESS GRANTED</div>
     </main>
   );
