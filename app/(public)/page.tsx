@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { AfricaPresenceMap } from "@/components/presence/africa-presence-map";
 import { AfricaMapGeometry } from "@/components/presence/africa-map-geometry";
+import { VisitCounter } from "@/components/shared/visit-counter";
 import { db } from "@/lib/db";
 import { getLeaderboard } from "@/features/reputation/queries";
 
@@ -124,10 +125,11 @@ export default async function HomePage() {
       </div>
 
       {/* Statistiques réelles */}
-      <section className="mb-20 grid grid-cols-3 gap-4 rounded-lg border border-border bg-muted/40 p-6 text-center">
+      <section className="mb-20 grid grid-cols-2 gap-4 rounded-lg border border-border bg-muted/40 p-6 text-center sm:grid-cols-4">
         <Stat label="Problèmes" value={problemCount} />
         <Stat label="Solutions" value={solutionCount} />
         <Stat label="Membres" value={userCount} />
+        <VisitCounter />
       </section>
     </div>
   );
