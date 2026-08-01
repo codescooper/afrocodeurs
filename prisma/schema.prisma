@@ -276,6 +276,17 @@ model NewsletterSubscriber {
   @@index([createdAt])
 }
 
+model PresencePoint {
+  id         String   @id @default(cuid())
+  visitorKey String   @unique
+  latitude   Float
+  longitude  Float
+  firstSeen  DateTime @default(now())
+  lastSeen   DateTime @updatedAt
+
+  @@index([lastSeen])
+}
+
 model Community {
   id          String        @id @default(cuid())
   name        String

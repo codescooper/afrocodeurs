@@ -29,6 +29,11 @@ export default function ConfidentialitePage() {
           <strong>Données techniques</strong> : journaux serveur et adresse IP,
           utilisés pour la sécurité et la lutte contre les abus.
         </li>
+        <li>
+          <strong>Présence géographique</strong> (facultatif) : si tu donnes
+          ton accord au navigateur, ta latitude et ta longitude sont arrondies
+          à une grille d&apos;environ 50 km avant leur enregistrement.
+        </li>
       </ul>
 
       <h2>Pourquoi nous les utilisons</h2>
@@ -52,7 +57,8 @@ export default function ConfidentialitePage() {
       <p>
         Nous utilisons uniquement des cookies <strong>nécessaires</strong> au
         fonctionnement (cookie de session pour te garder connecté·e). Aucun
-        cookie publicitaire ni traceur tiers.
+        cookie publicitaire ni traceur tiers. La carte de présence utilise un
+        identifiant aléatoire nécessaire pour distinguer anonymement les visites.
       </p>
 
       <h2>Partage des données</h2>
@@ -64,6 +70,10 @@ export default function ConfidentialitePage() {
       </p>
 
       <h2>Conservation</h2>
+      <p>
+        Les positions approximatives de la carte sont affichées et conservées
+        pendant 30 jours. Elles ne sont associées ni à ton compte ni à ton email.
+      </p>
       <p>
         Tes données sont conservées tant que ton compte existe. À la suppression
         du compte, elles sont effacées (le contenu communautaire peut être
