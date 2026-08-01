@@ -59,6 +59,8 @@ export default function ConfidentialitePage() {
         fonctionnement (cookie de session pour te garder connecté·e). Aucun
         cookie publicitaire ni traceur tiers. La carte de présence utilise un
         identifiant aléatoire nécessaire pour distinguer anonymement les visites.
+        Le compteur public utilise ce même principe pour ne compter qu&apos;une
+        visite par navigateur et par jour.
       </p>
 
       <h2>Partage des données</h2>

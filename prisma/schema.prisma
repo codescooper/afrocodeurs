@@ -287,6 +287,14 @@ model PresencePoint {
   @@index([lastSeen])
 }
 
+model DailyVisit {
+  id             String   @id @default(cuid())
+  visitorDayHash String   @unique
+  visitedAt      DateTime @default(now())
+
+  @@index([visitedAt])
+}
+
 model Community {
   id          String        @id @default(cuid())
   name        String
