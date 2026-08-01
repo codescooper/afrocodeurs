@@ -1,0 +1,9 @@
+.map { filter: drop-shadow(0 22px 35px rgb(17 24 39 / 0.16)); }
+.land { fill: #171713; stroke: #f5b800; stroke-width: 4; stroke-linejoin: round; }
+.countryLines { fill: none; opacity: 0.22; stroke: #fafaf8; stroke-width: 1.5; }
+.previous { fill: #8b8b82; opacity: 0.72; }
+.activeHalo { fill: #22c55e; opacity: 0.22; transform-box: fill-box; transform-origin: center; animation: ping 1.8s ease-out infinite; }
+.active { fill: #22c55e; stroke: #dcfce7; stroke-width: 2; }
+.count { fill: #fff; font-size: 13px; font-weight: 800; pointer-events: none; text-anchor: middle; }
+@keyframes ping { 0% { opacity: 0.48; transform: scale(0.65); } 75%, 100% { opacity: 0; transform: scale(2.2); } }
+@media (prefers-reduced-motion: reduce) { .activeHalo { animation: none; } }
