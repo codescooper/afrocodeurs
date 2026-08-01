@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { AfricaPresenceMap } from "@/components/presence/africa-presence-map";
+import { AfricaMapGeometry } from "@/components/presence/africa-map-geometry";
 import { db } from "@/lib/db";
 import { getLeaderboard } from "@/features/reputation/queries";
 
@@ -74,7 +75,7 @@ export default async function HomePage() {
       </section>
 
       {/* Découverte — alimentée en temps réel */}
-      <AfricaPresenceMap />
+      <AfricaPresenceMap mapGeometry={<AfricaMapGeometry />} />
 
       <div className="grid gap-6 pb-16 md:grid-cols-2">
         <DiscoveryCard
