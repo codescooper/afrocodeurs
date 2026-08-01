@@ -1,22 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { LocateFixed } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { createAfricaProjection } from "@/lib/africa-projection";
 import styles from "./africa-presence-map.module.css";
 
 type PresencePoint = { latitude: number; longitude: number; active: number; previous: number };
-const MAP = { minLongitude: -20, maxLongitude: 52, minLatitude: -37, maxLatitude: 38 };
 
 function project(latitude: number, longitude: number) {
-  return {
-    x: ((longitude - MAP.minLongitude) / (MAP.maxLongitude - MAP.minLongitude)) * 720,
-    y: ((MAP.maxLatitude - latitude) / (MAP.maxLatitude - MAP.minLatitude)) * 750,
-  };
+  const projected = createAfricaProjection()([longitude, latitude]);
+  return { x: projected?.[0] ?? 0, y: projected?.[1] ?? 0 };
 }
 
-export function AfricaPresenceMap() {
+export function AfricaPresenceMap({ mapGeometry }: { mapGeometry: ReactNode }) {
   const [points, setPoints] = useState<PresencePoint[]>([]);
   const [message, setMessage] = useState("Active ta position pour apparaître en vert.");
   const [sharing, setSharing] = useState(false);
@@ -97,8 +95,7 @@ export function AfricaPresenceMap() {
         </div>
 
         <svg className={styles.map} viewBox="0 0 720 750" role="img" aria-label="Carte des présences AfroCodeurs en Afrique">
-          <path className={styles.land} d="M183 33 312 12l115 30 92 65 88 19 61 67-28 56-48 24-16 71-62 63-38 104-83 167-52 55-45-78-14-105-62-62-29-101-53-66-2-87-68-74 42-88 53-33Z" />
-          <path className={styles.countryLines} d="M119 176h458M160 260l423 25M190 353l350 39M235 464l232 34M286 562l145 24M282 52l-17 426M383 41l-18 606M493 91l-55 413M570 151l-76 266" />
+          {mapGeometry}
           {points.map((point) => {
             const position = project(point.latitude, point.longitude);
             const active = point.active > 0;

@@ -1,6 +1,6 @@
 .map { filter: drop-shadow(0 22px 35px rgb(17 24 39 / 0.16)); }
-.land { fill: #171713; stroke: #f5b800; stroke-width: 4; stroke-linejoin: round; }
-.countryLines { fill: none; opacity: 0.22; stroke: #fafaf8; stroke-width: 1.5; }
+.country { fill: #171713; stroke: #f5b800; stroke-width: 1.4; stroke-linejoin: round; vector-effect: non-scaling-stroke; transition: fill 180ms ease; }
+.country:hover { fill: #27271f; }
 .previous { fill: #8b8b82; opacity: 0.72; }
 .activeHalo { fill: #22c55e; opacity: 0.22; transform-box: fill-box; transform-origin: center; animation: ping 1.8s ease-out infinite; }
 .active { fill: #22c55e; stroke: #dcfce7; stroke-width: 2; }
