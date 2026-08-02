@@ -8,8 +8,13 @@ import styles from "./construction.module.css";
 const WHATSAPP_URL = "https://chat.whatsapp.com/BfD3XW8X48ACQN5V8XkBye";
 type RiddleSymbol = "baobab" | "laptop" | "sun" | "logo";
 
-function PixelScene() {
+function PixelScene({ hoveredSymbol }: { hoveredSymbol: RiddleSymbol | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hoveredSymbolRef = useRef<RiddleSymbol | null>(hoveredSymbol);
+
+  useEffect(() => {
+    hoveredSymbolRef.current = hoveredSymbol;
+  }, [hoveredSymbol]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,21 +33,25 @@ function PixelScene() {
       frame += 1;
       const t = (frame % 720) / 720;
       const transformed = Math.max(0, Math.min(1, (t - 0.35) * 2.7));
+      const hoverStep = Math.floor(frame / 7) % 2 === 0 ? -1 : 1;
+      const sunShift = hoveredSymbolRef.current === "sun" ? hoverStep : 0;
+      const treeShift = hoveredSymbolRef.current === "baobab" ? hoverStep : 0;
+      const laptopShift = hoveredSymbolRef.current === "laptop" ? hoverStep : 0;
       const sky = ctx.createLinearGradient(0, 0, 0, 180);
       sky.addColorStop(0, transformed < .5 ? "#431e2d" : "#0c3851");
       sky.addColorStop(1, transformed < .5 ? "#f0a34b" : "#4f9f9c");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, 320, 180);
-      rect(252, 22, 25, 25, transformed < .5 ? "#f2b544" : "#72e8ef");
-      rect(256, 18, 17, 33, transformed < .5 ? "#f2b544" : "#72e8ef");
+      rect(252 + sunShift, 22 - sunShift, 25, 25, transformed < .5 ? "#f2b544" : "#72e8ef");
+      rect(256 + sunShift, 18 - sunShift, 17, 33, transformed < .5 ? "#f2b544" : "#72e8ef");
       for (let i = 0; i < 18; i += 1) {
         rect((i * 47 + 11) % 320, (i * 19 + 8) % 84, 1, 1, i % 3 ? "#f7dba0" : "#34d9e8");
       }
       rect(0, 132, 320, 48, transformed < .5 ? "#9d4c31" : "#214b3b");
 
-      rect(45, 73, 7, 59, "#251715");
-      rect(30, 66, 36, 10, "#251715");
-      rect(35, 57, 25, 12, "#251715");
+      rect(45 + treeShift, 73, 7, 59, "#251715");
+      rect(30 + treeShift, 66, 36, 10, "#251715");
+      rect(35 + treeShift, 57, 25, 12, "#251715");
 
       if (transformed > .08) {
         ctx.globalAlpha = transformed;
@@ -77,11 +86,11 @@ function PixelScene() {
       rect(x + 4, y + 6, 5, 12, "#20282e");
       rect(x + 13, y + 6, 5, 12, "#20282e");
       if (t > .48) {
-        rect(x + 17, y - 6, 18, 12, "#202a30");
-        rect(x + 20, y - 4, 12, 7, "#34d9e8");
+        rect(x + 17, y - 6 + laptopShift, 18, 12, "#202a30");
+        rect(x + 20, y - 4 + laptopShift, 12, 7, "#34d9e8");
       } else {
-        rect(132, 125, 18, 8, "#283139");
-        rect(137, 127, 8, 3, "#f2b544");
+        rect(132, 125 + laptopShift, 18, 8, "#283139");
+        rect(137, 127 + laptopShift, 8, 3, "#f2b544");
       }
 
       ctx.globalAlpha = .07;
@@ -102,6 +111,7 @@ export function ConstructionGate() {
   const [opening, setOpening] = useState(false);
   const [riddleProgress, setRiddleProgress] = useState(0);
   const [riddleMessage, setRiddleMessage] = useState("");
+  const [hoveredSymbol, setHoveredSymbol] = useState<RiddleSymbol | null>(null);
   const [soundOn, setSoundOn] = useState(false);
   const [formState, setFormState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
@@ -206,11 +216,11 @@ export function ConstructionGate() {
 
       <section className={styles.layout}>
         <div className={styles.story}>
-          <PixelScene />
+          <PixelScene hoveredSymbol={hoveredSymbol} />
           <div className={styles.vignette} />
-          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onClick={() => enqueueRiddleSymbol("baobab")} aria-label="Pixel mystérieux" />
-          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onClick={() => enqueueRiddleSymbol("laptop")} aria-label="Pixel mystérieux" />
-          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onClick={() => enqueueRiddleSymbol("sun")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onPointerEnter={() => setHoveredSymbol("baobab")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("baobab")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("baobab")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onPointerEnter={() => setHoveredSymbol("laptop")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("laptop")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("laptop")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onPointerEnter={() => setHoveredSymbol("sun")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("sun")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("sun")} aria-label="Pixel mystérieux" />
           <span className={styles.coordinates}>ABJ 05.3599° N · 04.0083° W</span>
           <div className={styles.copy}>
             <p><span>01</span> COMMUNAUTÉ TECH AFRICAINE</p>
