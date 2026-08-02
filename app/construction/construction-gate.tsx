@@ -98,24 +98,28 @@ function PixelScene() {
 
 export function ConstructionGate() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const riddleQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [opening, setOpening] = useState(false);
   const [riddleProgress, setRiddleProgress] = useState(0);
   const [riddleMessage, setRiddleMessage] = useState("");
-  const [riddleBusy, setRiddleBusy] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [formState, setFormState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
 
   async function submitRiddleSymbol(symbol: RiddleSymbol) {
-    if (opening || riddleBusy) return;
-    setRiddleBusy(true);
-    const response = await fetch("/api/preview", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ symbol }),
-    });
-    const data = (await response.json()) as { status?: string; progress?: number; retryAfter?: number };
-    setRiddleBusy(false);
+    if (opening) return;
+    let data: { status?: string; progress?: number; retryAfter?: number };
+    try {
+      const response = await fetch("/api/preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ symbol }),
+      });
+      data = (await response.json()) as typeof data;
+    } catch {
+      setRiddleMessage("Le signal s’est perdu. Réessayez.");
+      return;
+    }
 
     if (data.status === "unlocked") {
       setOpening(true);
@@ -136,6 +140,12 @@ export function ConstructionGate() {
     }
     setRiddleProgress(0);
     setRiddleMessage(data.status === "unavailable" ? "La porte dort encore." : "Le vent efface vos traces.");
+  }
+
+  function enqueueRiddleSymbol(symbol: RiddleSymbol) {
+    riddleQueueRef.current = riddleQueueRef.current
+      .catch(() => undefined)
+      .then(() => submitRiddleSymbol(symbol));
   }
 
   useEffect(() => {
@@ -187,7 +197,7 @@ export function ConstructionGate() {
       <audio ref={audioRef} src="/ancestral-pixel-loop.mp3" autoPlay loop preload="auto" />
       <div className={styles.ambientGrid} aria-hidden="true" />
       <header className={styles.header}>
-        <div className={styles.brand}><span>&lt;</span><button type="button" onClick={() => void submitRiddleSymbol("logo")} aria-label="Pixel mystérieux">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
+        <div className={styles.brand}><span>&lt;</span><button type="button" onClick={() => enqueueRiddleSymbol("logo")} aria-label="Pixel mystérieux">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
         <div className={styles.headerActions}>
           <button className={styles.sound} type="button" onClick={toggleSound} aria-pressed={soundOn} aria-label={soundOn ? "Couper la musique" : "Activer la musique"}>{soundOn ? "♫ ON" : "♫ OFF"}</button>
           <span className={styles.live}><i /> SITE EN CONSTRUCTION</span>
@@ -198,9 +208,9 @@ export function ConstructionGate() {
         <div className={styles.story}>
           <PixelScene />
           <div className={styles.vignette} />
-          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onClick={() => void submitRiddleSymbol("baobab")} aria-label="Pixel mystérieux" />
-          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onClick={() => void submitRiddleSymbol("laptop")} aria-label="Pixel mystérieux" />
-          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onClick={() => void submitRiddleSymbol("sun")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onClick={() => enqueueRiddleSymbol("baobab")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onClick={() => enqueueRiddleSymbol("laptop")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onClick={() => enqueueRiddleSymbol("sun")} aria-label="Pixel mystérieux" />
           <span className={styles.coordinates}>ABJ 05.3599° N · 04.0083° W</span>
           <div className={styles.copy}>
             <p><span>01</span> COMMUNAUTÉ TECH AFRICAINE</p>
