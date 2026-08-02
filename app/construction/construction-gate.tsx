@@ -33,7 +33,7 @@ function PixelScene({ hoveredSymbol }: { hoveredSymbol: RiddleSymbol | null }) {
       frame += 1;
       const t = (frame % 720) / 720;
       const transformed = Math.max(0, Math.min(1, (t - 0.35) * 2.7));
-      const hoverStep = Math.floor(frame / 7) % 2 === 0 ? -1 : 1;
+      const hoverStep = Math.floor(frame / 7) % 2 === 0 ? -3 : 3;
       const sunShift = hoveredSymbolRef.current === "sun" ? hoverStep : 0;
       const treeShift = hoveredSymbolRef.current === "baobab" ? hoverStep : 0;
       const laptopShift = hoveredSymbolRef.current === "laptop" ? hoverStep : 0;
@@ -118,7 +118,7 @@ export function ConstructionGate() {
 
   async function submitRiddleSymbol(symbol: RiddleSymbol) {
     if (opening) return;
-    let data: { status?: string; progress?: number; retryAfter?: number };
+    let data: { status?: string; progress?: number };
     try {
       const response = await fetch("/api/preview", {
         method: "POST",
@@ -141,11 +141,6 @@ export function ConstructionGate() {
     if (data.status === "progress") {
       setRiddleProgress(data.progress ?? 0);
       setRiddleMessage("Un fragment s’allume…");
-      return;
-    }
-    if (data.status === "locked") {
-      setRiddleProgress(0);
-      setRiddleMessage("Le désert garde le silence. Revenez plus tard.");
       return;
     }
     setRiddleProgress(0);

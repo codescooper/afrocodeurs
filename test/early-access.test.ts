@@ -39,14 +39,14 @@ describe("early access riddle", () => {
     expect(result.status).toBe("reset");
   });
 
-  it("locks after five failed attempts", () => {
+  it("allows another try after repeated mistakes", () => {
     let token: string | undefined;
-    for (let attempt = 0; attempt < 5; attempt += 1) {
+    for (let attempt = 0; attempt < 12; attempt += 1) {
       token = advanceEarlyAccess("logo", token).token;
     }
 
-    const locked = advanceEarlyAccess("sun", token);
-    expect(locked.status).toBe("locked");
-    expect(locked.retryAfter).toBeGreaterThan(0);
+    const retry = advanceEarlyAccess("sun", token);
+    expect(retry.status).toBe("progress");
+    expect(retry.progress).toBe(1);
   });
 });

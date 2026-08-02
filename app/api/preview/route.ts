@@ -22,8 +22,7 @@ export async function POST(request: Request) {
       ok: result.status === "unlocked",
       status: result.status,
       progress: result.progress,
-      retryAfter: result.retryAfter,
-    }, { status: result.status === "locked" ? 429 : 200 });
+    });
 
     if (result.token) {
       response.cookies.set(RIDDLE_COOKIE, result.token, {
