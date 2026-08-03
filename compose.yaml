@@ -1,0 +1,109 @@
+name: afrocodeurs
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: afrocodeurs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-afrocodeurs}
+      POSTGRES_USER: ${POSTGRES_USER:-afrocodeurs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requis}
+    volumes:
+      - afrocodeurs-postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  migrate:
+    build:
+      context: .
+      target: migrate
+    container_name: afrocodeurs-migrate
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-afrocodeurs}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-afrocodeurs}?schema=public
+    networks:
+      - internal
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://afrocodeurs.org}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+        NEXT_PUBLIC_POW_ENABLED: ${NEXT_PUBLIC_POW_ENABLED:-true}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}
+    container_name: afrocodeurs-web
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-afrocodeurs}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-afrocodeurs}?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET requis}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://afrocodeurs.org}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://afrocodeurs.org}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-AfroCodeurs <no-reply@afrocodeurs.org>}
+      CRON_SECRET: ${CRON_SECRET:?CRON_SECRET requis}
+      EARLY_ACCESS_SECRET: ${EARLY_ACCESS_SECRET:-}
+      EARLY_ACCESS_SEQUENCE: ${EARLY_ACCESS_SEQUENCE:?EARLY_ACCESS_SEQUENCE requise}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:contact@afrocodeurs.org}
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-}
+      MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY:-}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-auto}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      POW_ENABLED: ${POW_ENABLED:-true}
+      POW_DIFFICULTY: ${POW_DIFFICULTY:-18}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+    volumes:
+      - afrocodeurs-uploads:/app/public/uploads
+    expose:
+      - "4190"
+    networks:
+      - internal
+      - proxy
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4190/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+networks:
+  internal:
+    name: afrocodeurs-internal
+    internal: true
+  proxy:
+    name: matospro_default
+    external: true
+
+volumes:
+  afrocodeurs-postgres-data:
+    name: afrocodeurs-postgres-data
+  afrocodeurs-uploads:
+    name: afrocodeurs-uploads
