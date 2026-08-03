@@ -5,19 +5,13 @@ export type EarlyAccessSymbol = (typeof EARLY_ACCESS_SYMBOLS)[number];
 
 type RiddleState = {
   step: number;
-  failures: number;
-  windowStartedAt: number;
 };
 
 type RiddleResult = {
-  status: "progress" | "reset" | "unlocked" | "locked";
+  status: "progress" | "reset" | "unlocked";
   progress: number;
   token?: string;
-  retryAfter?: number;
 };
-
-const ATTEMPT_WINDOW_MS = 60 * 60 * 1000;
-const MAX_FAILURES = 5;
 
 function signingSecret() {
   const secret = process.env.EARLY_ACCESS_SECRET ?? process.env.AUTH_SECRET;
@@ -53,35 +47,18 @@ function decode(token: string | undefined): RiddleState | null {
   if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return null;
   try {
     const state = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as RiddleState;
-    return Number.isInteger(state.step) && Number.isInteger(state.failures) && Number.isFinite(state.windowStartedAt)
-      ? state
-      : null;
+    return Number.isInteger(state.step) ? { step: state.step } : null;
   } catch {
     return null;
   }
 }
 
 export function advanceEarlyAccess(symbol: EarlyAccessSymbol, token?: string): RiddleResult {
-  const now = Date.now();
   const sequence = configuredSequence();
-  let state = decode(token) ?? { step: 0, failures: 0, windowStartedAt: now };
-
-  if (now - state.windowStartedAt >= ATTEMPT_WINDOW_MS) {
-    state = { step: 0, failures: 0, windowStartedAt: now };
-  }
-
-  if (state.failures >= MAX_FAILURES) {
-    return {
-      status: "locked",
-      progress: 0,
-      token: encode(state),
-      retryAfter: Math.ceil((ATTEMPT_WINDOW_MS - (now - state.windowStartedAt)) / 1000),
-    };
-  }
+  const state = decode(token) ?? { step: 0 };
 
   if (symbol !== sequence[state.step]) {
-    const resetState = { ...state, step: 0, failures: state.failures + 1 };
-    return { status: "reset", progress: 0, token: encode(resetState) };
+    return { status: "reset", progress: 0, token: encode({ step: 0 }) };
   }
 
   const nextStep = state.step + 1;
