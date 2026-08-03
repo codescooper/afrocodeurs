@@ -14,6 +14,7 @@ describe("hasRank", () => {
 describe("can", () => {
   it("autorise selon le rôle minimal requis", () => {
     expect(can("USER", "question:create")).toBe(true);
+    expect(can("USER", "project:create")).toBe(true);
     expect(can("USER", "knowledge:create")).toBe(false); // CONTRIBUTOR requis
     expect(can("CONTRIBUTOR", "knowledge:create")).toBe(true);
     expect(can("MODERATOR", "report:handle")).toBe(true);
