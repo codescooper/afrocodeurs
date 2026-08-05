@@ -1,10 +1,17 @@
 import Link from "next/link";
-import { GitBranch, ListChecks } from "lucide-react";
+import { GitBranch } from "lucide-react";
+import type { ProjectStatus } from "@prisma/client";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { buttonVariants } from "@/components/ui/button";
 import { PROJECT_STATUS_LABELS } from "@/features/projects/constants";
+import { HubTemplate } from "@/components/templates/hub-template";
+import { EntityCard } from "@/components/molecules/entity-card";
+import { EmptyState } from "@/components/atoms/empty-state";
+import { ProgressBar } from "@/components/atoms/progress-bar";
+import { FilterPills } from "@/components/molecules/filter-pills";
+import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 
 export const metadata = { title: "Projets" };
 
@@ -12,80 +19,96 @@ export const metadata = { title: "Projets" };
 export const dynamic = "force-dynamic";
 
 /** Hub des projets OSS — chacun avec sa roadmap synchronisée depuis GitHub. */
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
   const session = await auth();
-  const projects = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      problem: { select: { title: true, slug: true } },
-      tasks: { select: { state: true, isGoodFirst: true } },
-    },
-  });
+
+  const [projects, statusCounts] = await Promise.all([
+    db.project.findMany({
+      where: status ? { status: status as ProjectStatus } : undefined,
+      orderBy: { createdAt: "desc" },
+      include: {
+        problem: { select: { title: true, slug: true } },
+        tasks: { select: { state: true, isGoodFirst: true } },
+      },
+    }),
+    db.project.groupBy({ by: ["status"], _count: { status: true } }),
+  ]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-12">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Projets</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Des projets concrets à construire ensemble. Chaque projet affiche sa
-            roadmap vivante (issues GitHub) : ce qui est fait, ce qui est prêt à
-            être pris, et qui s&apos;en occupe.
-          </p>
-        </div>
-        {session?.user && (
+    <HubTemplate
+      title="Projets"
+      description="Des projets concrets à construire ensemble. Chaque projet affiche sa roadmap vivante (issues GitHub) : ce qui est fait, ce qui est prêt à être pris, et qui s'en occupe."
+      rail={<SuggestionsRail />}
+      action={
+        session?.user ? (
           <Link href="/projects/new" className={buttonVariants({ size: "sm" })}>
             Référencer un projet
           </Link>
-        )}
-      </div>
+        ) : undefined
+      }
+    >
+      {statusCounts.length > 0 && (
+        <div className="mb-6">
+          <FilterPills
+            baseHref="/projects"
+            paramName="status"
+            active={status}
+            options={statusCounts.map((s) => ({
+              label: PROJECT_STATUS_LABELS[s.status],
+              value: s.status,
+              count: s._count.status,
+            }))}
+          />
+        </div>
+      )}
 
       {projects.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-          Aucun projet pour le moment. Référencez le premier !
-        </div>
+        <EmptyState>
+          {status
+            ? "Aucun projet dans cet état pour l'instant."
+            : "Aucun projet pour le moment. Référencez le premier !"}
+        </EmptyState>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {projects.map((project) => {
-            const open = project.tasks.filter((t) => t.state === "OPEN").length;
+            const done = project.tasks.filter((t) => t.state === "CLOSED").length;
+            const total = project.tasks.length;
             const goodFirst = project.tasks.filter(
               (t) => t.isGoodFirst && t.state === "OPEN",
             ).length;
             return (
-              <Link
+              <EntityCard
                 key={project.id}
                 href={`/projects/${project.slug}`}
-                className="flex flex-col gap-2 rounded-lg border border-border bg-background p-5 transition-colors hover:bg-muted/40"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                    <GitBranch className="size-3.5" />
-                    {project.githubRepo}
-                  </span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                    {PROJECT_STATUS_LABELS[project.status]}
-                  </span>
-                </div>
-                <h2 className="font-semibold">{project.name}</h2>
-                <p className="line-clamp-2 text-sm text-muted-foreground">
-                  {project.description}
-                </p>
-                {project.problem && (
-                  <p className="text-xs text-muted-foreground">
-                    Résout : {project.problem.title}
-                  </p>
-                )}
-                <span className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <ListChecks className="size-3.5" />
-                  {open} tâche{open > 1 ? "s" : ""} ouverte
-                  {open > 1 ? "s" : ""}
-                  {goodFirst > 0 && ` · ${goodFirst} pour débuter`}
-                </span>
-              </Link>
+                icon={GitBranch}
+                eyebrow={project.githubRepo}
+                badge={PROJECT_STATUS_LABELS[project.status]}
+                title={project.name}
+                description={
+                  project.problem
+                    ? `Résout : ${project.problem.title}`
+                    : project.description
+                }
+                meta={
+                  <div className="flex w-full flex-col gap-2">
+                    <ProgressBar value={done} max={total} label="Tâches faites" />
+                    {goodFirst > 0 && (
+                      <span className="text-xs text-accent">
+                        {goodFirst} tâche{goodFirst > 1 ? "s" : ""} pour débuter
+                      </span>
+                    )}
+                  </div>
+                }
+              />
             );
           })}
         </div>
       )}
-    </div>
+    </HubTemplate>
   );
 }

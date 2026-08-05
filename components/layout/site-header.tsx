@@ -4,6 +4,7 @@ import { auth, signOut } from "@/lib/auth";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { MainNav } from "./main-nav";
 import { NotificationBell } from "./notification-bell";
+import { ThemeToggle } from "./theme-toggle";
 
 /** En-tête public : logo + navigation desktop + état d'authentification. */
 export async function SiteHeader() {
@@ -22,6 +23,7 @@ export async function SiteHeader() {
         <MainNav />
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           {session?.user ? (
             <>
               <NotificationBell />
@@ -50,7 +52,10 @@ export async function SiteHeader() {
               >
                 Connexion
               </Link>
-              <Link href="/register" className={buttonVariants({ size: "sm" })}>
+              <Link
+                href="/register"
+                className={buttonVariants({ size: "sm", shape: "pill" })}
+              >
                 Rejoindre
               </Link>
             </>

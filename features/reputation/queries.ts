@@ -42,7 +42,7 @@ export async function getReputation(userId: string): Promise<Reputation> {
 }
 
 export type LeaderboardRow = {
-  user: { id: string; username: string; name: string | null };
+  user: { id: string; username: string; name: string | null; image: string | null };
   points: number;
 };
 
@@ -59,7 +59,7 @@ export async function getLeaderboard(limit = 50): Promise<LeaderboardRow[]> {
 
   const users = await db.user.findMany({
     where: { id: { in: ids } },
-    select: { id: true, username: true, name: true },
+    select: { id: true, username: true, name: true, image: true },
   });
   const byId = new Map(users.map((u) => [u.id, u]));
 

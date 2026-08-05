@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Clock } from "lucide-react";
+import type { KnowledgeType } from "@prisma/client";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -7,63 +8,104 @@ import { can } from "@/lib/permissions";
 import { buttonVariants } from "@/components/ui/button";
 import { excerpt, readingTimeMinutes } from "@/lib/markdown";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
+import { HubTemplate } from "@/components/templates/hub-template";
+import { EntityCard } from "@/components/molecules/entity-card";
+import { EmptyState } from "@/components/atoms/empty-state";
+import { FilterPills } from "@/components/molecules/filter-pills";
+import { knowledgeTypeIcon } from "@/components/atoms/knowledge-type-icon";
+import { Avatar } from "@/components/shared/avatar";
+import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 
 export const metadata = { title: "Apprendre" };
 
-/** Knowledge Hub — ressources publiées (Sprint 4). */
-export default async function KnowledgePage() {
+/** Knowledge Hub — ressources publiées (Sprint 4), filtrables par type. */
+export default async function KnowledgePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const { type } = await searchParams;
   const session = await auth();
   const canCreate = can(session?.user?.role, "knowledge:create");
-  const items = await db.knowledge.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: { publishedAt: "desc" },
-    include: { author: { select: { username: true, name: true } } },
-  });
+
+  const [items, typeCounts] = await Promise.all([
+    db.knowledge.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(type ? { type: type as KnowledgeType } : {}),
+      },
+      orderBy: { publishedAt: "desc" },
+      include: { author: { select: { username: true, name: true, image: true } } },
+    }),
+    db.knowledge.groupBy({
+      by: ["type"],
+      where: { status: "PUBLISHED" },
+      _count: { type: true },
+    }),
+  ]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-12">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Knowledge Hub</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Articles, tutoriels et guides rédigés par la communauté AfroMakers.
-          </p>
-        </div>
-        {canCreate && (
+    <HubTemplate
+      title="Knowledge Hub"
+      description="Articles, tutoriels et guides rédigés par la communauté AfroMakers."
+      rail={<SuggestionsRail />}
+      action={
+        canCreate ? (
           <Link href="/knowledge/new" className={buttonVariants({ size: "sm" })}>
             Rédiger une ressource
           </Link>
-        )}
-      </div>
+        ) : undefined
+      }
+    >
+      {typeCounts.length > 0 && (
+        <div className="mb-6">
+          <FilterPills
+            baseHref="/knowledge"
+            paramName="type"
+            active={type}
+            options={typeCounts.map((t) => ({
+              label: KNOWLEDGE_TYPE_LABELS[t.type],
+              value: t.type,
+              count: t._count.type,
+            }))}
+          />
+        </div>
+      )}
 
       {items.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-          Aucune ressource publiée pour le moment.
-        </div>
+        <EmptyState>
+          {type
+            ? "Aucune ressource de ce type pour l'instant."
+            : "Aucune ressource publiée pour le moment."}
+        </EmptyState>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <Link
+            <EntityCard
               key={item.id}
               href={`/knowledge/${item.slug}`}
-              className="flex flex-col gap-2 rounded-lg border border-border bg-background p-5 transition-colors hover:bg-muted/40"
-            >
-              <span className="text-xs font-medium uppercase tracking-wide text-primary">
-                {KNOWLEDGE_TYPE_LABELS[item.type]}
-              </span>
-              <h2 className="font-semibold">{item.title}</h2>
-              <p className="line-clamp-2 text-sm text-muted-foreground">
-                {item.summary ?? excerpt(item.content)}
-              </p>
-              <span className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="size-3.5" />
-                {readingTimeMinutes(item.content)} min ·{" "}
-                {item.author.name ?? `@${item.author.username}`}
-              </span>
-            </Link>
+              icon={knowledgeTypeIcon(item.type)}
+              eyebrow={KNOWLEDGE_TYPE_LABELS[item.type]}
+              badge={item.level ?? undefined}
+              title={item.title}
+              description={item.summary ?? excerpt(item.content)}
+              meta={
+                <>
+                  <Avatar
+                    image={item.author.image}
+                    name={item.author.name ?? item.author.username}
+                    size={18}
+                  />
+                  {item.author.name ?? `@${item.author.username}`}
+                  <span aria-hidden>·</span>
+                  <Clock className="size-3.5" />
+                  {readingTimeMinutes(item.content)} min
+                </>
+              }
+            />
           ))}
         </div>
       )}
-    </div>
+    </HubTemplate>
   );
 }
