@@ -67,3 +67,59 @@ export async function uniqueSlug(
   while (await exists(slug)) slug = `${root}-${n++}`;
   return slug;
 }
+
+/**
+ * Vrai si `error` est un conflit de contrainte unique Prisma (code `P2002`)
+ * portant sur le champ `username`. Seule cette erreur peut être débloquée par
+ * un retry avec un nouveau username — toute autre erreur doit remonter telle
+ * quelle.
+ */
+export function isUsernameConflict(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const { code, meta } = error as {
+    code?: unknown;
+    meta?: { target?: string | string[] };
+  };
+  if (code !== "P2002") return false;
+  const target = meta?.target;
+  return Array.isArray(target) ? target.includes("username") : target === "username";
+}
+
+/**
+ * Enveloppe un `createUser` d'adapter pour absorber les courses de génération
+ * de username : le pré-check `findUnique` (dans `generateUniqueUsername`)
+ * laisse une fenêtre entre la vérification et l'insertion, donc deux
+ * inscriptions simultanées peuvent choisir le même username. Si l'insertion
+ * échoue sur la contrainte unique `username` (P2002), on régénère un username
+ * et on retente, jusqu'à `maxAttempts`. Un username déjà fourni (ex. compte
+ * credentials) est conservé à la première tentative. Toute autre erreur
+ * remonte immédiatement.
+ */
+/** Type « promesse ou valeur » (équivalent de `Awaitable` de next-auth/adapters). */
+type Awaitable<T> = T | PromiseLike<T>;
+
+export function withUsernameRetry<T>(
+  createUser: (user: T) => Awaitable<T>,
+  generateUsername: (user: T) => Promise<string>,
+  maxAttempts = 5,
+): (user: T) => Promise<T> {
+  return async (user: T): Promise<T> => {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const candidate: T =
+        attempt === 0 && (user as T & { username?: string | null }).username
+          ? user
+          : ({ ...user, username: await generateUsername(user) } as T);
+      try {
+        return await createUser(candidate);
+      } catch (error) {
+        if (isUsernameConflict(error)) {
+          lastError = error;
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw lastError ?? new Error("Impossible de créer un nom d'utilisateur unique.");
+  };
+}

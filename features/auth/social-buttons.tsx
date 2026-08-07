@@ -4,11 +4,6 @@ import { Separator } from "@/components/ui/separator";
 
 import { SocialSignInButton } from "./social-sign-in-button";
 
-const PROVIDERS = [
-  { id: "google", enabled: Boolean(process.env.GOOGLE_CLIENT_ID) },
-  { id: "github", enabled: Boolean(process.env.GITHUB_CLIENT_ID) },
-] as const;
-
 /**
  * Boutons de connexion sociale (Google / GitHub), rendus uniquement si les
  * clés OAuth correspondantes sont configurées côté serveur — dégradation
@@ -20,6 +15,14 @@ const PROVIDERS = [
  */
 export async function SocialButtons() {
   await connection();
+
+  // Lecture de process.env à l'intérieur du composant (et non au chargement du
+  // module) : les valeurs ne sont pas figées au build, elles reflètent les
+  // variables réellement définies au moment de chaque requête.
+  const PROVIDERS = [
+    { id: "google", enabled: Boolean(process.env.GOOGLE_CLIENT_ID) },
+    { id: "github", enabled: Boolean(process.env.GITHUB_CLIENT_ID) },
+  ] as const;
 
   const enabled = PROVIDERS.filter((p) => p.enabled);
   if (enabled.length === 0) return null;

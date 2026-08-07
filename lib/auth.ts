@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { db } from "./db";
-import { normalizeUsername } from "./utils";
+import { normalizeUsername, withUsernameRetry } from "./utils";
 import type { UserRole } from "@prisma/client";
 
 const credentialsSchema = z.object({
@@ -55,15 +55,18 @@ export async function generateUniqueUsername(user: {
  * Adaptateur enveloppé : Auth.js crée les comptes OAuth via `createUser({ ...
  * profile })` sans username, or `User.username` est NOT NULL sans défaut. On
  * génère donc un username ici, avant l'insertion en base.
+ *
+ * `withUsernameRetry` gère aussi les courses de génération : le pré-check
+ * `findUnique` (dans `generateUniqueUsername`) laisse une fenêtre entre la
+ * vérification et l'insertion, donc deux signups simultanés peuvent choisir le
+ * même username et faire échouer l'insertion (contrainte unique DB). Un conflit
+ * `P2002` sur `username` déclenche un retry avec un nouveau username.
  */
 const prismaAdapter = PrismaAdapter(db);
 
 const adapter: Adapter = {
   ...prismaAdapter,
-  async createUser(user) {
-    const username = await generateUniqueUsername(user);
-    return prismaAdapter.createUser!({ ...user, username });
-  },
+  createUser: withUsernameRetry(prismaAdapter.createUser!, generateUniqueUsername),
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

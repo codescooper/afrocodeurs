@@ -93,7 +93,7 @@ logs, clean, deploy…). En cas de doute : `./run doctor`.
 > 🔑 **Connexion sociale (Google/GitHub)** : optionnelle et liée au domaine.
 > Active sur l'instance officielle `afrocodeurs.org` — tous les membres s'y
 > connectent directement avec leur compte Google/GitHub. Un fork auto-hébergé
-> doit créer ses propres clés OAuth (un app par domaine) ou reste en
+> doit créer ses propres clés OAuth (une app par domaine) ou reste en
 > email/mot de passe : sans clés, les boutons « Continuer avec … » se masquent
 > automatiquement. Détails dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
