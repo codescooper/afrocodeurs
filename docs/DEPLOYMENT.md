@@ -52,12 +52,56 @@ vérifient déjà les adresses).
 Puis renseigne `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`,
 `GITHUB_CLIENT_SECRET` dans le dashboard de l'hébergeur.
 
+### Deux cas d'usage
+
+**Cas A — Instance officielle (`afrocodeurs.org`), recommandé pour la communauté.**
+
+Les clés OAuth des mainteneurs sont définies **une seule fois côté serveur**
+(dashboard Railway de l'app `web-production-2b204.up.railway.app`). Tous les
+membres de la communauté les utilisent **directement, sans rien configurer** —
+ils cliquent simplement « Continuer avec Google/GitHub » (modèle SaaS classique,
+aucune clé ne quitte le serveur).
+
+Une même app OAuth Google/GitHub accepte **plusieurs callback URLs** (dev
+`localhost` + prod `afrocodeurs.org`) : il n'est pas nécessaire de créer de
+nouvelles clés pour la production.
+
+**Checklist de mise en ligne de l'instance officielle :**
+
+- [ ] DNS : `afrocodeurs.org` pointe vers l'app Railway
+      (`web-production-2b204.up.railway.app`).
+- [ ] Console Google — OAuth client → **Authorized redirect URI** :
+      `https://afrocodeurs.org/api/auth/callback/google`
+      (en plus de `http://localhost:3000/...` si tu gardes le dev).
+- [ ] Console GitHub — OAuth App → **Authorization callback URL** :
+      `https://afrocodeurs.org/api/auth/callback/github`
+- [ ] Railway — variables d'environnement :
+      `NEXTAUTH_URL=https://afrocodeurs.org`,
+      `NEXT_PUBLIC_SITE_URL=https://afrocodeurs.org`,
+      `AUTH_TRUST_HOST=true`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+      `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, et un **`AUTH_SECRET`
+      régénéré** (`openssl rand -base64 32`, distinct de celui du dev).
+
+**Cas B — Fork auto-hébergé (un autre domaine).**
+
+Contrainte imposée par Google/GitHub : un app OAuth ne valide que les callback
+URLs **explicitement déclarées** pour son domaine. Réutiliser les clés de
+l'instance officielle sur un autre domaine échoue avec `redirect_uri_mismatch`.
+Chaque domaine doit donc avoir **ses propres apps OAuth** (suivre la procédure
+ci-dessus avec `https://ton-domaine/...`). Sans clés, les boutons « Continuer
+avec … » sont masqués (`features/auth/social-buttons.tsx`) et l'instance reste
+utilisable en **email / mot de passe** — dégradation propre, aucun code à changer.
+
 **Sécurité**
 - Ne **jamais** committer ces secrets ni les partager ; `.env` est gitignoré.
 - Portée demandée : uniquement `user:email` + `read:user` (GitHub) et
   `openid email profile` (Google) — nom, email, avatar. Aucun accès en écriture.
 - En dev, teste avec un **compte secondaire** et des clés **dédiées au dev**
   (callback `localhost:3000`).
+
+> ⚠️ Le gate d'accès `/construction` (easter egg) reste actif indépendamment de
+> la connexion sociale : l'ouverture publique de la plateforme se décide à part
+> (cf. `docs/BETA-CONTROLEE.md`). L'OAuth ne modifie pas ce comportement.
 
 ## 3. Build
 

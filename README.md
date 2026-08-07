@@ -90,6 +90,13 @@ node seed.mjs            # comptes de démo : amina@ / kwame@ / admin@afrocodeur
 👉 `./run help` liste **toutes** les commandes du projet (build, test, lint,
 logs, clean, deploy…). En cas de doute : `./run doctor`.
 
+> 🔑 **Connexion sociale (Google/GitHub)** : optionnelle et liée au domaine.
+> Active sur l'instance officielle `afrocodeurs.org` — tous les membres s'y
+> connectent directement avec leur compte Google/GitHub. Un fork auto-hébergé
+> doit créer ses propres clés OAuth (un app par domaine) ou reste en
+> email/mot de passe : sans clés, les boutons « Continuer avec … » se masquent
+> automatiquement. Détails dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ## 🤲 Contribuer
 
 **Oui, toi.** Que tu écrives ton premier `git commit` ou ton millième, il y a une

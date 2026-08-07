@@ -83,6 +83,13 @@ node seed.mjs            # demo accounts: amina@ / kwame@ / admin@afrocodeurs.or
 👉 `./run help` lists **all** project commands (build, test, lint, logs, clean,
 deploy…). When in doubt: `./run doctor`.
 
+> 🔑 **Social login (Google/GitHub)**: optional and domain-bound. Enabled on the
+> official instance `afrocodeurs.org` — every member signs in directly with
+> their Google/GitHub account. A self-hosted fork must create its own OAuth apps
+> (one app per domain) or stick to email/password: without keys, the
+> « Continue with … » buttons hide automatically. Details in
+> [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ## 🤲 Contribute
 
 **Yes, you.** Whether you're writing your first `git commit` or your thousandth,
