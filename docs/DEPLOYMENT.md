@@ -22,11 +22,42 @@ Mise en production de l'app (Next.js 16 + Prisma 7 driver adapter + Auth.js v5).
 | `RESEND_API_KEY` + `EMAIL_FROM` | ✅\* | **Indispensable** pour mot de passe oublié / vérification. Domaine expéditeur vérifié sur Resend |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` | ✅\* | CAPTCHA anti-bot (Cloudflare Turnstile) |
 | `VAPID_*` + `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | ⬜ | Notifications push. **Régénérer** : `npx web-push generate-vapid-keys` |
-| `GOOGLE_*`, `GITHUB_*` | ⬜ | Connexion sociale |
+| `GOOGLE_*`, `GITHUB_*` | ⬜ | Connexion sociale — voir §2bis |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | ⬜ | Observabilité (cf. §6) |
 
 \* L'app démarre sans, mais en mode dégradé : **pas de récupération de compte par
 email** et **inscription non protégée**. À activer avant tout lancement public.
+
+## 2bis. Connexion sociale (Google / GitHub OAuth)
+
+Le code est prêt (`lib/auth.ts`) : les providers Google et GitHub sont déclarés
+et les boutons « Continuer avec … » apparaissent sur `/login` et `/register`
+**uniquement si les clés sont définies** (sinon ils sont masqués). À l'inscription
+OAuth, un **username est généré automatiquement** (depuis le nom / la local-part de
+l'email, collision-safe) et l'email est considéré **vérifié** (Google et GitHub
+vérifient déjà les adresses).
+
+**Créer une app OAuth par environnement** (dév. local ≠ production) :
+
+- **GitHub** — `github.com` → Settings → Developer settings → OAuth Apps → New
+  OAuth App :
+  - Homepage URL : `https://ton-domaine`
+  - Authorization callback URL : `https://ton-domaine/api/auth/callback/github`
+- **Google** — `console.cloud.google.com` → (écran de consentement une fois, puis)
+  Credentials → Create Credentials → OAuth client ID → Web application :
+  - Authorized redirect URI : `https://ton-domaine/api/auth/callback/google`
+  - En production, utilise un identifiant **« Testing »** avec des test users
+    pendant la phase bêta, puis passe en « In production ».
+
+Puis renseigne `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`,
+`GITHUB_CLIENT_SECRET` dans le dashboard de l'hébergeur.
+
+**Sécurité**
+- Ne **jamais** committer ces secrets ni les partager ; `.env` est gitignoré.
+- Portée demandée : uniquement `user:email` + `read:user` (GitHub) et
+  `openid email profile` (Google) — nom, email, avatar. Aucun accès en écriture.
+- En dev, teste avec un **compte secondaire** et des clés **dédiées au dev**
+  (callback `localhost:3000`).
 
 ## 3. Build
 

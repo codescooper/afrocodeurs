@@ -14,7 +14,9 @@ type RiddleResult = {
 };
 
 function signingSecret() {
-  const secret = process.env.EARLY_ACCESS_SECRET ?? process.env.AUTH_SECRET;
+  // `||` (et non `??`) : EARLY_ACCESS_SECRET peut être "" dans le .env —
+  // le fallback doit se déclencher aussi sur une chaîne vide.
+  const secret = process.env.EARLY_ACCESS_SECRET || process.env.AUTH_SECRET;
   if (!secret) throw new Error("EARLY_ACCESS_SECRET ou AUTH_SECRET est requis");
   return secret;
 }

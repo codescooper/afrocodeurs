@@ -39,6 +39,20 @@ export function githubLoginFromUrl(url: string | null | undefined): string | nul
 }
 
 /**
+ * Normalise une base de username : accents retirés, minuscules, `[a-z0-9_]`
+ * uniquement, 30 caractères max. Aligné sur `usernameSchema` (lib/validators).
+ */
+export function normalizeUsername(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 30);
+}
+
+/**
  * Génère un slug unique : slugifie `base` (ou `fallback` si vide), puis ajoute
  * un suffixe -2, -3… tant que `exists(slug)` renvoie vrai.
  */

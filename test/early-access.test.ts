@@ -10,6 +10,7 @@ describe("early access riddle", () => {
 
   afterEach(() => {
     delete process.env.AUTH_SECRET;
+    delete process.env.EARLY_ACCESS_SECRET;
     delete process.env.EARLY_ACCESS_SEQUENCE;
   });
 
@@ -48,5 +49,12 @@ describe("early access riddle", () => {
     const retry = advanceEarlyAccess("sun", token);
     expect(retry.status).toBe("progress");
     expect(retry.progress).toBe(1);
+  });
+
+  it("falls back to AUTH_SECRET when EARLY_ACCESS_SECRET is an empty string", () => {
+    process.env.EARLY_ACCESS_SECRET = "";
+
+    const first = advanceEarlyAccess("sun");
+    expect(first.status).toBe("progress");
   });
 });

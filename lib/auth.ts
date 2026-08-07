@@ -1,5 +1,8 @@
+import { randomBytes } from "node:crypto";
+
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { Adapter } from "next-auth/adapters";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
@@ -7,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { db } from "./db";
+import { normalizeUsername } from "./utils";
 import type { UserRole } from "@prisma/client";
 
 const credentialsSchema = z.object({
@@ -14,8 +18,56 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
+/**
+ * Génère un username unique (3–30 caractères, `[a-z0-9_]` — cf. usernameSchema)
+ * pour les comptes OAuth, qui n'en fournissent jamais. Base : nom → local-part
+ * de l'email → "user". Collision-safe : suffixe aléatoire puis retry.
+ */
+export async function generateUniqueUsername(user: {
+  name?: string | null;
+  email?: string | null;
+}): Promise<string> {
+  let base = "user";
+  for (const candidate of [user.name, user.email?.split("@")[0]]) {
+    if (!candidate) continue;
+    const normalized = normalizeUsername(candidate);
+    if (normalized.length >= 3) {
+      base = normalized;
+      break;
+    }
+  }
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const username =
+      attempt === 0
+        ? base
+        : `${base.slice(0, 25)}_${randomBytes(2).toString("hex")}`;
+    const existing = await db.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+    if (!existing) return username;
+  }
+  throw new Error("Impossible de générer un nom d'utilisateur unique.");
+}
+
+/**
+ * Adaptateur enveloppé : Auth.js crée les comptes OAuth via `createUser({ ...
+ * profile })` sans username, or `User.username` est NOT NULL sans défaut. On
+ * génère donc un username ici, avant l'insertion en base.
+ */
+const prismaAdapter = PrismaAdapter(db);
+
+const adapter: Adapter = {
+  ...prismaAdapter,
+  async createUser(user) {
+    const username = await generateUniqueUsername(user);
+    return prismaAdapter.createUser!({ ...user, username });
+  },
+};
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
+  adapter,
   // Credentials impose la stratégie JWT ; l'adapter Prisma reste utilisé
   // pour le linking des comptes OAuth (Account/User).
   session: { strategy: "jwt" },
@@ -23,8 +75,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   providers: [
-    Google({ allowDangerousEmailAccountLinking: true }),
-    GitHub({ allowDangerousEmailAccountLinking: true }),
+    // Auth.js v5 ne lit que AUTH_GOOGLE_ID/SECRET depuis l'env — on passe ici
+    // explicitement les clés GOOGLE_CLIENT_ID/SECRET documentées par le projet
+    // (cf. .env.example), sinon le provider n'aurait jamais de clientId.
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -52,6 +115,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    // Google et GitHub vérifient déjà l'email de leurs comptes : on considère
+    // donc l'email comme vérifié dès la liaison OAuth — que ce soit un nouveau
+    // compte ou le linking d'un compte existant (le callback `signIn` ne voit
+    // pas l'id utilisateur au premier sign-in, `linkAccount` oui).
+    // Best-effort : ne doit jamais bloquer la connexion.
+    async linkAccount({ user }) {
+      try {
+        await db.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        });
+      } catch {
+        /* le pont d'identité ne doit pas bloquer la connexion */
+      }
+    },
+  },
   callbacks: {
     // À la connexion GitHub, on mémorise le login GitHub sur le profil
     // AfroMaker (pont d'identité pour la réputation des tâches de roadmap).
