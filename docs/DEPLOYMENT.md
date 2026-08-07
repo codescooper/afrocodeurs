@@ -84,7 +84,7 @@ nouvelles clés pour la production.
 
 **Cas B — Fork auto-hébergé (un autre domaine).**
 
-Contrainte imposée par Google/GitHub : un app OAuth ne valide que les callback
+Contrainte imposée par Google/GitHub : une app OAuth ne valide que les callback
 URLs **explicitement déclarées** pour son domaine. Réutiliser les clés de
 l'instance officielle sur un autre domaine échoue avec `redirect_uri_mismatch`.
 Chaque domaine doit donc avoir **ses propres apps OAuth** (suivre la procédure
