@@ -1,8 +1,11 @@
+import { XIcon } from "lucide-react";
 import Link from "next/link";
 
+import { EmptyState } from "@/components/atoms/empty-state";
 import { Avatar } from "@/components/shared/avatar";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -29,6 +32,10 @@ export function MembersRow({
   members: MembersRowMember[];
   rowMax?: number;
 }) {
+  if (members.length === 0) {
+    return <EmptyState>Aucun membre pour le moment.</EmptyState>;
+  }
+
   const visible = members.slice(0, rowMax);
   const overflow = members.length - visible.length;
 
@@ -76,7 +83,11 @@ export function MembersRow({
   return (
     <Dialog>
       {row}
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
+        <DialogClose className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden">
+          <XIcon className="size-4" />
+          <span className="sr-only">Fermer</span>
+        </DialogClose>
         <DialogHeader>
           <DialogTitle>Membres ({members.length})</DialogTitle>
         </DialogHeader>
