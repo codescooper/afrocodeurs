@@ -94,6 +94,7 @@ export const challengeSchema = z.object({
   story: z.string().max(1000).optional(),
   instructions: z.string().min(20, "Expliquez l’énigme en 20 caractères minimum"),
   difficulty: z.enum(["INITIATE", "EXPLORER", "HACKER", "MASTER", "LEGENDARY"]),
+  mode: z.enum(["CLASSIC", "PIXEL_TERMINAL"]).default("CLASSIC"),
   answer: z.string().min(1, "Indiquez la réponse attendue").max(200),
   solutionExplanation: z.string().min(20, "Expliquez la solution en 20 caractères minimum"),
   hint1: z.string().max(500).optional(),

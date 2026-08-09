@@ -114,6 +114,11 @@ enum ChallengeStatus {
   ARCHIVED
 }
 
+enum ChallengeMode {
+  CLASSIC
+  PIXEL_TERMINAL
+}
+
 // Cycle incubateur (cf. PRD fondateur §15) : Idée → Validation → Construction
 // → Prototype → Déploiement → Maintenu.
 enum ProjectStatus {
@@ -206,6 +211,7 @@ model User {
   challengeAttempts ChallengeAttempt[]
   challengeSolves ChallengeSolve[]
   challengeHints ChallengeHintUnlock[]
+  challengeProgress ChallengeProgress[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -222,9 +228,11 @@ model Challenge {
   instructions        String
   difficulty          ChallengeDifficulty
   status              ChallengeStatus     @default(DRAFT)
+  mode                ChallengeMode       @default(CLASSIC)
   basePoints           Int
   answerHash           String
   answerSalt           String
+  completionCode       String?
   solutionExplanation String
   maxAttempts          Int                 @default(30)
   publishAt            DateTime?
@@ -236,12 +244,29 @@ model Challenge {
   attempts             ChallengeAttempt[]
   solves               ChallengeSolve[]
   hintUnlocks          ChallengeHintUnlock[]
+  progress             ChallengeProgress[]
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 
   @@index([status, publishAt])
   @@index([difficulty])
   @@index([authorId])
+}
+
+model ChallengeProgress {
+  id          String   @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step        Int      @default(0)
+  inventory   String[] @default([])
+  completedAt DateTime?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@unique([challengeId, userId])
+  @@index([userId])
 }
 
 model ChallengeHint {

@@ -20,10 +20,22 @@ describe("challenge validators", () => {
       story: "Une console ancienne attend votre commande.",
       instructions: "Trouvez le mot caché dans cette suite logique.",
       difficulty: "EXPLORER",
+      mode: "PIXEL_TERMINAL",
       answer: "ubuntu",
       solutionExplanation: "Chaque caractère provenait de la première colonne.",
       hint1: "Regardez verticalement.",
     }).success).toBe(true);
+  });
+
+  it("rejette un moteur interactif non autorisé", () => {
+    expect(challengeSchema.safeParse({
+      title: "Moteur arbitraire",
+      instructions: "Cette énigme tente de charger un moteur inconnu.",
+      difficulty: "INITIATE",
+      mode: "JAVASCRIPT_ARBITRAIRE",
+      answer: "AFRO{test}",
+      solutionExplanation: "Le moteur ne doit jamais être accepté par la validation.",
+    }).success).toBe(false);
   });
 
   it("rejette une réponse vide", () => {

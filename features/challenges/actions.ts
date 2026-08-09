@@ -42,9 +42,11 @@ export async function createChallengeAction(_: ChallengeState, formData: FormDat
       story: data.story?.trim() || null,
       instructions: data.instructions,
       difficulty: data.difficulty,
+      mode: data.mode,
       basePoints: CHALLENGE_BASE_POINTS[data.difficulty],
       answerHash: hashAnswer(data.answer, salt),
       answerSalt: salt,
+      completionCode: data.mode === "PIXEL_TERMINAL" ? data.answer : null,
       solutionExplanation: data.solutionExplanation,
       status: formData.get("intent") === "draft" ? "DRAFT" : "SUBMITTED",
       authorId: g.user.id,
@@ -66,6 +68,10 @@ export async function submitChallengeAnswer(_: ChallengeState, formData: FormDat
   if (!challenge || challenge.status !== "PUBLISHED") return { error: "Ce défi n’est pas ouvert." };
   if (challenge.closeAt && challenge.closeAt <= new Date()) return { error: "La période de résolution est terminée." };
   if (await db.challengeSolve.findUnique({ where: { challengeId_userId: { challengeId: id, userId: g.user.id } } })) return { success: "Déjà résolue !" };
+  if (challenge.mode === "PIXEL_TERMINAL") {
+    const progress = await db.challengeProgress.findUnique({ where: { challengeId_userId: { challengeId: id, userId: g.user.id } }, select: { step: true } });
+    if (!progress || progress.step < 8) return { error: "Terminez d’abord la mission interactive pour découvrir le flag." };
+  }
 
   const attempts = await db.challengeAttempt.count({ where: { challengeId: id, userId: g.user.id } });
   if (attempts >= challenge.maxAttempts) return { error: "Nombre maximal de tentatives atteint." };
