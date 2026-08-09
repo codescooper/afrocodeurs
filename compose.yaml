@@ -46,6 +46,9 @@ services:
     container_name: afrocodeurs-web
     restart: unless-stopped
     environment:
+      # Auth.js peut fragmenter un JWT en plusieurs cookies. Une marge de 32 Kio
+      # évite les 431 lors du renouvellement tout en gardant une limite bornée.
+      NODE_OPTIONS: --max-http-header-size=32768
       DATABASE_URL: postgresql://${POSTGRES_USER:-afrocodeurs}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-afrocodeurs}?schema=public
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET requis}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
