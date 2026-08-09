@@ -5,9 +5,9 @@ import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { KnowledgeForm } from "@/features/knowledge/knowledge-form";
 
-export const metadata = { title: "Rédiger une ressource" };
+export const metadata = { title: "Partager une ressource" };
 
-/** Rédaction d'une ressource — réservé aux contributeurs (Sprint 4). */
+/** Proposition d'une ressource par un membre de la communauté. */
 export default async function NewKnowledgePage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -15,12 +15,9 @@ export default async function NewKnowledgePage() {
   if (!can(session.user.role, "knowledge:create")) {
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-12">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Devenez contributeur
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight">Accès indisponible</h1>
         <p className="mt-2 text-muted-foreground">
-          La rédaction de ressources est réservée aux contributeurs. Participez
-          à la communauté (réponses, problèmes, votes) pour débloquer ce statut.
+          Connectez-vous avec un compte membre pour proposer une ressource.
         </p>
         <Link
           href="/knowledge"
@@ -35,10 +32,11 @@ export default async function NewKnowledgePage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight">
-        Rédiger une ressource
+        Partager une ressource
       </h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
-        Markdown First. Enregistrez un brouillon ou soumettez à validation.
+        Partagez un cours, une astuce, une vidéo, un outil ou un guide utile.
+        Vous pouvez enregistrer un brouillon avant de le soumettre à la modération.
       </p>
       <div className="mt-8">
         <KnowledgeForm />

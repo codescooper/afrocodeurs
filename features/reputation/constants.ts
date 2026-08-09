@@ -15,6 +15,8 @@ export const REPUTATION_POINTS = {
   RELATION_ADDED: { points: 3, dimension: "CONTRIBUTION" },
   PROJECT_CREATED: { points: 8, dimension: "CONTRIBUTION" },
   TASK_COMPLETED: { points: 10, dimension: "CONTRIBUTION" },
+  CHALLENGE_CREATED: { points: 25, dimension: "CONTRIBUTION" },
+  CHALLENGE_SOLVED: { points: 10, dimension: "PARTICIPATION" },
 } as const satisfies Record<string, PointDef>;
 
 export type ReputationAction = keyof typeof REPUTATION_POINTS;

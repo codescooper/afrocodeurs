@@ -8,7 +8,7 @@ import { orNull, uniqueSlug } from "@/lib/utils";
 import { guard, invalidMessage } from "@/lib/guard";
 import { knowledgeSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
-import { award } from "@/features/reputation/award";
+import { award, awardVote } from "@/features/reputation/award";
 
 export type KnowledgeFormState = { error?: string } | undefined;
 
@@ -34,6 +34,10 @@ export async function createKnowledgeAction(
     type: formData.get("type"),
     language: formData.get("language") || "fr",
     level: formData.get("level") || undefined,
+    externalUrl: formData.get("externalUrl") || "",
+    provider: formData.get("provider") || undefined,
+    durationMinutes: formData.get("durationMinutes") || undefined,
+    isFree: formData.get("isFree") === "true",
   });
 
   if (!parsed.success) return { error: invalidMessage(parsed.error) };
@@ -55,6 +59,10 @@ export async function createKnowledgeAction(
       type: d.type,
       language: d.language,
       level: orNull(d.level),
+      externalUrl: orNull(d.externalUrl),
+      provider: orNull(d.provider),
+      durationMinutes: d.durationMinutes ?? null,
+      isFree: d.isFree,
       status: submit ? "SUBMITTED" : "DRAFT",
       authorId: g.user.id,
     },
@@ -63,6 +71,47 @@ export async function createKnowledgeAction(
   revalidatePath("/knowledge");
   revalidatePath("/dashboard/contributions");
   redirect(`/knowledge/${slug}`);
+}
+
+/** Booster une ressource publiée — un seul boost par membre, retirable. */
+export async function boostKnowledgeAction(formData: FormData): Promise<void> {
+  const g = await guard({ permission: "content:vote", verified: true });
+  if (!g.ok) return;
+
+  const id = formData.get("id");
+  const slug = formData.get("slug");
+  if (typeof id !== "string" || typeof slug !== "string") return;
+
+  const resource = await db.knowledge.findUnique({
+    where: { id, status: "PUBLISHED" },
+    select: { authorId: true },
+  });
+  if (!resource) return;
+
+  const key = {
+    userId: g.user.id,
+    targetType: "KNOWLEDGE" as const,
+    targetId: id,
+  };
+  const existing = await db.vote.findUnique({
+    where: { userId_targetType_targetId: key },
+  });
+
+  if (existing) {
+    await db.vote.delete({ where: { id: existing.id } });
+  } else {
+    await db.vote.create({ data: { ...key, value: "UP" } });
+  }
+
+  if (resource.authorId !== g.user.id) {
+    await awardVote(resource.authorId, existing ? -1 : 1, {
+      type: "KNOWLEDGE",
+      id,
+    });
+  }
+
+  revalidatePath(`/knowledge/${slug}`);
+  revalidatePath("/knowledge");
 }
 
 /** Modération d'une ressource soumise (Sprint 4 / 8) : publier ou rejeter. */

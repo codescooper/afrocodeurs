@@ -15,7 +15,11 @@ describe("can", () => {
   it("autorise selon le rôle minimal requis", () => {
     expect(can("USER", "question:create")).toBe(true);
     expect(can("USER", "project:create")).toBe(true);
-    expect(can("USER", "knowledge:create")).toBe(false); // CONTRIBUTOR requis
+    expect(can("USER", "knowledge:create")).toBe(true);
+    expect(can("USER", "challenge:create")).toBe(true);
+    expect(can("USER", "challenge:solve")).toBe(true);
+    expect(can("USER", "challenge:moderate")).toBe(false);
+    expect(can("MODERATOR", "challenge:moderate")).toBe(true);
     expect(can("CONTRIBUTOR", "knowledge:create")).toBe(true);
     expect(can("MODERATOR", "report:handle")).toBe(true);
     expect(can("USER", "report:handle")).toBe(false);

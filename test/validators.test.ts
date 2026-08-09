@@ -4,6 +4,7 @@ import {
   signUpSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  knowledgeSchema,
 } from "@/lib/validators";
 
 describe("signUpSchema", () => {
@@ -25,6 +26,16 @@ describe("signUpSchema", () => {
     expect(r.success).toBe(false);
   });
 
+  it("convertit automatiquement les majuscules en minuscules", () => {
+    const result = signUpSchema.safeParse({
+      email: "angel@example.com",
+      username: "Angel",
+      password: "motdepasse",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.username).toBe("angel");
+  });
+
   it("rejette un mot de passe trop court", () => {
     const r = signUpSchema.safeParse({
       email: "a@b.co",
@@ -32,6 +43,36 @@ describe("signUpSchema", () => {
       password: "court",
     });
     expect(r.success).toBe(false);
+  });
+});
+
+describe("knowledgeSchema", () => {
+  it("accepte un cours externe gratuit", () => {
+    const result = knowledgeSchema.safeParse({
+      title: "Comprendre Git en pratique",
+      summary: "Un cours accessible aux débutants.",
+      content: "Une présentation suffisamment détaillée.",
+      type: "COURSE",
+      language: "fr",
+      level: "Débutant",
+      externalUrl: "https://example.com/cours-git",
+      provider: "AfroCodeurs",
+      durationMinutes: "45",
+      isFree: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejette un lien externe invalide", () => {
+    const result = knowledgeSchema.safeParse({
+      title: "Une ressource invalide",
+      content: "Une présentation suffisamment détaillée.",
+      type: "LINK",
+      language: "fr",
+      externalUrl: "pas-un-lien",
+      isFree: true,
+    });
+    expect(result.success).toBe(false);
   });
 });
 

@@ -4,6 +4,8 @@ import { z } from "zod";
 
 export const usernameSchema = z
   .string()
+  .trim()
+  .toLowerCase()
   .min(3, "Au moins 3 caractères")
   .max(30, "30 caractères maximum")
   .regex(/^[a-z0-9_]+$/, "Lettres minuscules, chiffres et _ uniquement");
@@ -64,11 +66,16 @@ export const knowledgeSchema = z.object({
     .min(5, "Au moins 5 caractères")
     .max(160, "160 caractères maximum"),
   summary: z.string().max(300).optional(),
-  content: z.string().min(50, "Le contenu doit faire au moins 50 caractères"),
+  content: z.string().min(20, "La présentation doit faire au moins 20 caractères"),
   type: z.enum([
     "ARTICLE",
     "TUTORIAL",
     "GUIDE",
+    "COURSE",
+    "TIP",
+    "VIDEO",
+    "TOOL",
+    "LINK",
     "CASE_STUDY",
     "DOCUMENTATION",
     "DOSSIER",
@@ -76,6 +83,26 @@ export const knowledgeSchema = z.object({
   ]),
   language: z.string().min(2).max(10).default("fr"),
   level: z.string().max(40).optional(),
+  externalUrl: z.union([z.literal(""), z.string().url("Lien invalide")]).optional(),
+  provider: z.string().max(120).optional(),
+  durationMinutes: z.coerce.number().int().min(1).max(100_000).optional(),
+  isFree: z.boolean().default(true),
+});
+
+export const challengeSchema = z.object({
+  title: z.string().min(5, "Au moins 5 caractères").max(140),
+  story: z.string().max(1000).optional(),
+  instructions: z.string().min(20, "Expliquez l’énigme en 20 caractères minimum"),
+  difficulty: z.enum(["INITIATE", "EXPLORER", "HACKER", "MASTER", "LEGENDARY"]),
+  answer: z.string().min(1, "Indiquez la réponse attendue").max(200),
+  solutionExplanation: z.string().min(20, "Expliquez la solution en 20 caractères minimum"),
+  hint1: z.string().max(500).optional(),
+  hint2: z.string().max(500).optional(),
+  hint3: z.string().max(500).optional(),
+});
+
+export const challengeAnswerSchema = z.object({
+  answer: z.string().min(1, "Entrez une réponse").max(200),
 });
 
 export const solutionSchema = z.object({
