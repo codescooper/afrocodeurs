@@ -31,13 +31,16 @@ export const PERMISSIONS = {
   "solution:propose": "USER",
   "relation:create": "USER",
   "project:create": "USER",
+  "knowledge:create": "USER",
+  "challenge:solve": "USER",
+  "challenge:create": "USER",
   // Contributor
-  "knowledge:create": "CONTRIBUTOR",
   "knowledge:submit": "CONTRIBUTOR",
   "knowledge:editOwn": "CONTRIBUTOR",
   "roadmap:edit": "CONTRIBUTOR",
   // Moderator
   "content:validate": "MODERATOR",
+  "challenge:moderate": "MODERATOR",
   "forum:moderate": "MODERATOR",
   "report:handle": "MODERATOR",
   // Admin

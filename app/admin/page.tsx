@@ -7,6 +7,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { moderateKnowledgeAction } from "@/features/knowledge/actions";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { REPORT_REASON_LABELS } from "@/features/admin/constants";
+import { moderateChallengeAction } from "@/features/challenges/actions";
+import { CHALLENGE_DIFFICULTY_LABELS } from "@/features/challenges/constants";
 
 export const metadata = { title: "Administration" };
 
@@ -15,9 +17,14 @@ export default async function AdminPage() {
   const session = await auth();
   const isAdmin = can(session?.user?.role, "user:manage");
 
-  const [pending, reports, userCount] = await Promise.all([
+  const [pending, pendingChallenges, reports, userCount] = await Promise.all([
     db.knowledge.findMany({
       where: { status: "SUBMITTED" },
+      orderBy: { createdAt: "asc" },
+      include: { author: { select: { username: true, name: true } } },
+    }),
+    db.challenge.findMany({
+      where: { status: { in: ["SUBMITTED", "TESTING"] } },
       orderBy: { createdAt: "asc" },
       include: { author: { select: { username: true, name: true } } },
     }),
@@ -33,10 +40,11 @@ export default async function AdminPage() {
     <div className="flex flex-col gap-8">
       <h1 className="text-2xl font-bold">Administration</h1>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Membres", userCount],
           ["À valider", pending.length],
+          ["Énigmes", pendingChallenges.length],
           ["Signalements", reports.length],
         ].map(([label, value]) => (
           <div
@@ -107,6 +115,11 @@ export default async function AdminPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold">Énigmes à valider</h2>
+        {pendingChallenges.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">Aucune énigme en attente.</p> : <ul className="mt-4 flex flex-col gap-2">{pendingChallenges.map((challenge) => <li key={challenge.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border px-4 py-3"><span className="flex flex-col"><Link href={`/challenges/${challenge.slug}`} className="font-medium hover:underline">{challenge.title}</Link><span className="text-xs text-muted-foreground">{CHALLENGE_DIFFICULTY_LABELS[challenge.difficulty]} · par {challenge.author.name ?? `@${challenge.author.username}`}</span></span><span className="flex flex-wrap gap-2"><form action={moderateChallengeAction}><input type="hidden" name="id" value={challenge.id} /><input type="hidden" name="decision" value="testing" /><Button type="submit" size="sm" variant="outline">Mettre en test</Button></form><form action={moderateChallengeAction}><input type="hidden" name="id" value={challenge.id} /><input type="hidden" name="decision" value="publish" /><Button type="submit" size="sm">Publier 7 jours</Button></form><form action={moderateChallengeAction}><input type="hidden" name="id" value={challenge.id} /><input type="hidden" name="decision" value="reject" /><Button type="submit" size="sm" variant="destructive">Rejeter</Button></form></span></li>)}</ul>}
       </section>
 
       <section>

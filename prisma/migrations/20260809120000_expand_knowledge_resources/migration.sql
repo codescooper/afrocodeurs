@@ -1,0 +1,12 @@
+ALTER TYPE "KnowledgeType" ADD VALUE 'COURSE';
+ALTER TYPE "KnowledgeType" ADD VALUE 'TIP';
+ALTER TYPE "KnowledgeType" ADD VALUE 'VIDEO';
+ALTER TYPE "KnowledgeType" ADD VALUE 'TOOL';
+ALTER TYPE "KnowledgeType" ADD VALUE 'LINK';
+
+ALTER TABLE "Knowledge"
+ADD COLUMN "externalUrl" TEXT,
+ADD COLUMN "provider" TEXT,
+ADD COLUMN "durationMinutes" INTEGER,
+ADD COLUMN "isFree" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN "lastVerifiedAt" TIMESTAMP(3);

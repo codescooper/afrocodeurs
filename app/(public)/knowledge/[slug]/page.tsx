@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, Eye } from "lucide-react";
+import { Clock, ExternalLink, Eye, Zap } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can, hasRank } from "@/lib/permissions";
 import { Markdown } from "@/components/shared/markdown";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { readingTimeMinutes } from "@/lib/markdown";
-import { moderateKnowledgeAction } from "@/features/knowledge/actions";
+import {
+  boostKnowledgeAction,
+  moderateKnowledgeAction,
+} from "@/features/knowledge/actions";
 import {
   CONTENT_STATUS_LABELS,
   KNOWLEDGE_TYPE_LABELS,
@@ -51,11 +54,23 @@ export default async function KnowledgeDetailPage({
   const canModerate =
     item.status === "SUBMITTED" && can(session?.user?.role, "content:validate");
 
-  const savedKnowledge = await isBookmarked(
-    session?.user?.id,
-    "KNOWLEDGE",
-    item.id,
-  );
+  const [savedKnowledge, boostCount, myBoost] = await Promise.all([
+    isBookmarked(session?.user?.id, "KNOWLEDGE", item.id),
+    db.vote.count({
+      where: { targetType: "KNOWLEDGE", targetId: item.id, value: "UP" },
+    }),
+    session?.user?.id
+      ? db.vote.findUnique({
+          where: {
+            userId_targetType_targetId: {
+              userId: session.user.id,
+              targetType: "KNOWLEDGE",
+              targetId: item.id,
+            },
+          },
+        })
+      : null,
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
@@ -88,10 +103,11 @@ export default async function KnowledgeDetailPage({
             {item.author.name ?? `@${item.author.username}`}
           </Link>
           {item.level ? ` · ${item.level}` : ""}
+          {item.provider ? ` · ${item.provider}` : ""}
         </span>
         <span className="flex items-center gap-1.5">
           <Clock className="size-4" />
-          {readingTimeMinutes(item.content)} min de lecture
+          {item.durationMinutes ?? readingTimeMinutes(item.content)} min
         </span>
         <span className="flex items-center gap-1.5">
           <Eye className="size-4" />
@@ -103,6 +119,31 @@ export default async function KnowledgeDetailPage({
             targetId={item.id}
             initialSaved={savedKnowledge}
           />
+        )}
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <span className="rounded-full bg-muted px-3 py-1 text-sm font-medium">
+          {item.isFree ? "Accès gratuit" : "Ressource payante"}
+        </span>
+        {item.status === "PUBLISHED" && session?.user && (
+          <form action={boostKnowledgeAction}>
+            <input type="hidden" name="id" value={item.id} />
+            <input type="hidden" name="slug" value={item.slug} />
+            <Button type="submit" size="sm" variant={myBoost ? "primary" : "outline"}>
+              <Zap /> {myBoost ? "Boostée" : "Booster"} · {boostCount}
+            </Button>
+          </form>
+        )}
+        {item.externalUrl && (
+          <a
+            href={item.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ size: "sm" })}
+          >
+            Accéder à la ressource <ExternalLink />
+          </a>
         )}
       </div>
 

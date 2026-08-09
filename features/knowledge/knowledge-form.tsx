@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 const inputClass =
   "rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary";
 
-/** Éditeur Markdown — création d'une ressource avec aperçu (Sprint 4). */
+/** Formulaire communautaire pour partager une ressource avec aperçu Markdown. */
 export function KnowledgeForm() {
   const [state, formAction, pending] = useActionState(
     createKnowledgeAction,
@@ -100,9 +100,53 @@ export function KnowledgeForm() {
         />
       </label>
 
+      <fieldset className="grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-2">
+        <legend className="px-1 text-sm font-semibold">Accès à la ressource</legend>
+        <label className="flex flex-col gap-1 text-sm font-medium sm:col-span-2">
+          Lien externe (optionnel)
+          <input
+            name="externalUrl"
+            type="url"
+            placeholder="https://…"
+            className={inputClass}
+          />
+          <span className="text-xs font-normal text-muted-foreground">
+            Pour un cours, une vidéo, un outil ou un article hébergé ailleurs.
+          </span>
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          Auteur, organisme ou plateforme (optionnel)
+          <input
+            name="provider"
+            type="text"
+            maxLength={120}
+            placeholder="Ex. OpenClassrooms"
+            className={inputClass}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          Durée estimée en minutes (optionnel)
+          <input
+            name="durationMinutes"
+            type="number"
+            min={1}
+            max={100000}
+            placeholder="Ex. 45"
+            className={inputClass}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          Tarif
+          <select name="isFree" defaultValue="true" className={inputClass}>
+            <option value="true">Gratuit</option>
+            <option value="false">Payant</option>
+          </select>
+        </label>
+      </fieldset>
+
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Contenu (Markdown)</span>
+          <span className="text-sm font-medium">Présentation ou astuce (Markdown)</span>
           <span className="flex items-center gap-4">
             <ImageUploadButton
               onUploaded={insertImage}
@@ -121,11 +165,11 @@ export function KnowledgeForm() {
           ref={textareaRef}
           name="content"
           required
-          minLength={50}
+          minLength={20}
           rows={14}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="# Titre&#10;&#10;Rédigez en Markdown : **gras**, listes, ```code```, [liens](https://…)…"
+          placeholder="Expliquez ce que la ressource apporte, à qui elle s'adresse et comment bien l'utiliser."
           className={cn(inputClass, "font-mono", preview && "hidden")}
         />
         {preview && (

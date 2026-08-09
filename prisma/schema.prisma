@@ -31,6 +31,11 @@ enum KnowledgeType {
   ARTICLE
   TUTORIAL
   GUIDE
+  COURSE
+  TIP
+  VIDEO
+  TOOL
+  LINK
   CASE_STUDY
   DOCUMENTATION
   DOSSIER
@@ -87,6 +92,26 @@ enum EntityType {
   ORGANIZATION
   TAG
   PROJECT
+  CHALLENGE
+}
+
+enum ChallengeDifficulty {
+  INITIATE
+  EXPLORER
+  HACKER
+  MASTER
+  LEGENDARY
+}
+
+enum ChallengeStatus {
+  DRAFT
+  SUBMITTED
+  TESTING
+  SCHEDULED
+  PUBLISHED
+  CLOSED
+  REJECTED
+  ARCHIVED
 }
 
 // Cycle incubateur (cf. PRD fondateur §15) : Idée → Validation → Construction
@@ -177,12 +202,100 @@ model User {
   followers     Follow[] @relation("Followers")
   bookmarks     Bookmark[]
   notificationOptOut String[] @default([])
+  challengesAuthored Challenge[] @relation("ChallengeAuthor")
+  challengeAttempts ChallengeAttempt[]
+  challengeSolves ChallengeSolve[]
+  challengeHints ChallengeHintUnlock[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([username])
   @@index([role])
+}
+
+model Challenge {
+  id                  String              @id @default(cuid())
+  title               String
+  slug                String              @unique
+  story               String?
+  instructions        String
+  difficulty          ChallengeDifficulty
+  status              ChallengeStatus     @default(DRAFT)
+  basePoints           Int
+  answerHash           String
+  answerSalt           String
+  solutionExplanation String
+  maxAttempts          Int                 @default(30)
+  publishAt            DateTime?
+  closeAt              DateTime?
+  publishedAt          DateTime?
+  authorId             String
+  author               User                @relation("ChallengeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  hints                ChallengeHint[]
+  attempts             ChallengeAttempt[]
+  solves               ChallengeSolve[]
+  hintUnlocks          ChallengeHintUnlock[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  @@index([status, publishAt])
+  @@index([difficulty])
+  @@index([authorId])
+}
+
+model ChallengeHint {
+  id          String   @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  position    Int
+  content     String
+  penalty     Int
+  unlocks     ChallengeHintUnlock[]
+
+  @@unique([challengeId, position])
+}
+
+model ChallengeHintUnlock {
+  id          String   @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  hintId      String
+  hint        ChallengeHint @relation(fields: [hintId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([hintId, userId])
+  @@index([challengeId, userId])
+}
+
+model ChallengeAttempt {
+  id          String   @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  correct     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([challengeId, userId, createdAt])
+}
+
+model ChallengeSolve {
+  id            String   @id @default(cuid())
+  challengeId   String
+  challenge     Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score         Int
+  attemptsUsed  Int
+  hintsUsed     Int
+  solvedAt      DateTime @default(now())
+
+  @@unique([challengeId, userId])
+  @@index([score, solvedAt])
+  @@index([userId])
 }
 
 model Follow {
@@ -368,6 +481,11 @@ model Knowledge {
   type        KnowledgeType
   language    String        @default("fr")
   level       String?
+  externalUrl String?
+  provider    String?
+  durationMinutes Int?
+  isFree      Boolean       @default(true)
+  lastVerifiedAt DateTime?
   status      ContentStatus @default(DRAFT)
   views       Int           @default(0)
 

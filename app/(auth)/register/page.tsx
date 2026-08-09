@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 
 import { registerAction } from "@/features/auth/actions";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(registerAction, undefined);
+  const [usernameNormalized, setUsernameNormalized] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,8 +39,23 @@ export default function RegisterPage() {
             required
             pattern="[a-z0-9_]+"
             placeholder="afromaker"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            onInput={(event) => {
+              const normalized = event.currentTarget.value.toLocaleLowerCase("fr");
+              if (normalized !== event.currentTarget.value) {
+                event.currentTarget.value = normalized;
+                setUsernameNormalized(true);
+              }
+            }}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
           />
+          <span className="text-xs font-normal text-muted-foreground" aria-live="polite">
+            {usernameNormalized
+              ? "Majuscule détectée : nous l’avons convertie en minuscule."
+              : "Les majuscules sont automatiquement converties en minuscules."}
+          </span>
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
           Email
