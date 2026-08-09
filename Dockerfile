@@ -43,4 +43,4 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 4190
-CMD ["node", "server.js"]
+CMD ["node", "--max-http-header-size=65536", "server.js"]

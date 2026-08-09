@@ -45,7 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          image: user.image,
+          image: user.image?.startsWith("data:") ? null : user.image,
           username: user.username,
           role: user.role,
         };
@@ -74,6 +74,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async jwt({ token, user }) {
+      // Éliminer toute image Base64 ou attributs OAuth volumineux qui feraient gonfler le cookie JWT
+      if (typeof token.picture === "string" && token.picture.startsWith("data:")) {
+        delete token.picture;
+      }
+      if (typeof token.image === "string" && token.image.startsWith("data:")) {
+        delete token.image;
+      }
+      delete (token as Record<string, unknown>).account;
+      delete (token as Record<string, unknown>).profile;
+
       if (user) {
         token.id = user.id as string;
         token.role = (user as { role?: UserRole }).role ?? "USER";

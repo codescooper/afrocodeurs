@@ -7,6 +7,8 @@ import { githubLoginFromUrl, orNull, parseList } from "@/lib/utils";
 import { guard, invalidMessage } from "@/lib/guard";
 import { profileSchema } from "@/lib/validators";
 
+import { saveImage } from "@/lib/storage";
+
 export type ProfileFormState = { error?: string; success?: boolean } | undefined;
 
 /** Édition du profil AfroMaker (Sprint 1). Upsert le profil de l'utilisateur courant. */
@@ -58,22 +60,41 @@ export async function updateProfileAction(
   return { success: true };
 }
 
-/** Met à jour (ou retire) la photo de profil — data URL redimensionnée côté client. */
+/** Met à jour (ou retire) la photo de profil — enregistrée sous forme de fichier stocké. */
 export async function updateAvatarAction(
   dataUrl: string | null,
 ): Promise<ProfileFormState> {
   const g = await guard();
   if (!g.ok) return { error: g.error };
 
+  let imageUrl: string | null = null;
+
   if (dataUrl !== null) {
-    if (!dataUrl.startsWith("data:image/") || dataUrl.length > 200_000) {
-      return { error: "Image invalide ou trop lourde." };
+    if (dataUrl.startsWith("data:image/")) {
+      if (dataUrl.length > 300_000) {
+        return { error: "Image trop lourde." };
+      }
+      const match = dataUrl.match(/^data:(image\/[a-z+]+);base64,(.+)$/);
+      if (!match) {
+        return { error: "Format d'image invalide." };
+      }
+      const contentType = match[1];
+      const base64Data = match[2];
+      try {
+        const buffer = Buffer.from(base64Data, "base64");
+        const bytes = new Uint8Array(buffer);
+        imageUrl = await saveImage(bytes, contentType);
+      } catch {
+        return { error: "Échec du stockage de l'image." };
+      }
+    } else {
+      imageUrl = dataUrl;
     }
   }
 
   await db.user.update({
     where: { id: g.user.id },
-    data: { image: dataUrl },
+    data: { image: imageUrl },
   });
 
   revalidatePath("/dashboard/profile");
