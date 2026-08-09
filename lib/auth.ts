@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { db } from "./db";
+import { minimizeAuthToken } from "./auth-token";
 import type { UserRole } from "@prisma/client";
 
 const credentialsSchema = z.object({
@@ -74,6 +75,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async jwt({ token, user }) {
+      token = minimizeAuthToken(token);
       if (user) {
         token.id = user.id as string;
         token.role = (user as { role?: UserRole }).role ?? "USER";
