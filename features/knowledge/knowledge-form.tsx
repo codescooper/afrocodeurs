@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { createKnowledgeAction } from "./actions";
 import {
@@ -18,6 +19,7 @@ const inputClass =
 
 /** Formulaire communautaire pour partager une ressource avec aperçu Markdown. */
 export function KnowledgeForm() {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     createKnowledgeAction,
     undefined,
@@ -25,6 +27,10 @@ export function KnowledgeForm() {
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (state?.createdSlug) router.push(`/knowledge/${state.createdSlug}`);
+  }, [router, state?.createdSlug]);
 
   /** Insère le Markdown d'une image uploadée à la position du curseur. */
   function insertImage(url: string, name: string) {

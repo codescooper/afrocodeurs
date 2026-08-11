@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { orNull, uniqueSlug } from "@/lib/utils";
@@ -10,7 +9,7 @@ import { knowledgeSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
 
-export type KnowledgeFormState = { error?: string } | undefined;
+export type KnowledgeFormState = { error?: string; createdSlug?: string } | undefined;
 
 /**
  * Création d'une ressource (Sprint 4). Selon le bouton : brouillon (DRAFT)
@@ -50,27 +49,32 @@ export async function createKnowledgeAction(
     ),
   );
 
-  await db.knowledge.create({
-    data: {
-      title: d.title,
-      slug,
-      summary: orNull(d.summary),
-      content: d.content,
-      type: d.type,
-      language: d.language,
-      level: orNull(d.level),
-      externalUrl: orNull(d.externalUrl),
-      provider: orNull(d.provider),
-      durationMinutes: d.durationMinutes ?? null,
-      isFree: d.isFree,
-      status: submit ? "SUBMITTED" : "DRAFT",
-      authorId: g.user.id,
-    },
-  });
+  try {
+    await db.knowledge.create({
+      data: {
+        title: d.title,
+        slug,
+        summary: orNull(d.summary),
+        content: d.content,
+        type: d.type,
+        language: d.language,
+        level: orNull(d.level),
+        externalUrl: orNull(d.externalUrl),
+        provider: orNull(d.provider),
+        durationMinutes: d.durationMinutes ?? null,
+        isFree: d.isFree,
+        status: submit ? "SUBMITTED" : "DRAFT",
+        authorId: g.user.id,
+      },
+    });
+  } catch (error) {
+    console.error("knowledge creation failed", error);
+    return { error: "La ressource n’a pas pu être enregistrée. Vos informations sont conservées à l’écran : réessayez dans un instant ou contactez l’équipe." };
+  }
 
   revalidatePath("/knowledge");
   revalidatePath("/dashboard/contributions");
-  redirect(`/knowledge/${slug}`);
+  return { createdSlug: slug };
 }
 
 /** Booster une ressource publiée — un seul boost par membre, retirable. */
