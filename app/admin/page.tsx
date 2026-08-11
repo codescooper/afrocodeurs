@@ -9,6 +9,7 @@ import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { REPORT_REASON_LABELS } from "@/features/admin/constants";
 import { moderateChallengeAction } from "@/features/challenges/actions";
 import { CHALLENGE_DIFFICULTY_LABELS } from "@/features/challenges/constants";
+import { createPlatformUpdateAction } from "@/features/updates/actions";
 
 export const metadata = { title: "Administration" };
 
@@ -17,7 +18,7 @@ export default async function AdminPage() {
   const session = await auth();
   const isAdmin = can(session?.user?.role, "user:manage");
 
-  const [pending, pendingChallenges, reports, userCount] = await Promise.all([
+  const [pending, pendingChallenges, reports, userCount, recentUpdates] = await Promise.all([
     db.knowledge.findMany({
       where: { status: "SUBMITTED" },
       orderBy: { createdAt: "asc" },
@@ -34,6 +35,7 @@ export default async function AdminPage() {
       include: { reporter: { select: { username: true } } },
     }),
     db.user.count(),
+    db.platformUpdate.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
   ]);
 
   return (
@@ -116,6 +118,8 @@ export default async function AdminPage() {
           </ul>
         )}
       </section>
+
+      {isAdmin && <section className="rounded-xl border border-border p-5"><h2 className="text-lg font-semibold">Publier une nouveauté</h2><p className="mt-1 text-sm text-muted-foreground">Elle apparaîtra dans le journal, sur le tableau de bord des membres et dans leurs notifications.</p><form action={createPlatformUpdateAction} className="mt-5 grid gap-4"><div className="grid gap-4 sm:grid-cols-2"><label className="flex flex-col gap-1 text-sm font-medium">Version<input name="version" required maxLength={40} placeholder="Août 2026" className="rounded-md border border-border bg-background px-3 py-2" /></label><label className="flex flex-col gap-1 text-sm font-medium">Catégorie<input name="category" required maxLength={40} defaultValue="NOUVEAUTÉ" className="rounded-md border border-border bg-background px-3 py-2" /></label></div><label className="flex flex-col gap-1 text-sm font-medium">Titre<input name="title" required minLength={5} maxLength={140} className="rounded-md border border-border bg-background px-3 py-2" /></label><label className="flex flex-col gap-1 text-sm font-medium">Résumé<input name="summary" required minLength={10} maxLength={320} className="rounded-md border border-border bg-background px-3 py-2" /></label><label className="flex flex-col gap-1 text-sm font-medium">Détails en Markdown<textarea name="content" required minLength={20} rows={8} className="rounded-md border border-border bg-background px-3 py-2 font-mono text-sm" /></label><Button type="submit" className="w-fit">Publier et notifier les membres</Button></form>{recentUpdates.length > 0 && <div className="mt-6 border-t border-border pt-4"><h3 className="text-sm font-semibold">Dernières publications</h3><ul className="mt-2 space-y-2">{recentUpdates.map((update) => <li key={update.id} className="flex justify-between gap-3 text-sm"><span>{update.title}</span><span className="text-muted-foreground">{update.version}</span></li>)}</ul></div>}</section>}
 
       <section>
         <h2 className="text-lg font-semibold">Énigmes à valider</h2>
