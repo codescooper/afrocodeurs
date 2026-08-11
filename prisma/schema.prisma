@@ -176,6 +176,16 @@ enum VoteValue {
   DOWN
 }
 
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum ConversationMemberRole {
+  OWNER
+  MEMBER
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -212,12 +222,56 @@ model User {
   challengeSolves ChallengeSolve[]
   challengeHints ChallengeHintUnlock[]
   challengeProgress ChallengeProgress[]
+  conversationMemberships ConversationMember[]
+  sentMessages Message[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([username])
   @@index([role])
+}
+
+model Conversation {
+  id        String           @id @default(cuid())
+  type      ConversationType
+  title     String?
+  directKey String?          @unique
+  members   ConversationMember[]
+  messages  Message[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([updatedAt])
+}
+
+model ConversationMember {
+  id             String                 @id @default(cuid())
+  conversationId String
+  conversation   Conversation           @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           ConversationMemberRole @default(MEMBER)
+  lastReadAt     DateTime                @default(now())
+  joinedAt       DateTime                @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId, lastReadAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body           String
+  deletedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([authorId])
 }
 
 model Challenge {
