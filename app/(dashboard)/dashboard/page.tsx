@@ -4,6 +4,9 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getReputation } from "@/features/reputation/queries";
 import { VerifyEmailBanner } from "@/features/auth/verify-email-banner";
+import { Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { markPlatformUpdatesReadAction } from "@/features/updates/actions";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -26,6 +29,7 @@ export default async function DashboardPage() {
     myCommunities,
     recentProblems,
     recentKnowledge,
+    unreadUpdates,
   ] = await Promise.all([
     getReputation(user.id),
     db.user.findUnique({
@@ -53,6 +57,12 @@ export default async function DashboardPage() {
       select: { title: true, slug: true, publishedAt: true },
       orderBy: { publishedAt: "desc" },
       take: 5,
+    }),
+    db.platformUpdate.findMany({
+      where: { published: true, reads: { none: { userId: user.id } } },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+      select: { id: true, title: true, summary: true, version: true },
     }),
   ]);
 
@@ -141,6 +151,8 @@ export default async function DashboardPage() {
       </div>
 
       {!account?.emailVerified && <VerifyEmailBanner />}
+
+      {unreadUpdates.length > 0 && <section className="overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background to-amber-400/10"><div className="flex flex-wrap items-start justify-between gap-4 p-6"><div className="max-w-2xl"><div className="flex items-center gap-2 text-primary"><Sparkles className="size-5" /><span className="text-xs font-bold uppercase tracking-[.18em]">Nouveau depuis votre dernière visite</span></div><h2 className="mt-2 text-xl font-bold">AfroCodeurs évolue avec vous</h2><ul className="mt-4 space-y-3">{unreadUpdates.map((update) => <li key={update.id}><Link href="/updates" className="block rounded-lg border border-border/70 bg-background/70 p-3 transition hover:bg-background"><span className="text-xs font-semibold text-primary">{update.version}</span><p className="font-semibold">{update.title}</p><p className="line-clamp-2 text-sm text-muted-foreground">{update.summary}</p></Link></li>)}</ul></div><div className="flex gap-2"><Link href="/updates" className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Voir les nouveautés</Link><form action={markPlatformUpdatesReadAction}><Button type="submit" variant="ghost">J’ai vu</Button></form></div></div></section>}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Quoi de neuf — flux de contenu frais */}
