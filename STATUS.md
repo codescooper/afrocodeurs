@@ -1,6 +1,6 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-07-15**
+**Dernière MAJ : 2026-08-06**
 > Statut actualisé à partir du dépôt, de Railway, de GitHub Actions, de Resend et de contrôles HTTP réels.
 
 ## 🎯 Phase
@@ -17,6 +17,7 @@
 - [x] Validation locale verte : ESLint, build Next.js 16.2.7 et 36/36 tests Vitest.
 - [x] Hébergeur Railway renseigné dans les mentions légales à partir de ses informations officielles.
 - [x] Avertissement de dépréciation Sentry supprimé de la configuration du build.
+- [x] Page détail communauté : rangée d'avatars empilés `MembersRow` (tooltip, badge « +N », modale liste complète) ; shadcn `dialog`/`tooltip` ajoutés ; vérifié en dev le 2026-08-06 (tsc, ESLint, 40/40 Vitest, captures navigateur).
 
 ## 🚧 En cours / À faire
 

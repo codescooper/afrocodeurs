@@ -1,16 +1,17 @@
+import { MapPin, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Users } from "lucide-react";
 
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { ReportForm } from "@/features/admin/report-form";
 import {
   joinCommunityAction,
   leaveCommunityAction,
 } from "@/features/communities/actions";
 import { COMMUNITY_TYPE_LABELS } from "@/features/communities/constants";
-import { ReportForm } from "@/features/admin/report-form";
+import { MembersRow } from "@/features/communities/members-row";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 /** Page détail d'une communauté + rejoindre/quitter (Sprint 2). */
 export default async function CommunityDetailPage({
@@ -26,7 +27,7 @@ export default async function CommunityDetailPage({
     include: {
       members: {
         include: {
-          user: { select: { username: true, name: true } },
+          user: { select: { username: true, name: true, image: true } },
         },
         orderBy: { joinedAt: "asc" },
       },
@@ -98,24 +99,9 @@ export default async function CommunityDetailPage({
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Membres</h2>
-        <ul className="mt-4 flex flex-col gap-2">
-          {community.members.map((member) => (
-            <li
-              key={member.id}
-              className="flex items-center justify-between rounded-md border border-border px-4 py-2 text-sm"
-            >
-              <Link
-                href={`/u/${member.user.username}`}
-                className="font-medium hover:underline"
-              >
-                {member.user.name ?? `@${member.user.username}`}
-              </Link>
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                {member.role}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-4">
+          <MembersRow members={community.members} rowMax={8} />
+        </div>
       </section>
 
       {session?.user && (
