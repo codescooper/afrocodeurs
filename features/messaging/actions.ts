@@ -49,3 +49,21 @@ export async function leaveConversationAction(formData: FormData) {
   revalidatePath("/messages");
   redirect("/messages");
 }
+
+export async function startDirectConversationAction(formData: FormData) {
+  const g = await guard({ verified: true });
+  if (!g.ok) redirect("/login");
+  const recipientId = formData.get("recipientId");
+  if (typeof recipientId !== "string" || recipientId === g.user.id) redirect("/messages");
+  const recipient = await db.user.findUnique({ where: { id: recipientId }, select: { id: true } });
+  if (!recipient) redirect("/messages");
+  const memberIds = [g.user.id, recipient.id].sort();
+  const directKey = memberIds.join(":");
+  const existing = await db.conversation.findUnique({ where: { directKey }, select: { id: true } });
+  if (existing) redirect(`/messages/${existing.id}`);
+  const conversation = await db.conversation.create({
+    data: { type: "DIRECT", directKey, members: { create: memberIds.map((userId) => ({ userId, role: userId === g.user.id ? "OWNER" : "MEMBER" })) } },
+    select: { id: true },
+  });
+  redirect(`/messages/${conversation.id}`);
+}

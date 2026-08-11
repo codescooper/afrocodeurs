@@ -179,11 +179,34 @@ enum VoteValue {
 enum ConversationType {
   DIRECT
   GROUP
+  GLOBAL
 }
 
 enum ConversationMemberRole {
   OWNER
   MEMBER
+}
+
+enum OpportunityType {
+  JOB
+  INTERNSHIP
+  SCHOLARSHIP
+  FUNDING
+  COMPETITION
+  MENTORSHIP
+  EVENT
+  OTHER
+}
+
+enum OpportunityStatus {
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+enum OpportunityResponseKind {
+  INTEREST
+  APPLICATION
 }
 
 model User {
@@ -224,6 +247,8 @@ model User {
   challengeProgress ChallengeProgress[]
   conversationMemberships ConversationMember[]
   sentMessages Message[]
+  opportunities Opportunity[]
+  opportunityResponses OpportunityResponse[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -237,6 +262,7 @@ model Conversation {
   type      ConversationType
   title     String?
   directKey String?          @unique
+  slug      String?          @unique
   members   ConversationMember[]
   messages  Message[]
   createdAt DateTime         @default(now())
@@ -272,6 +298,48 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@index([authorId])
+}
+
+model Opportunity {
+  id           String            @id @default(cuid())
+  title        String
+  slug         String            @unique
+  organization String
+  type         OpportunityType
+  status       OpportunityStatus @default(ACTIVE)
+  summary      String
+  description  String
+  requirements String?
+  location     String?
+  isRemote     Boolean           @default(false)
+  externalUrl  String?
+  deadline     DateTime?
+  authorId     String
+  author       User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  responses    OpportunityResponse[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([status, createdAt])
+  @@index([type])
+  @@index([authorId])
+  @@index([deadline])
+}
+
+model OpportunityResponse {
+  id            String                  @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity             @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind          OpportunityResponseKind
+  message       String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@unique([opportunityId, userId])
+  @@index([userId])
+  @@index([opportunityId, kind])
 }
 
 model Challenge {

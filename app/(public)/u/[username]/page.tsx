@@ -20,6 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import { USER_ROLE_LABELS } from "@/features/admin/constants";
 import { KNOWLEDGE_TYPE_LABELS } from "@/features/knowledge/constants";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
+import { startDirectConversationAction } from "@/features/messaging/actions";
+import { Button } from "@/components/ui/button";
 
 export async function generateMetadata({
   params,
@@ -127,7 +129,13 @@ export default async function PublicProfilePage({
         </div>
 
         {session?.user && !isSelf && (
-          <FollowButton userId={user.id} initialFollowing={isFollowing} />
+          <div className="grid grid-cols-2 gap-2">
+            <FollowButton userId={user.id} initialFollowing={isFollowing} />
+            <form action={startDirectConversationAction}>
+              <input type="hidden" name="recipientId" value={user.id} />
+              <Button type="submit" variant="outline" className="w-full gap-2"><MessageSquare className="size-4" />Message</Button>
+            </form>
+          </div>
         )}
 
         {p?.bio && <p className="text-sm text-muted-foreground">{p.bio}</p>}
