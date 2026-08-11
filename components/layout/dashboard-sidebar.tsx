@@ -11,6 +11,7 @@ import {
   User,
   Settings,
   Shield,
+  MessagesSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
       { label: "Mes contributions", href: "/dashboard/contributions", icon: FileText },
       { label: "Mes communautés", href: "/dashboard/communities", icon: Users },
+      { label: "Messagerie", href: "/messages", icon: MessagesSquare },
       { label: "Mes favoris", href: "/dashboard/saved", icon: Bookmark },
       { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
     ],
