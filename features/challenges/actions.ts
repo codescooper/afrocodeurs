@@ -108,6 +108,22 @@ export async function unlockHintAction(formData: FormData) {
   revalidatePath(`/challenges/${slug}`);
 }
 
+/** Soumet un brouillon appartenant au membre courant à la modération. */
+export async function submitDraftChallengeAction(formData: FormData) {
+  const g = await guard({ permission: "challenge:create", verified: true });
+  if (!g.ok) return;
+  const id = formData.get("id");
+  if (typeof id !== "string") return;
+  const challenge = await db.challenge.findFirst({
+    where: { id, authorId: g.user.id, status: { in: ["DRAFT", "REJECTED"] } },
+    select: { slug: true },
+  });
+  if (!challenge) return;
+  await db.challenge.update({ where: { id }, data: { status: "SUBMITTED" } });
+  revalidatePath("/dashboard/contributions");
+  revalidatePath(`/challenges/${challenge.slug}`);
+}
+
 export async function moderateChallengeAction(formData: FormData) {
   const g = await guard({ permission: "challenge:moderate" });
   if (!g.ok) return;

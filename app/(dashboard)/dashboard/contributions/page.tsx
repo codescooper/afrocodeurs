@@ -8,16 +8,26 @@ import {
   CONTENT_STATUS_LABELS,
   KNOWLEDGE_TYPE_LABELS,
 } from "@/features/knowledge/constants";
+import {
+  CHALLENGE_DIFFICULTY_LABELS,
+  CHALLENGE_STATUS_LABELS,
+} from "@/features/challenges/constants";
 
 export const metadata = { title: "Mes contributions" };
 
 /** Ressources rédigées par l'utilisateur courant, tous statuts (Sprint 4). */
 export default async function ContributionsPage() {
   const session = await auth();
-  const items = await db.knowledge.findMany({
-    where: { authorId: session!.user.id },
-    orderBy: { updatedAt: "desc" },
-  });
+  const [items, challenges] = await Promise.all([
+    db.knowledge.findMany({
+      where: { authorId: session!.user.id },
+      orderBy: { updatedAt: "desc" },
+    }),
+    db.challenge.findMany({
+      where: { authorId: session!.user.id },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
   const canCreate = can(session!.user.role, "knowledge:create");
 
   return (
@@ -26,7 +36,7 @@ export default async function ContributionsPage() {
         <div>
           <h1 className="text-2xl font-bold">Mes contributions</h1>
           <p className="text-sm text-muted-foreground">
-            Vos ressources et leur statut de validation.
+            Vos ressources, énigmes et leur statut de validation.
           </p>
         </div>
         {canCreate && (
@@ -62,6 +72,14 @@ export default async function ContributionsPage() {
           ))}
         </ul>
       )}
+
+      <section className="mt-4 flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div><h2 className="text-xl font-semibold">Mes énigmes</h2><p className="text-sm text-muted-foreground">Retrouvez vos brouillons et suivez leur validation.</p></div>
+          <Link href="/challenges/new" className={buttonVariants({ size: "sm", variant: "outline" })}>Créer une énigme</Link>
+        </div>
+        {challenges.length === 0 ? <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Vous n&apos;avez pas encore créé d&apos;énigme.</div> : <ul className="flex flex-col gap-2">{challenges.map((challenge) => <li key={challenge.id}><Link href={`/challenges/${challenge.slug}`} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border px-4 py-3 transition-colors hover:bg-muted/40"><span className="flex flex-col"><span className="font-medium">{challenge.title}</span><span className="text-xs text-muted-foreground">{CHALLENGE_DIFFICULTY_LABELS[challenge.difficulty]} · {challenge.mode === "PIXEL_TERMINAL" ? "CTF pixel art" : "Classique"}</span></span><span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{CHALLENGE_STATUS_LABELS[challenge.status]}</span></Link></li>)}</ul>}
+      </section>
     </div>
   );
 }
