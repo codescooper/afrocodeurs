@@ -98,3 +98,38 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/* Contenu ?ditorial Markdown du Knowledge Hub. */
+.markdown-content { color: var(--foreground); line-height: 1.75; overflow-wrap: anywhere; }
+.markdown-content > :first-child { margin-top: 0; }
+.markdown-content > :last-child { margin-bottom: 0; }
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 { margin: 1.75em 0 0.65em; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.markdown-content h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+.markdown-content h2 { font-size: clamp(1.4rem, 3vw, 1.85rem); }
+.markdown-content h3 { font-size: 1.25rem; }
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content blockquote,
+.markdown-content pre,
+.markdown-content table { margin: 1em 0; }
+.markdown-content ul,
+.markdown-content ol { padding-left: 1.5rem; }
+.markdown-content ul { list-style: disc; }
+.markdown-content ol { list-style: decimal; }
+.markdown-content li + li { margin-top: 0.35rem; }
+.markdown-content a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
+.markdown-content blockquote { border-left: 4px solid var(--primary); color: var(--muted-foreground); padding: 0.25rem 0 0.25rem 1rem; }
+.markdown-content hr { margin: 2rem 0; border-color: var(--border); }
+.markdown-content code { border-radius: 0.3rem; background: var(--muted); padding: 0.15em 0.35em; font-family: var(--font-mono); font-size: 0.9em; }
+.markdown-content pre { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--secondary); color: var(--secondary-foreground); padding: 1rem; }
+.markdown-content pre code { background: transparent; padding: 0; color: inherit; }
+.markdown-content table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; }
+.markdown-content th,
+.markdown-content td { border: 1px solid var(--border); padding: 0.65rem 0.8rem; text-align: left; }
+.markdown-content th { background: var(--muted); font-weight: 700; }
+.markdown-content img { display: block; width: auto; max-width: 100%; max-height: 42rem; margin: 1.5rem auto; border: 1px solid var(--border); border-radius: var(--radius); object-fit: contain; }
+.markdown-image-unavailable { display: block; margin: 1.5rem 0; border: 1px dashed var(--border); border-radius: var(--radius); background: var(--muted); color: var(--muted-foreground); padding: 1rem; text-align: center; }
