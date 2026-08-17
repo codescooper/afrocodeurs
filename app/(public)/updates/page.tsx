@@ -19,9 +19,11 @@ const GOAL_STATUS = {
 const FEEDBACK_STATUS = {
   NEW: "À étudier",
   REVIEWING: "En analyse",
+  IN_PROGRESS: "En cours",
   ACCEPTED: "Acceptée",
   REJECTED: "Rejetée",
   CONVERTED: "Objectif créé",
+  RESOLVED: "Résolue",
 } as const;
 
 export default async function UpdatesPage() {

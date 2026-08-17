@@ -231,9 +231,11 @@ enum FeedbackCategory {
 enum FeedbackStatus {
   NEW
   REVIEWING
+  IN_PROGRESS
   ACCEPTED
   REJECTED
   CONVERTED
+  RESOLVED
 }
 
 enum DevelopmentGoalStatus {

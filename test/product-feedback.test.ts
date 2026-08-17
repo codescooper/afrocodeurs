@@ -27,4 +27,21 @@ describe("analyzeFeedback", () => {
     );
     expect(result.analysis).toContain("Validation humaine requise");
   });
+
+  it("détecte un bug sans tenir compte de la casse", () => {
+    const result = analyzeFeedback(
+      "BUG de Publication",
+      "Les membres sont BloQUés par plusieurs ERREURS.",
+    );
+    expect(result.category).toBe("BUG");
+    expect(result.priorityScore).toBeGreaterThanOrEqual(4);
+  });
+
+  it("reconnaît les variantes accentuées et plurielles d’une fonctionnalité", () => {
+    const result = analyzeFeedback(
+      "Nouvelles fonctionnalités",
+      "Il faudrait ajouter des fonctionnalités de planification.",
+    );
+    expect(result.category).toBe("MISSING_FEATURE");
+  });
 });

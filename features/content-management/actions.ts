@@ -87,10 +87,27 @@ export async function deleteUserContentAction(formData: FormData): Promise<void>
   const authorId = "createdById" in current ? current.createdById : current.authorId;
   if (!mayMutate(g.user.id, g.user.role, authorId)) return;
 
-  await recordAudit({ actorId: g.user.id, action: "DELETE", entityType, entityId, before: current });
+  let cascadeAnswerIds: string[] = [];
+  let cascadeCommentIds: string[] = [];
   if (entityType === "QUESTION") {
     const answers = await db.answer.findMany({ where: { questionId: entityId }, select: { id: true } });
-    const targetIds = [entityId, ...answers.map((answer) => answer.id)];
+    cascadeAnswerIds = answers.map((answer) => answer.id);
+    const comments = await db.comment.findMany({
+      where: { targetId: { in: [entityId, ...cascadeAnswerIds] }, targetType: { in: ["QUESTION", "ANSWER"] } },
+      select: { id: true },
+    });
+    cascadeCommentIds = comments.map((comment) => comment.id);
+  }
+  await recordAudit({
+    actorId: g.user.id,
+    action: "DELETE",
+    entityType,
+    entityId,
+    before: current,
+    metadata: entityType === "QUESTION" ? { cascadeAnswerIds, cascadeCommentIds } : undefined,
+  });
+  if (entityType === "QUESTION") {
+    const targetIds = [entityId, ...cascadeAnswerIds];
     await db.$transaction([
       db.comment.deleteMany({ where: { OR: targetIds.map((targetId) => ({ targetId })) } }),
       db.vote.deleteMany({ where: { OR: targetIds.map((targetId) => ({ targetId })) } }),

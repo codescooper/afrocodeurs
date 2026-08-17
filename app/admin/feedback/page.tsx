@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { triageFeedbackAction, updateDevelopmentGoalAction } from "@/features/product-feedback/actions";
 
 const CATEGORY = { BUG: "Bug", MISSING_FEATURE: "Fonctionnalité manquante", UX: "Expérience", CONTENT: "Contenu", PERFORMANCE: "Performance", OTHER: "Autre" } as const;
-const STATUS = { NEW: "Nouvelle", REVIEWING: "En analyse", ACCEPTED: "Acceptée", REJECTED: "Rejetée", CONVERTED: "Convertie en objectif" } as const;
+const STATUS = { NEW: "Nouvelle", REVIEWING: "En analyse", IN_PROGRESS: "En cours", ACCEPTED: "Acceptée", REJECTED: "Rejetée", CONVERTED: "Convertie en objectif", RESOLVED: "Résolue" } as const;
 
 export default async function FeedbackAdminPage() {
   const session = await auth();
