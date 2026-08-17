@@ -32,6 +32,7 @@ export default async function ForumPage({
       orderBy: { createdAt: "desc" },
       include: {
         author: { select: { username: true, name: true } },
+        community: { select: { name: true, slug: true } },
         _count: { select: { answers: true } },
       },
     }),
@@ -91,13 +92,14 @@ export default async function ForumPage({
                     answers={question._count.answers}
                     solved={question.status === "SOLVED"}
                   />
-                  <span className="flex flex-col gap-1">
+                  <span className="min-w-0 flex flex-col gap-1">
                     <span className="flex items-center gap-2 font-semibold">
                       {question.status === "SOLVED" && (
                         <CheckCircle2 className="size-4 text-accent" />
                       )}
                       {question.title}
                     </span>
+                    {question.community && <span className="w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium">Depuis {question.community.name}</span>}
                     <span className="text-xs text-muted-foreground">
                       {QUESTION_STATUS_LABELS[question.status]} · par{" "}
                       {question.author.name ?? `@${question.author.username}`}

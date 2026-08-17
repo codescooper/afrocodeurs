@@ -8,9 +8,11 @@ import { VisitCounter } from "@/components/shared/visit-counter";
 import { db } from "@/lib/db";
 import { getLeaderboard } from "@/features/reputation/queries";
 import { DiscoveryCard } from "@/components/molecules/discovery-card";
+import { auth } from "@/lib/auth";
 
 export default async function HomePage() {
-  const [problems, knowledge, communities, makers, counts] = await Promise.all([
+  const [session, problems, knowledge, communities, makers, counts, countries] = await Promise.all([
+    auth(),
     db.problem.findMany({
       select: { title: true, slug: true, sector: true },
       orderBy: { createdAt: "desc" },
@@ -29,6 +31,7 @@ export default async function HomePage() {
     }),
     getLeaderboard(5),
     Promise.all([db.problem.count(), db.solution.count(), db.user.count()]),
+    db.profile.groupBy({ by: ["country"], where: { country: { not: null } }, _count: { country: true }, orderBy: { _count: { country: "desc" } }, take: 8 }),
   ]);
   const [problemCount, solutionCount, userCount] = counts;
 
@@ -61,25 +64,32 @@ export default async function HomePage() {
           </button>
         </form>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
           <Link href="/explorer" className={buttonVariants({ size: "lg" })}>
             Explorer les problèmes
           </Link>
-          <Link
-            href="/register"
-            className={buttonVariants({
-              variant: "outline",
-              size: "lg",
-              shape: "pill",
-            })}
-          >
-            Rejoindre la communauté
-          </Link>
+          {!session?.user && (
+            <div className="flex flex-col items-center gap-1">
+              <Link
+                href="/register"
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "lg",
+                  shape: "pill",
+                })}
+              >
+                Créer mon compte gratuitement
+              </Link>
+              <span className="max-w-64 text-xs text-muted-foreground">
+                Pour publier, échanger et construire avec la communauté.
+              </span>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Découverte — alimentée en temps réel */}
-      <AfricaPresenceMap mapGeometry={<AfricaMapGeometry />} />
+      <AfricaPresenceMap mapGeometry={<AfricaMapGeometry />} countryRanking={countries.filter(item => item.country).map(item => ({ country: item.country!, members: item._count.country }))} />
 
       <div className="grid gap-6 pb-16 md:grid-cols-2">
         <DiscoveryCard

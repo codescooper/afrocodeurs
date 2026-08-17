@@ -10,6 +10,8 @@ import { guard, invalidMessage } from "@/lib/guard";
 import { answerSchema, commentSchema, questionSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
+import { recordAudit } from "@/features/audit/log";
+import { communityIdForMember } from "@/features/communities/posting";
 
 export type ForumFormState = { error?: string } | undefined;
 
@@ -32,14 +34,17 @@ export async function createQuestionAction(
       await db.question.findUnique({ where: { slug: s }, select: { id: true } }),
     ),
   );
+  const communityId = await communityIdForMember(g.user.id, formData.get("communityId"));
   const question = await db.question.create({
     data: {
       title: parsed.data.title,
       slug,
       body: parsed.data.body,
       authorId: g.user.id,
+      communityId,
     },
   });
+  await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "QUESTION", entityId: question.id, after: { title: question.title, body: question.body } });
   await award(g.user.id, "QUESTION_ASKED", {
     type: "QUESTION",
     id: question.id,
@@ -71,6 +76,7 @@ export async function createAnswerAction(
       authorId: g.user.id,
     },
   });
+  await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "ANSWER", entityId: answer.id, after: { body: answer.body, questionId } });
   await award(g.user.id, "ANSWER_POSTED", {
     type: "ANSWER",
     id: answer.id,
@@ -232,9 +238,10 @@ export async function addCommentAction(
   if (typeof targetId !== "string") return { error: "Cible invalide." };
 
   const targetType: EntityType = rawType;
-  await db.comment.create({
+  const comment = await db.comment.create({
     data: { body: parsed.data.body, authorId: g.user.id, targetType, targetId },
   });
+  await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "COMMENT", entityId: comment.id, after: { body: comment.body, targetType, targetId } });
 
   const recipientId =
     targetType === "QUESTION"

@@ -4,6 +4,7 @@ import "./globals.css";
 import { CookieBanner } from "@/components/layout/cookie-banner";
 import { ThemeScript } from "@/components/layout/theme-script";
 import { ChatDock } from "@/features/messaging/chat-dock";
+import { FeedbackWidget } from "@/features/product-feedback/feedback-widget";
 
 const displaySans = Space_Grotesk({
   variable: "--font-display",
@@ -66,6 +67,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         {children}
+        <FeedbackWidget />
         <ChatDock />
         <CookieBanner />
       </body>

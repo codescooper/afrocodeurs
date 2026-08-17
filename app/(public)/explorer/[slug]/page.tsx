@@ -15,6 +15,9 @@ import { LinkForm } from "@/features/relations/link-form";
 import { ReportForm } from "@/features/admin/report-form";
 import { SaveButton } from "@/features/bookmarks/save-button";
 import { isBookmarked } from "@/features/bookmarks/queries";
+import { ContentActions } from "@/features/content-management/content-actions";
+import { promoteContentToFeedbackAction } from "@/features/product-feedback/actions";
+import { CommentSection } from "@/features/comments/comment-section";
 
 /** Page détail d'un problème (Sprint 3). */
 export default async function ProblemDetailPage({
@@ -27,7 +30,7 @@ export default async function ProblemDetailPage({
 
   const problem = await db.problem.findUnique({
     where: { slug },
-    include: { createdBy: { select: { username: true, name: true } } },
+    include: { createdBy: { select: { username: true, name: true } }, community: { select: { name: true, slug: true } } },
   });
 
   if (!problem) notFound();
@@ -42,6 +45,7 @@ export default async function ProblemDetailPage({
   const isStaff = session?.user
     ? hasRank(session.user.role, "MODERATOR")
     : false;
+  const isAuthor = session?.user?.id === problem.createdById;
   const candidates = canLink
     ? await getLinkCandidates(
         linked.filter((i) => i.kind === "SOLUTION").map((i) => i.sourceId),
@@ -71,6 +75,7 @@ export default async function ProblemDetailPage({
         <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
           {PROBLEM_STATUS_LABELS[problem.status]}
         </span>
+        {problem.community && <Link href={`/communities/${problem.community.slug}`} className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium hover:bg-primary/20">Publié depuis {problem.community.name}</Link>}
       </div>
 
       <h1 className="mt-1 text-3xl font-bold tracking-tight">
@@ -104,6 +109,7 @@ export default async function ProblemDetailPage({
         )}
       </div>
 
+      <CommentSection targetType="PROBLEM" targetId={problem.id} returnPath={`/explorer/${problem.slug}`} />
       {session?.user && (
         <div className="mt-4">
           <SaveButton
@@ -121,6 +127,8 @@ export default async function ProblemDetailPage({
       <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed">
         {problem.description}
       </div>
+      {(isAuthor || isStaff) && <div className="mt-4"><ContentActions entityType="PROBLEM" entityId={problem.id} title={problem.title} body={problem.description} returnPath={`/explorer/${problem.slug}`} /></div>}
+      {isStaff && <form action={promoteContentToFeedbackAction} className="mt-2"><input type="hidden" name="sourceType" value="PROBLEM"/><input type="hidden" name="sourceId" value={problem.id}/><input type="hidden" name="sourceUrl" value={`/explorer/${problem.slug}`}/><input type="hidden" name="title" value={problem.title}/><input type="hidden" name="description" value={problem.description}/><button className="text-xs font-medium text-accent underline">Transformer en demande produit</button></form>}
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold">

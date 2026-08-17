@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { cn } from "@/lib/utils";
@@ -10,6 +8,7 @@ import {
 } from "@/features/notifications/actions";
 import { NOTIFICATION_CATEGORIES } from "@/features/notifications/constants";
 import { PushToggle } from "@/features/notifications/push-toggle";
+import { NotificationLink } from "@/features/notifications/notification-link";
 
 export const metadata = { title: "Notifications" };
 
@@ -77,9 +76,9 @@ export default async function NotificationsPage() {
             return (
               <li key={n.id}>
                 {n.link ? (
-                  <Link href={n.link} className={className}>
+                  <NotificationLink id={n.id} href={n.link} className={className}>
                     {body}
-                  </Link>
+                  </NotificationLink>
                 ) : (
                   <div className={className}>{body}</div>
                 )}

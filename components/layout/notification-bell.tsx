@@ -6,6 +6,7 @@ import { Bell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { markNotificationsReadAction } from "@/features/notifications/actions";
+import { NotificationLink } from "@/features/notifications/notification-link";
 
 type Notif = {
   id: string;
@@ -91,6 +92,14 @@ export function NotificationBell() {
     setItems((it) => it.map((n) => ({ ...n, read: true })));
   };
 
+  const markOneRead = (id: string) => {
+    setItems((current) =>
+      current.map((item) => (item.id === id ? { ...item, read: true } : item)),
+    );
+    setCount((current) => Math.max(0, current - 1));
+    setOpen(false);
+  };
+
   return (
     <div ref={containerRef} className="relative">
       <style>{`@keyframes nb-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
@@ -148,14 +157,15 @@ export function NotificationBell() {
                   !n.read && "bg-primary/5",
                 );
                 return n.link ? (
-                  <Link
+                  <NotificationLink
                     key={n.id}
+                    id={n.id}
                     href={n.link}
                     className={className}
-                    onClick={() => setOpen(false)}
+                    onOpen={() => !n.read && markOneRead(n.id)}
                   >
                     {inner}
-                  </Link>
+                  </NotificationLink>
                 ) : (
                   <div key={n.id} className={className}>
                     {inner}
@@ -175,7 +185,7 @@ export function NotificationBell() {
       )}
 
       {/* Toasts « push up » */}
-      <div className="pointer-events-none fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+      <div className="pointer-events-none fixed bottom-20 right-3 z-[100] flex max-w-[calc(100vw-1.5rem)] flex-col gap-2 md:bottom-4 md:right-4 md:max-w-none">
         {toasts.map((t) => (
           <div
             key={t.id}

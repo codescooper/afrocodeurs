@@ -8,6 +8,8 @@ import { guard, invalidMessage } from "@/lib/guard";
 import { knowledgeSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
+import { recordAudit } from "@/features/audit/log";
+import { communityIdForMember } from "@/features/communities/posting";
 
 export type KnowledgeFormState = { error?: string; createdSlug?: string } | undefined;
 
@@ -43,6 +45,7 @@ export async function createKnowledgeAction(
 
   const submit = formData.get("intent") === "submit";
   const d = parsed.data;
+  const communityId = await communityIdForMember(g.user.id, formData.get("communityId"));
   const slug = await uniqueSlug(d.title, "ressource", async (s) =>
     Boolean(
       await db.knowledge.findUnique({ where: { slug: s }, select: { id: true } }),
@@ -50,7 +53,7 @@ export async function createKnowledgeAction(
   );
 
   try {
-    await db.knowledge.create({
+    const knowledge = await db.knowledge.create({
       data: {
         title: d.title,
         slug,
@@ -65,8 +68,10 @@ export async function createKnowledgeAction(
         isFree: d.isFree,
         status: submit ? "SUBMITTED" : "DRAFT",
         authorId: g.user.id,
+        communityId,
       },
     });
+    await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "KNOWLEDGE", entityId: knowledge.id, after: { title: knowledge.title, content: knowledge.content, status: knowledge.status } });
   } catch (error) {
     console.error("knowledge creation failed", error);
     return { error: "La ressource n’a pas pu être enregistrée. Vos informations sont conservées à l’écran : réessayez dans un instant ou contactez l’équipe." };
@@ -133,7 +138,11 @@ export async function moderateKnowledgeAction(
   if (decision === "publish") {
     const k = await db.knowledge.update({
       where: { id },
-      data: { status: "PUBLISHED", publishedAt: new Date() },
+      data: {
+        status: "PUBLISHED",
+        publishedAt: new Date(),
+        lastVerifiedAt: new Date(),
+      },
       select: { authorId: true, title: true },
     });
     await notify({

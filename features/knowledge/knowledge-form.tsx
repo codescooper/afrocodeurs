@@ -18,7 +18,7 @@ const inputClass =
   "rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary";
 
 /** Formulaire communautaire pour partager une ressource avec aperçu Markdown. */
-export function KnowledgeForm() {
+export function KnowledgeForm({ community, defaultType = "ARTICLE" }: { community?: { id: string; name: string } | null; defaultType?: (typeof KNOWLEDGE_TYPES)[number] }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(
     createKnowledgeAction,
@@ -52,6 +52,7 @@ export function KnowledgeForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {community && <><input type="hidden" name="communityId" value={community.id} /><p className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">Publié depuis la communauté <strong>{community.name}</strong>. La ressource restera visible dans le Knowledge Hub général.</p></>}
       <label className="flex flex-col gap-1 text-sm font-medium">
         Titre
         <input
@@ -67,7 +68,7 @@ export function KnowledgeForm() {
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1 text-sm font-medium">
           Type
-          <select name="type" defaultValue="ARTICLE" className={inputClass}>
+          <select name="type" defaultValue={defaultType} className={inputClass}>
             {KNOWLEDGE_TYPES.map((type) => (
               <option key={type} value={type}>
                 {KNOWLEDGE_TYPE_LABELS[type]}

@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { OPPORTUNITY_TYPE_LABELS } from "@/features/opportunities/constants";
 import { OpportunityResponseForm } from "@/features/opportunities/response-form";
 import { startDirectConversationAction } from "@/features/messaging/actions";
+import { CommentSection } from "@/features/comments/comment-section";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -47,6 +48,7 @@ export default async function OpportunityDetailPage({ params }: { params: Promis
         <section className="mt-10"><h2 className="text-xl font-semibold">À propos de l’opportunité</h2><div className="mt-4 whitespace-pre-wrap text-sm leading-7 text-muted-foreground">{opportunity.description}</div></section>
         {opportunity.requirements && <section className="mt-10"><h2 className="text-xl font-semibold">Prérequis et profil recherché</h2><div className="mt-4 whitespace-pre-wrap text-sm leading-7 text-muted-foreground">{opportunity.requirements}</div></section>}
         {isAuthor && opportunity.responses.length > 0 && <section className="mt-10"><h2 className="text-xl font-semibold">Réponses reçues</h2><div className="mt-4 space-y-3">{opportunity.responses.map((response) => <div key={response.id} className="rounded-xl border border-border p-4"><div className="flex items-center gap-3"><Avatar image={response.user.image} name={response.user.name ?? response.user.username} size={36} /><div><Link href={`/u/${response.user.username}`} className="font-semibold hover:underline">{response.user.name ?? `@${response.user.username}`}</Link><p className="text-xs text-muted-foreground">{response.kind === "APPLICATION" ? "Candidature" : "Intérêt"}</p></div></div>{response.message && <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{response.message}</p>}<form action={startDirectConversationAction} className="mt-3"><input type="hidden" name="recipientId" value={response.user.id} /><Button type="submit" size="sm" variant="outline"><MessageSquare />Répondre</Button></form></div>)}</div></section>}
+        <CommentSection targetType="OPPORTUNITY" targetId={opportunity.id} returnPath={`/opportunities/${opportunity.slug}`} />
       </article>
       <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
         <div className="rounded-xl border border-border p-5"><p className="text-xs uppercase tracking-wide text-muted-foreground">Publié par</p><Link href={`/u/${opportunity.author.username}`} className="mt-3 flex items-center gap-3 hover:underline"><Avatar image={opportunity.author.image} name={opportunity.author.name ?? opportunity.author.username} size={44} /><span><b className="block">{opportunity.author.name ?? opportunity.author.username}</b><span className="text-xs text-muted-foreground">@{opportunity.author.username}</span></span></Link>

@@ -6,6 +6,7 @@ import { levelForPoints } from "@/features/reputation/constants";
 import { EmptyState } from "@/components/atoms/empty-state";
 import { Avatar } from "@/components/shared/avatar";
 import { Podium } from "@/components/molecules/podium";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata = { title: "AfroMakers — Classement" };
 
@@ -16,9 +17,12 @@ export default async function AfroMakersPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
-      <div className="flex items-center gap-2">
-        <Trophy className="size-6 text-primary" />
-        <h1 className="text-3xl font-bold tracking-tight">AfroMakers</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="size-6 text-primary" />
+          <h1 className="text-3xl font-bold tracking-tight">AfroMakers</h1>
+        </div>
+        <Link href="/afromakers/parcours" className={buttonVariants({ variant: "outline" })}>Découvrir le parcours AfroMaker</Link>
       </div>
       <p className="mt-2 max-w-2xl text-muted-foreground">
         Celles et ceux qui construisent le plus. <em>Build Before Consume.</em>

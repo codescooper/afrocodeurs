@@ -26,7 +26,7 @@ export default async function ExplorerPage({
     db.problem.findMany({
       where: sector ? { sector } : undefined,
       orderBy: { createdAt: "desc" },
-      include: { createdBy: { select: { username: true, name: true } } },
+      include: { createdBy: { select: { username: true, name: true } }, community: { select: { name: true, slug: true } } },
     }),
     db.problem.groupBy({
       by: ["sector"],
@@ -77,7 +77,7 @@ export default async function ExplorerPage({
               href={`/explorer/${problem.slug}`}
               icon={sectorIcon(problem.sector)}
               eyebrow={problem.sector}
-              badge={PROBLEM_STATUS_LABELS[problem.status]}
+              badge={`${PROBLEM_STATUS_LABELS[problem.status]}${problem.community ? ` · ${problem.community.name}` : ""}`}
               title={problem.title}
               description={problem.summary ?? undefined}
               meta={

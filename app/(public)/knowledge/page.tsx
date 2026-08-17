@@ -52,7 +52,7 @@ export default async function KnowledgePage({
         ...(access ? { isFree: access === "free" } : {}),
       },
       orderBy: { publishedAt: "desc" },
-      include: { author: { select: { username: true, name: true, image: true } } },
+      include: { author: { select: { username: true, name: true, image: true } }, community: { select: { name: true, slug: true } } },
     }),
     db.knowledge.groupBy({
       by: ["type"],
@@ -139,7 +139,7 @@ export default async function KnowledgePage({
               href={`/knowledge/${item.slug}`}
               icon={knowledgeTypeIcon(item.type)}
               eyebrow={KNOWLEDGE_TYPE_LABELS[item.type]}
-              badge={item.isFree ? "Gratuit" : "Payant"}
+              badge={`${item.isFree ? "Gratuit" : "Payant"} · ${item.lastVerifiedAt ? "Vérifié" : "Non vérifié"}${item.community ? ` · ${item.community.name}` : ""}`}
               title={item.title}
               description={item.summary ?? excerpt(item.content)}
               meta={

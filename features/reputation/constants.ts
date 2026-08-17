@@ -21,6 +21,23 @@ export const REPUTATION_POINTS = {
 
 export type ReputationAction = keyof typeof REPUTATION_POINTS;
 
+/** Libellés publics du barème, gardés à côté des valeurs pour rester synchronisés. */
+export const REPUTATION_ACTION_LABELS: Record<ReputationAction, string> = {
+  QUESTION_ASKED: "Poser une question",
+  COMMENT_POSTED: "Publier un commentaire",
+  COMMUNITY_JOINED: "Rejoindre une communauté",
+  ANSWER_POSTED: "Proposer une réponse",
+  ANSWER_ACCEPTED: "Voir sa réponse acceptée",
+  KNOWLEDGE_PUBLISHED: "Publier une ressource validée",
+  PROBLEM_PROPOSED: "Proposer un problème",
+  SOLUTION_ADDED: "Ajouter une solution",
+  RELATION_ADDED: "Relier deux contenus utiles",
+  PROJECT_CREATED: "Référencer un projet",
+  TASK_COMPLETED: "Terminer une tâche de projet",
+  CHALLENGE_CREATED: "Créer une énigme validée",
+  CHALLENGE_SOLVED: "Résoudre une énigme",
+};
+
 /** Points gagnés (ou perdus) par l'auteur d'un contenu pour chaque upvote reçu. */
 export const UPVOTE_POINTS = 10;
 
