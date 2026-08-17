@@ -93,6 +93,7 @@ enum EntityType {
   TAG
   PROJECT
   CHALLENGE
+  COMMENT
 }
 
 enum ChallengeDifficulty {
@@ -209,6 +210,36 @@ enum OpportunityResponseKind {
   APPLICATION
 }
 
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum FeedbackCategory {
+  BUG
+  MISSING_FEATURE
+  UX
+  CONTENT
+  PERFORMANCE
+  OTHER
+}
+
+enum FeedbackStatus {
+  NEW
+  REVIEWING
+  ACCEPTED
+  REJECTED
+  CONVERTED
+}
+
+enum DevelopmentGoalStatus {
+  PLANNED
+  IN_PROGRESS
+  SHIPPED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -250,12 +281,69 @@ model User {
   opportunities Opportunity[]
   opportunityResponses OpportunityResponse[]
   updateReads PlatformUpdateRead[]
+  auditLogs AuditLog[]
+  productFeedback ProductFeedback[]
+  developmentGoals DevelopmentGoal[] @relation("GoalCreator")
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([username])
   @@index([role])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  actor      User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  entityType EntityType
+  entityId   String
+  before     Json?
+  after      Json?
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId, createdAt])
+}
+
+model ProductFeedback {
+  id              String           @id @default(cuid())
+  title           String
+  description     String
+  category        FeedbackCategory
+  status          FeedbackStatus   @default(NEW)
+  priorityScore   Int              @default(1)
+  analysis        String
+  sourceUrl       String?
+  sourceType      EntityType?
+  sourceId        String?
+  authorId        String?
+  author          User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  developmentGoal DevelopmentGoal?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([status, priorityScore, createdAt])
+  @@index([sourceType, sourceId])
+  @@index([authorId])
+}
+
+model DevelopmentGoal {
+  id          String                @id @default(cuid())
+  title       String
+  summary     String
+  status      DevelopmentGoalStatus @default(PLANNED)
+  priority    Int                   @default(1)
+  feedbackId  String                @unique
+  feedback    ProductFeedback       @relation(fields: [feedbackId], references: [id], onDelete: Restrict)
+  createdById String?
+  createdBy   User?                 @relation("GoalCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([status, priority, createdAt])
 }
 
 model PlatformUpdate {

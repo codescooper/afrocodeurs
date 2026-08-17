@@ -15,6 +15,8 @@ import { LinkForm } from "@/features/relations/link-form";
 import { ReportForm } from "@/features/admin/report-form";
 import { SaveButton } from "@/features/bookmarks/save-button";
 import { isBookmarked } from "@/features/bookmarks/queries";
+import { ContentActions } from "@/features/content-management/content-actions";
+import { promoteContentToFeedbackAction } from "@/features/product-feedback/actions";
 
 /** Page détail d'un problème (Sprint 3). */
 export default async function ProblemDetailPage({
@@ -42,6 +44,7 @@ export default async function ProblemDetailPage({
   const isStaff = session?.user
     ? hasRank(session.user.role, "MODERATOR")
     : false;
+  const isAuthor = session?.user?.id === problem.createdById;
   const candidates = canLink
     ? await getLinkCandidates(
         linked.filter((i) => i.kind === "SOLUTION").map((i) => i.sourceId),
@@ -121,6 +124,8 @@ export default async function ProblemDetailPage({
       <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed">
         {problem.description}
       </div>
+      {(isAuthor || isStaff) && <div className="mt-4"><ContentActions entityType="PROBLEM" entityId={problem.id} title={problem.title} body={problem.description} returnPath={`/explorer/${problem.slug}`} /></div>}
+      {isStaff && <form action={promoteContentToFeedbackAction} className="mt-2"><input type="hidden" name="sourceType" value="PROBLEM"/><input type="hidden" name="sourceId" value={problem.id}/><input type="hidden" name="sourceUrl" value={`/explorer/${problem.slug}`}/><input type="hidden" name="title" value={problem.title}/><input type="hidden" name="description" value={problem.description}/><button className="text-xs font-medium text-accent underline">Transformer en demande produit</button></form>}
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold">

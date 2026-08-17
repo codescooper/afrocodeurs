@@ -13,6 +13,8 @@ import { CommentForm } from "@/features/forum/comment-form";
 import { acceptAnswerAction } from "@/features/forum/actions";
 import { QUESTION_STATUS_LABELS } from "@/features/forum/constants";
 import { ReportForm } from "@/features/admin/report-form";
+import { ContentActions } from "@/features/content-management/content-actions";
+import { promoteContentToFeedbackAction } from "@/features/product-feedback/actions";
 
 /** Page détail d'une question : votes, réponses, acceptation, commentaires. */
 export default async function QuestionDetailPage({
@@ -57,6 +59,7 @@ export default async function QuestionDetailPage({
   const qVote = tally.get(question.id) ?? { score: 0, mine: null };
 
   const isQuestionAuthor = userId === question.authorId;
+  const isStaff = can(session?.user?.role, "forum:moderate");
   const canVote = can(session?.user?.role, "content:vote");
   const canAnswer = can(session?.user?.role, "answer:create");
   const canComment = can(session?.user?.role, "content:comment");
@@ -103,6 +106,9 @@ export default async function QuestionDetailPage({
             <Markdown>{question.body}</Markdown>
           </article>
 
+          {(isQuestionAuthor || isStaff) && <div className="mt-3"><ContentActions entityType="QUESTION" entityId={question.id} title={question.title} body={question.body} returnPath={`/forum/${question.slug}`} /></div>}
+          {isStaff && <form action={promoteContentToFeedbackAction} className="mt-2"><input type="hidden" name="sourceType" value="QUESTION"/><input type="hidden" name="sourceId" value={question.id}/><input type="hidden" name="sourceUrl" value={`/forum/${question.slug}`}/><input type="hidden" name="title" value={question.title}/><input type="hidden" name="description" value={question.body}/><button className="text-xs font-medium text-accent underline">Transformer en demande produit</button></form>}
+
           {userId && (
             <div className="mt-3">
               <ReportForm targetType="QUESTION" targetId={question.id} />
@@ -125,6 +131,7 @@ export default async function QuestionDetailPage({
                       {comment.author.name ?? `@${comment.author.username}`}
                     </Link>
                   </span>
+                  {(userId === comment.authorId || isStaff) && <ContentActions entityType="COMMENT" entityId={comment.id} body={comment.body} returnPath={`/forum/${question.slug}`} />}
                 </li>
               ))}
             </ul>
@@ -170,6 +177,7 @@ export default async function QuestionDetailPage({
                   <article>
                     <Markdown>{answer.body}</Markdown>
                   </article>
+                  {(userId === answer.authorId || isStaff) && <div className="mt-2"><ContentActions entityType="ANSWER" entityId={answer.id} body={answer.body} returnPath={`/forum/${question.slug}`} /></div>}
                   <div className="mt-2 flex items-center gap-4">
                     <Link
                       href={`/u/${answer.author.username}`}

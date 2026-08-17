@@ -60,13 +60,16 @@ export default async function AdminPage() {
       </div>
 
       {isAdmin && (
-        <div>
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/admin/users"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             Gérer les utilisateurs
           </Link>
+          <Link href="/admin/feedback" className={buttonVariants({ variant: "outline", size: "sm" })}>Demandes produit</Link>
+          <Link href="/admin/audit" className={buttonVariants({ variant: "outline", size: "sm" })}>Journal des actions</Link>
+          <Link href="/roadmap" className={buttonVariants({ variant: "outline", size: "sm" })}>Objectifs de développement</Link>
         </div>
       )}
 

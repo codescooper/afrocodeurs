@@ -8,6 +8,7 @@ import { orNull, parseList, uniqueSlug } from "@/lib/utils";
 import { guard, invalidMessage } from "@/lib/guard";
 import { problemSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
+import { recordAudit } from "@/features/audit/log";
 
 export type ProblemFormState = { error?: string } | undefined;
 
@@ -51,6 +52,7 @@ export async function createProblemAction(
       createdById: g.user.id,
     },
   });
+  await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "PROBLEM", entityId: problem.id, after: { title: problem.title, description: problem.description } });
   await award(g.user.id, "PROBLEM_PROPOSED", {
     type: "PROBLEM",
     id: problem.id,

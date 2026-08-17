@@ -8,6 +8,7 @@ import { guard, invalidMessage } from "@/lib/guard";
 import { knowledgeSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
+import { recordAudit } from "@/features/audit/log";
 
 export type KnowledgeFormState = { error?: string; createdSlug?: string } | undefined;
 
@@ -50,7 +51,7 @@ export async function createKnowledgeAction(
   );
 
   try {
-    await db.knowledge.create({
+    const knowledge = await db.knowledge.create({
       data: {
         title: d.title,
         slug,
@@ -67,6 +68,7 @@ export async function createKnowledgeAction(
         authorId: g.user.id,
       },
     });
+    await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "KNOWLEDGE", entityId: knowledge.id, after: { title: knowledge.title, content: knowledge.content, status: knowledge.status } });
   } catch (error) {
     console.error("knowledge creation failed", error);
     return { error: "La ressource n’a pas pu être enregistrée. Vos informations sont conservées à l’écran : réessayez dans un instant ou contactez l’équipe." };

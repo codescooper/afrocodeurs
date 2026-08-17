@@ -19,6 +19,8 @@ import {
 import { ReportForm } from "@/features/admin/report-form";
 import { SaveButton } from "@/features/bookmarks/save-button";
 import { isBookmarked } from "@/features/bookmarks/queries";
+import { ContentActions } from "@/features/content-management/content-actions";
+import { promoteContentToFeedbackAction } from "@/features/product-feedback/actions";
 
 /** Page détail d'une ressource (Sprint 4) : rendu Markdown + modération. */
 export default async function KnowledgeDetailPage({
@@ -154,6 +156,8 @@ export default async function KnowledgeDetailPage({
       <article className="mt-6">
         <Markdown>{item.content}</Markdown>
       </article>
+      {(isAuthor || isStaff) && <div className="mt-4"><ContentActions entityType="KNOWLEDGE" entityId={item.id} title={item.title} body={item.content} returnPath={`/knowledge/${item.slug}`} /></div>}
+      {isStaff && <form action={promoteContentToFeedbackAction} className="mt-2"><input type="hidden" name="sourceType" value="KNOWLEDGE"/><input type="hidden" name="sourceId" value={item.id}/><input type="hidden" name="sourceUrl" value={`/knowledge/${item.slug}`}/><input type="hidden" name="title" value={item.title}/><input type="hidden" name="description" value={item.summary ?? item.content.slice(0, 2000)}/><button className="text-xs font-medium text-accent underline">Transformer en demande produit</button></form>}
 
       {canModerate && (
         <div className="mt-10 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/40 p-4">

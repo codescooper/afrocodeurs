@@ -13,6 +13,7 @@ import {
   Shield,
   MessagesSquare,
   Megaphone,
+  History,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
     items: [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
       { label: "Mes contributions", href: "/dashboard/contributions", icon: FileText },
+      { label: "Historique", href: "/dashboard/activity", icon: History },
       { label: "Mes communautés", href: "/dashboard/communities", icon: Users },
       { label: "Messagerie", href: "/messages", icon: MessagesSquare },
       { label: "Nouveautés", href: "/updates", icon: Megaphone },
