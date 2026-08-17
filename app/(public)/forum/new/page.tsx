@@ -2,13 +2,16 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { QuestionForm } from "@/features/forum/question-form";
+import { postingCommunityBySlug } from "@/features/communities/posting";
 
 export const metadata = { title: "Poser une question" };
 
 /** Poser une question — réservé aux utilisateurs connectés (Sprint 5). */
-export default async function NewQuestionPage() {
+export default async function NewQuestionPage({ searchParams }: { searchParams: Promise<{ community?: string }> }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const query = await searchParams;
+  const community = await postingCommunityBySlug(session.user.id, query.community);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
@@ -18,7 +21,7 @@ export default async function NewQuestionPage() {
         réponses.
       </p>
       <div className="mt-8">
-        <QuestionForm />
+        <QuestionForm community={community} />
       </div>
     </div>
   );

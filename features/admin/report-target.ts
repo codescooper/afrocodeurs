@@ -140,6 +140,22 @@ export async function resolveReportTarget(
         authorId: a.author.id,
       };
     }
+    case "MESSAGE": {
+      const message = await db.message.findUnique({
+        where: { id },
+        select: { body: true, conversationId: true, author: { select: { id: true, username: true } }, conversation: { select: { community: { select: { slug: true, name: true } } } } },
+      });
+      if (!message) return null;
+      return {
+        kind: "Message",
+        title: message.conversation.community ? `Message dans ${message.conversation.community.name}` : "Message privé ou de groupe",
+        href: message.conversation.community ? `/communities/${message.conversation.community.slug}` : `/messages/${message.conversationId}`,
+        snippet: message.body.slice(0, 240),
+        canHide: true,
+        authorLabel: `@${message.author.username}`,
+        authorId: message.author.id,
+      };
+    }
     default:
       return null;
   }
@@ -153,6 +169,8 @@ export async function hideTarget(type: EntityType, id: string): Promise<void> {
     await db.problem.updateMany({ where: { id }, data: { status: "ARCHIVED" } });
   } else if (type === "QUESTION") {
     await db.question.updateMany({ where: { id }, data: { status: "CLOSED" } });
+  } else if (type === "MESSAGE") {
+    await db.message.updateMany({ where: { id }, data: { deletedAt: new Date() } });
   }
 }
 
@@ -176,6 +194,9 @@ export async function deleteTarget(type: EntityType, id: string): Promise<void> 
       break;
     case "ANSWER":
       await db.answer.deleteMany({ where: { id } });
+      break;
+    case "MESSAGE":
+      await db.message.updateMany({ where: { id }, data: { deletedAt: new Date() } });
       break;
     default:
       break;

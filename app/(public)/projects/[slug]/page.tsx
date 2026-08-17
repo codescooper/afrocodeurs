@@ -20,6 +20,7 @@ import { DependencyForm } from "@/features/projects/dependency-form";
 import { RefreshButton } from "@/features/projects/refresh-button";
 import { removeDependencyAction } from "@/features/projects/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { CommentSection } from "@/features/comments/comment-section";
 
 export const dynamic = "force-dynamic";
 
@@ -481,6 +482,7 @@ export default async function ProjectDetailPage({
           )}
         </section>
       )}
+      <CommentSection targetType="PROJECT" targetId={project.id} returnPath={`/projects/${project.slug}`} />
     </div>
   );
 }

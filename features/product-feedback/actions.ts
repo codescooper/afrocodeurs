@@ -57,7 +57,7 @@ export async function triageFeedbackAction(formData: FormData): Promise<void> {
     ]);
   }
   revalidatePath("/admin/feedback");
-  revalidatePath("/roadmap");
+  revalidatePath("/updates");
 }
 
 export async function updateDevelopmentGoalAction(formData: FormData): Promise<void> {
@@ -68,5 +68,5 @@ export async function updateDevelopmentGoalAction(formData: FormData): Promise<v
   if (typeof id !== "string" || !(status === "PLANNED" || status === "IN_PROGRESS" || status === "SHIPPED" || status === "CANCELLED")) return;
   await db.developmentGoal.update({ where: { id }, data: { status } });
   revalidatePath("/admin/feedback");
-  revalidatePath("/roadmap");
+  revalidatePath("/updates");
 }

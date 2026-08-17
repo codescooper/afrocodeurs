@@ -69,7 +69,7 @@ export default async function AdminPage() {
           </Link>
           <Link href="/admin/feedback" className={buttonVariants({ variant: "outline", size: "sm" })}>Demandes produit</Link>
           <Link href="/admin/audit" className={buttonVariants({ variant: "outline", size: "sm" })}>Journal des actions</Link>
-          <Link href="/roadmap" className={buttonVariants({ variant: "outline", size: "sm" })}>Objectifs de développement</Link>
+          <Link href="/updates#roadmap" className={buttonVariants({ variant: "outline", size: "sm" })}>Objectifs de développement</Link>
         </div>
       )}
 

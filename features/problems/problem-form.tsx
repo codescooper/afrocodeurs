@@ -11,7 +11,7 @@ const inputClass =
 const LEVELS = [1, 2, 3, 4, 5];
 
 /** Formulaire de proposition d'un problème (Sprint 3). */
-export function ProblemForm() {
+export function ProblemForm({ community }: { community?: { id: string; name: string } | null }) {
   const [state, formAction, pending] = useActionState(
     createProblemAction,
     undefined,
@@ -19,6 +19,7 @@ export function ProblemForm() {
 
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-4">
+      {community && <><input type="hidden" name="communityId" value={community.id} /><p className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">Publié depuis la communauté <strong>{community.name}</strong>. Le problème restera visible dans l’Explorer général.</p></>}
       <label className="flex flex-col gap-1 text-sm font-medium">
         Titre
         <input

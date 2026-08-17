@@ -14,7 +14,7 @@ function project(latitude: number, longitude: number) {
   return { x: projected?.[0] ?? 0, y: projected?.[1] ?? 0 };
 }
 
-export function AfricaPresenceMap({ mapGeometry }: { mapGeometry: ReactNode }) {
+export function AfricaPresenceMap({ mapGeometry, countryRanking }: { mapGeometry: ReactNode; countryRanking: Array<{ country: string; members: number }> }) {
   const [points, setPoints] = useState<PresencePoint[]>([]);
   const [message, setMessage] = useState("Active ta position pour apparaître en vert.");
   const [sharing, setSharing] = useState(false);
@@ -92,6 +92,7 @@ export function AfricaPresenceMap({ mapGeometry }: { mapGeometry: ReactNode }) {
             <LocateFixed className="size-4" />{sharing ? "Présence activée" : "Me placer sur la carte"}
           </Button>
           <p className="mt-3 text-xs text-black/55" aria-live="polite">{message} Position arrondie à environ 50 km.</p>
+          {countryRanking.length > 0 && <div className="mt-7 border-t border-black/15 pt-5"><p className="text-xs font-bold uppercase tracking-[.18em] text-black/60">AfroCodeurs dans le monde</p><ol className="mt-3 grid gap-2 sm:grid-cols-2">{countryRanking.map((item, index) => <li key={item.country} className="flex items-center justify-between gap-3 rounded-lg bg-black/5 px-3 py-2 text-sm text-black"><span><b className="mr-2 text-black/45">{index + 1}</b>{item.country}</span><strong>{item.members}</strong></li>)}</ol><p className="mt-2 text-xs text-black/50">Classement basé sur les pays renseignés volontairement dans les profils.</p></div>}
         </div>
 
         <svg className={styles.map} viewBox="0 0 720 750" role="img" aria-label="Carte des présences AfroCodeurs en Afrique">

@@ -13,8 +13,10 @@ name: Crons de production
 
 on:
   schedule:
+    - cron: "23 * * * *" # Ressources en attente depuis 24 h — chaque heure
     - cron: "0 8 * * 1" # Digest hebdomadaire — lundi 08:00 UTC
     - cron: "0 4 * * *" # Sync des roadmaps GitHub — chaque jour 04:00 UTC
+    - cron: "5,20,35,50 * * * *" # Rappels d’événements — toutes les 15 minutes
   workflow_dispatch: {} # Déclenchement manuel (lance les deux tâches)
 
 concurrency:
@@ -22,9 +24,23 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BASE_URL: https://web-production-2b204.up.railway.app
+  BASE_URL: https://afrocodeurs.org
 
 jobs:
+  knowledge-auto-publish:
+    name: Publication automatique des ressources
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 * * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publier les ressources arrivées à échéance
+        run: |
+          code=$(curl -sS --max-time 600 -o /tmp/out -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "$BASE_URL/api/cron/knowledge-auto-publish")
+          echo "HTTP $code"
+          cat /tmp/out; echo
+          test "$code" = "200"
+
   digest:
     name: Digest hebdomadaire
     if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 8 * * 1'
@@ -49,6 +65,20 @@ jobs:
           code=$(curl -sS --max-time 600 -o /tmp/out -w '%{http_code}' \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             "$BASE_URL/api/cron/roadmap-sync")
+          echo "HTTP $code"
+          cat /tmp/out; echo
+          test "$code" = "200"
+
+  event-reminders:
+    name: Rappels des événements
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '5,20,35,50 * * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Envoyer les rappels arrivés à échéance
+        run: |
+          code=$(curl -sS --max-time 600 -o /tmp/out -w '%{http_code}' \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "$BASE_URL/api/cron/event-reminders")
           echo "HTTP $code"
           cat /tmp/out; echo
           test "$code" = "200"

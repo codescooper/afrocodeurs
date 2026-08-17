@@ -1,18 +1,24 @@
 import Link from "next/link";
 
 import { auth, signOut } from "@/lib/auth";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { MainNav } from "./main-nav";
 import { NotificationBell } from "./notification-bell";
 import { ThemeToggle } from "./theme-toggle";
+import { UserMenu } from "./user-menu";
 
 /** En-tête public : logo + navigation desktop + état d'authentification. */
 export async function SiteHeader() {
   const session = await auth();
 
+  async function signOutAction() {
+    "use server";
+    await signOut({ redirectTo: "/" });
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-6 px-4">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 lg:gap-5">
         <Link href="/" className="flex items-center gap-2 font-bold">
           <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
             A
@@ -27,22 +33,7 @@ export async function SiteHeader() {
           {session?.user ? (
             <>
               <NotificationBell />
-              <Link
-                href="/dashboard"
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
-              >
-                @{session.user.username}
-              </Link>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/" });
-                }}
-              >
-                <Button type="submit" variant="outline" size="sm">
-                  Déconnexion
-                </Button>
-              </form>
+              <UserMenu user={session.user} signOutAction={signOutAction} />
             </>
           ) : (
             <>
@@ -56,7 +47,7 @@ export async function SiteHeader() {
                 href="/register"
                 className={buttonVariants({ size: "sm", shape: "pill" })}
               >
-                Rejoindre
+                Créer un compte
               </Link>
             </>
           )}

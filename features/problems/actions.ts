@@ -9,6 +9,7 @@ import { guard, invalidMessage } from "@/lib/guard";
 import { problemSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
 import { recordAudit } from "@/features/audit/log";
+import { communityIdForMember } from "@/features/communities/posting";
 
 export type ProblemFormState = { error?: string } | undefined;
 
@@ -33,6 +34,7 @@ export async function createProblemAction(
   if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const d = parsed.data;
+  const communityId = await communityIdForMember(g.user.id, formData.get("communityId"));
   const slug = await uniqueSlug(d.title, "probleme", async (s) =>
     Boolean(
       await db.problem.findUnique({ where: { slug: s }, select: { id: true } }),
@@ -50,6 +52,7 @@ export async function createProblemAction(
       impactLevel: d.impactLevel,
       difficultyLevel: d.difficultyLevel,
       createdById: g.user.id,
+      communityId,
     },
   });
   await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "PROBLEM", entityId: problem.id, after: { title: problem.title, description: problem.description } });

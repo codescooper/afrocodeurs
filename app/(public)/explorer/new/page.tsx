@@ -2,13 +2,16 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { ProblemForm } from "@/features/problems/problem-form";
+import { postingCommunityBySlug } from "@/features/communities/posting";
 
 export const metadata = { title: "Proposer un problème" };
 
 /** Proposition de problème — réservé aux utilisateurs connectés (Sprint 3). */
-export default async function NewProblemPage() {
+export default async function NewProblemPage({ searchParams }: { searchParams: Promise<{ community?: string }> }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const query = await searchParams;
+  const community = await postingCommunityBySlug(session.user.id, query.community);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12">
@@ -20,7 +23,7 @@ export default async function NewProblemPage() {
         rattacher ressources et solutions.
       </p>
       <div className="mt-8">
-        <ProblemForm />
+        <ProblemForm community={community} />
       </div>
     </div>
   );

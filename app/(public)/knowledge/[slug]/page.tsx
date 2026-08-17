@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, ExternalLink, Eye, Zap } from "lucide-react";
+import { Clock, ExternalLink, Eye, ShieldCheck, ShieldQuestion, Zap } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -17,6 +17,7 @@ import {
   KNOWLEDGE_TYPE_LABELS,
 } from "@/features/knowledge/constants";
 import { ReportForm } from "@/features/admin/report-form";
+import { CommentSection } from "@/features/comments/comment-section";
 import { SaveButton } from "@/features/bookmarks/save-button";
 import { isBookmarked } from "@/features/bookmarks/queries";
 import { ContentActions } from "@/features/content-management/content-actions";
@@ -33,7 +34,7 @@ export default async function KnowledgeDetailPage({
 
   const item = await db.knowledge.findUnique({
     where: { slug },
-    include: { author: { select: { id: true, username: true, name: true } } },
+    include: { author: { select: { id: true, username: true, name: true } }, community: { select: { name: true, slug: true } } },
   });
 
   if (!item) notFound();
@@ -92,6 +93,7 @@ export default async function KnowledgeDetailPage({
             {CONTENT_STATUS_LABELS[item.status]}
           </span>
         )}
+        {item.community && <Link href={`/communities/${item.community.slug}`} className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium hover:bg-primary/20">Publié depuis {item.community.name}</Link>}
       </div>
 
       <h1 className="mt-1 text-3xl font-bold tracking-tight">{item.title}</h1>
@@ -128,6 +130,16 @@ export default async function KnowledgeDetailPage({
         <span className="rounded-full bg-muted px-3 py-1 text-sm font-medium">
           {item.isFree ? "Accès gratuit" : "Ressource payante"}
         </span>
+        {item.status === "PUBLISHED" && (
+          <span
+            className={item.lastVerifiedAt
+              ? "inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent"
+              : "inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-sm font-medium text-foreground"}
+          >
+            {item.lastVerifiedAt ? <ShieldCheck className="size-4" /> : <ShieldQuestion className="size-4" />}
+            {item.lastVerifiedAt ? "Vérifié par AfroCodeurs" : "Non vérifié"}
+          </span>
+        )}
         {item.status === "PUBLISHED" && session?.user && (
           <form action={boostKnowledgeAction}>
             <input type="hidden" name="id" value={item.id} />
@@ -181,6 +193,7 @@ export default async function KnowledgeDetailPage({
         </div>
       )}
 
+      <CommentSection targetType="KNOWLEDGE" targetId={item.id} returnPath={`/knowledge/${item.slug}`} />
       {session?.user && (
         <div className="mt-10 border-t border-border pt-4">
           <ReportForm targetType="KNOWLEDGE" targetId={item.id} />

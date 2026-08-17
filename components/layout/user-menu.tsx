@@ -22,9 +22,9 @@ export function UserMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className="flex min-w-0 max-w-44 items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Avatar image={user.image} name={user.name ?? user.username} size={32} />
-        <span className="hidden text-sm font-medium sm:inline">
+        <span className="hidden min-w-0 truncate text-sm font-medium sm:inline">
           @{user.username}
         </span>
       </DropdownMenuTrigger>

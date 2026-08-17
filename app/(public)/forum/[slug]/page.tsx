@@ -30,6 +30,7 @@ export default async function QuestionDetailPage({
     where: { slug },
     include: {
       author: { select: { username: true, name: true } },
+      community: { select: { name: true, slug: true } },
       answers: {
         include: { author: { select: { username: true, name: true } } },
         orderBy: [{ isAccepted: "desc" }, { createdAt: "asc" }],
@@ -86,6 +87,7 @@ export default async function QuestionDetailPage({
           <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
             {QUESTION_STATUS_LABELS[question.status]}
           </span>
+          {question.community && <Link href={`/communities/${question.community.slug}`} className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium hover:bg-primary/20">Publié depuis {question.community.name}</Link>}
           <h1 className="mt-2 text-2xl font-bold tracking-tight">
             {question.title}
           </h1>

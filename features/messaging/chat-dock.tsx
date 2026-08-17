@@ -35,8 +35,8 @@ export function ChatDock() {
   if (!summary?.authenticated || !summary.general) return null;
   const unread = summary.conversations.reduce((total, item) => total + item.unread, 0);
 
-  return <aside className="fixed bottom-4 right-4 z-40 flex max-w-[calc(100vw-2rem)] items-end gap-2" aria-label="Messagerie instantanée">
-    {open && <section className="absolute bottom-16 right-0 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
+  return <aside className="fixed bottom-20 right-3 z-40 flex max-w-[calc(100vw-1.5rem)] items-end gap-2 md:bottom-4 md:right-4 md:max-w-[calc(100vw-2rem)]" aria-label="Messagerie instantanée">
+    {open && <section className="absolute bottom-16 right-0 max-h-[calc(100dvh-10rem)] w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-border bg-background shadow-2xl md:max-h-[calc(100dvh-6rem)] md:w-[min(24rem,calc(100vw-2rem))]">
       <header className="flex items-center justify-between border-b border-border bg-muted/50 px-4 py-3">
         <div><h2 className="font-semibold">Chat général</h2><p className="text-xs text-muted-foreground">Tous les membres connectés</p></div>
         <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-muted" aria-label="Fermer le chat"><X className="size-4" /></button>
@@ -44,7 +44,7 @@ export function ChatDock() {
       {summary.verified ? <ChatRoom conversationId={summary.general.id} currentUserId={summary.currentUserId} initialMessages={[]} compact /> : <p className="p-6 text-sm text-muted-foreground">Confirmez votre adresse e-mail pour participer au chat général.</p>}
     </section>}
 
-    <div className="flex items-center gap-2">
+    <div className="hidden items-center gap-2 sm:flex">
       <Link href="/messages/new" title="Nouvelle conversation" className="grid size-10 place-items-center rounded-full border border-border bg-background shadow-lg hover:bg-muted"><Plus className="size-4" /></Link>
       {summary.conversations.slice(0, 3).reverse().map((conversation) => <Link key={conversation.id} href={`/messages/${conversation.id}`} title={`${conversation.title} — ${conversation.preview}`} className="relative grid size-11 place-items-center overflow-hidden rounded-full border-2 border-background bg-secondary text-xs font-bold shadow-lg">
         {conversation.image ? <span className="size-full bg-cover bg-center" style={{ backgroundImage: `url(${conversation.image})` }} /> : conversation.title.slice(0, 2).toUpperCase()}

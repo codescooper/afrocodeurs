@@ -9,7 +9,7 @@ const inputClass =
   "rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary";
 
 /** Formulaire « poser une question » (Sprint 5). */
-export function QuestionForm() {
+export function QuestionForm({ community }: { community?: { id: string; name: string } | null }) {
   const [state, formAction, pending] = useActionState(
     createQuestionAction,
     undefined,
@@ -17,6 +17,7 @@ export function QuestionForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {community && <><input type="hidden" name="communityId" value={community.id} /><p className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">Publié depuis la communauté <strong>{community.name}</strong>. La discussion restera visible dans le Forum général.</p></>}
       <label className="flex flex-col gap-1 text-sm font-medium">
         Titre
         <input

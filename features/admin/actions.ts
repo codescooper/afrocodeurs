@@ -19,6 +19,7 @@ const REPORTABLE: EntityType[] = [
   "ANSWER",
   "COMMUNITY",
   "SOLUTION",
+  "MESSAGE",
 ];
 
 /**

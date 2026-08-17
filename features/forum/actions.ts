@@ -11,6 +11,7 @@ import { answerSchema, commentSchema, questionSchema } from "@/lib/validators";
 import { notify } from "@/features/notifications/notify";
 import { award, awardVote } from "@/features/reputation/award";
 import { recordAudit } from "@/features/audit/log";
+import { communityIdForMember } from "@/features/communities/posting";
 
 export type ForumFormState = { error?: string } | undefined;
 
@@ -33,12 +34,14 @@ export async function createQuestionAction(
       await db.question.findUnique({ where: { slug: s }, select: { id: true } }),
     ),
   );
+  const communityId = await communityIdForMember(g.user.id, formData.get("communityId"));
   const question = await db.question.create({
     data: {
       title: parsed.data.title,
       slug,
       body: parsed.data.body,
       authorId: g.user.id,
+      communityId,
     },
   });
   await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "QUESTION", entityId: question.id, after: { title: question.title, body: question.body } });

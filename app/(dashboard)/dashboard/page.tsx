@@ -143,10 +143,10 @@ export default async function DashboardPage() {
           </p>
         </div>
         <Link
-          href="/afromakers"
+          href="/afromakers/parcours"
           className="text-sm font-medium text-foreground underline"
         >
-          Classement AfroMakers →
+          Voir ma progression →
         </Link>
       </div>
 

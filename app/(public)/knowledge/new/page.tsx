@@ -4,11 +4,12 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { KnowledgeForm } from "@/features/knowledge/knowledge-form";
+import { postingCommunityBySlug } from "@/features/communities/posting";
 
 export const metadata = { title: "Partager une ressource" };
 
 /** Proposition d'une ressource par un membre de la communauté. */
-export default async function NewKnowledgePage() {
+export default async function NewKnowledgePage({ searchParams }: { searchParams: Promise<{ community?: string; type?: string }> }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
@@ -28,6 +29,8 @@ export default async function NewKnowledgePage() {
       </div>
     );
   }
+  const query = await searchParams;
+  const community = await postingCommunityBySlug(session.user.id, query.community);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
@@ -39,7 +42,7 @@ export default async function NewKnowledgePage() {
         Vous pouvez enregistrer un brouillon avant de le soumettre à la modération.
       </p>
       <div className="mt-8">
-        <KnowledgeForm />
+        <KnowledgeForm community={community} defaultType={query.type === "LINK" ? "LINK" : "ARTICLE"} />
       </div>
     </div>
   );

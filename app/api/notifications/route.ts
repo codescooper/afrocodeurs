@@ -33,3 +33,23 @@ export async function GET() {
 
   return NextResponse.json({ unreadCount, notifications });
 }
+
+/** Marque une notification précise comme lue lors de l'ouverture de son contenu. */
+export async function PATCH(request: Request) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
+
+  const body = (await request.json().catch(() => null)) as { id?: unknown } | null;
+  if (!body || typeof body.id !== "string" || body.id.length > 100) {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+
+  await db.notification.updateMany({
+    where: { id: body.id, userId: session.user.id, read: false },
+    data: { read: true },
+  });
+
+  return NextResponse.json({ ok: true });
+}

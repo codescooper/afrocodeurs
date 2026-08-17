@@ -17,6 +17,7 @@ import { SaveButton } from "@/features/bookmarks/save-button";
 import { isBookmarked } from "@/features/bookmarks/queries";
 import { ContentActions } from "@/features/content-management/content-actions";
 import { promoteContentToFeedbackAction } from "@/features/product-feedback/actions";
+import { CommentSection } from "@/features/comments/comment-section";
 
 /** Page détail d'un problème (Sprint 3). */
 export default async function ProblemDetailPage({
@@ -29,7 +30,7 @@ export default async function ProblemDetailPage({
 
   const problem = await db.problem.findUnique({
     where: { slug },
-    include: { createdBy: { select: { username: true, name: true } } },
+    include: { createdBy: { select: { username: true, name: true } }, community: { select: { name: true, slug: true } } },
   });
 
   if (!problem) notFound();
@@ -74,6 +75,7 @@ export default async function ProblemDetailPage({
         <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
           {PROBLEM_STATUS_LABELS[problem.status]}
         </span>
+        {problem.community && <Link href={`/communities/${problem.community.slug}`} className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium hover:bg-primary/20">Publié depuis {problem.community.name}</Link>}
       </div>
 
       <h1 className="mt-1 text-3xl font-bold tracking-tight">
@@ -107,6 +109,7 @@ export default async function ProblemDetailPage({
         )}
       </div>
 
+      <CommentSection targetType="PROBLEM" targetId={problem.id} returnPath={`/explorer/${problem.slug}`} />
       {session?.user && (
         <div className="mt-4">
           <SaveButton
