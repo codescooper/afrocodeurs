@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { auth, signOut } from "@/lib/auth";
+import { Logo } from "@/components/atoms/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { NotificationBell } from "./notification-bell";
 import { ThemeToggle } from "./theme-toggle";
@@ -17,12 +18,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur md:hidden">
-      <Link href="/" className="flex items-center gap-2 font-bold">
-        <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
-          A
-        </span>
-        <span>AfroCodeurs</span>
-      </Link>
+      <Logo />
 
       <div className="ml-auto flex items-center gap-1">
         <ThemeToggle />

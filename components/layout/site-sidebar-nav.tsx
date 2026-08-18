@@ -6,6 +6,12 @@ import { usePathname } from "next/navigation";
 import { MAIN_NAV } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
+/** Vrai si `pathname` correspond à `href` (segments complets, `/` spécial). */
+function isActive(href: string, pathname: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 /** Navigation verticale de la sidebar publique, avec état actif et icônes. */
 export function SiteSidebarNav() {
   const pathname = usePathname();
@@ -13,7 +19,7 @@ export function SiteSidebarNav() {
   return (
     <nav className="flex flex-col gap-1">
       {MAIN_NAV.map((item) => {
-        const active = pathname.startsWith(item.href);
+        const active = isActive(item.href, pathname);
         const Icon = item.icon;
         return (
           <Link

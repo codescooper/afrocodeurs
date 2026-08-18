@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { auth, signOut } from "@/lib/auth";
+import { Logo } from "@/components/atoms/logo";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "./notification-bell";
@@ -14,12 +15,7 @@ export async function SiteSidebar() {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background md:flex">
       <div className="flex h-16 shrink-0 items-center justify-center border-b border-border px-4">
-        <Link href="/" className="flex items-center gap-2 font-bold">
-          <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
-            A
-          </span>
-          <span>AfroCodeurs</span>
-        </Link>
+        <Logo />
       </div>
 
       <SiteSidebarNav />
