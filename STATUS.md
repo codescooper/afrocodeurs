@@ -1,6 +1,6 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-08-06**
+**Dernière MAJ : 2026-08-17**
 > Statut actualisé à partir du dépôt, de Railway, de GitHub Actions, de Resend et de contrôles HTTP réels.
 
 ## 🎯 Phase
@@ -9,6 +9,7 @@
 
 ## ✅ Fait
 
+- [x] Navigation publique passée en **sidebar verticale** (desktop) : `components/layout/site-sidebar.tsx` + `site-sidebar-nav.tsx`, liens avec icônes et état actif, section utilisateur (Connexion/Rejoindre ou @username + Déconnexion) centrée et en pleine largeur en bas de la sidebar. Header horizontal supprimé (`main-nav.tsx`), `SiteHeader` allégé en en-tête compact mobile (`md:hidden`), `NotificationBell` gagne une prop `align`. Vérifié : lint + build + 54/54 tests Vitest + rendu HTTP 200 des pages publiques.
 - [x] Production Railway et PostgreSQL en ligne : `https://web-production-2b204.up.railway.app`.
 - [x] Accueil, `robots.txt`, `sitemap.xml`, pages légales et API PoW vérifiés en HTTP 200 le 2026-07-15.
 - [x] PoW actif en production (`POW_ENABLED=true`, widget client actif, difficulté 20) et Turnstile configuré.
