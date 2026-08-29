@@ -1,5 +1,12 @@
 import Link from "next/link";
 
+import {
+  COMMUNITY_EMAIL,
+  DISCORD_INVITE_URL,
+  GITHUB_URL,
+  WHATSAPP_INVITE_URL,
+} from "@/lib/community-links";
+
 const EXPLORE_LINKS = [
   { href: "/explorer", label: "Problèmes" },
   { href: "/knowledge", label: "Ressources" },
@@ -65,12 +72,30 @@ export function SiteFooter() {
                 Projet
               </span>
               <a
-                href="https://github.com/codescooper/afrocodeurs"
+                href={GITHUB_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="text-muted-foreground transition-colors hover:text-foreground"
               >
                 GitHub
+              </a>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Contact
+              </span>
+              <Link href="/contact" className="text-muted-foreground transition-colors hover:text-foreground">
+                Nous contacter
+              </Link>
+              <a href={DISCORD_INVITE_URL} target="_blank" rel="noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
+                Discord
+              </a>
+              <a href={WHATSAPP_INVITE_URL} target="_blank" rel="noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
+                WhatsApp
+              </a>
+              <a href={`mailto:${COMMUNITY_EMAIL}`} className="text-muted-foreground transition-colors hover:text-foreground">
+                {COMMUNITY_EMAIL}
               </a>
             </div>
           </nav>

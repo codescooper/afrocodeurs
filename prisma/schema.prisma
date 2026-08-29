@@ -720,6 +720,7 @@ model Community {
 
 enum EventType {
   LIVE
+  COURSE
   WEBINAR
   WORKSHOP
   MEETUP
@@ -739,33 +740,45 @@ enum EventStatus {
   COMPLETED
 }
 
+enum DiscordSyncStatus {
+  NOT_REQUESTED
+  PENDING
+  SYNCED
+  FAILED
+}
+
 model Event {
-  id             String              @id @default(cuid())
-  title          String
-  slug           String              @unique
-  summary        String
-  description    String
-  type           EventType
-  format         EventFormat
-  status         EventStatus         @default(PUBLISHED)
-  startsAt       DateTime
-  endsAt         DateTime
-  timezone       String              @default("Africa/Abidjan")
-  capacity       Int?
-  platform       String?
-  accessUrl      String?
-  replayUrl      String?
-  reminderSentAt DateTime?
-  venue          String?
-  city           String?
-  country        String?
-  organizerId    String
-  communityId    String?
-  organizer      User                @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
-  community      Community?          @relation(fields: [communityId], references: [id], onDelete: SetNull)
-  registrations  EventRegistration[]
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+  id                String              @id @default(cuid())
+  title             String
+  slug              String              @unique
+  summary           String
+  description       String
+  type              EventType
+  format            EventFormat
+  status            EventStatus         @default(PUBLISHED)
+  startsAt          DateTime
+  endsAt            DateTime
+  timezone          String              @default("Africa/Abidjan")
+  capacity          Int?
+  platform          String?
+  accessUrl         String?
+  replayUrl         String?
+  discordEventId    String?             @unique
+  discordEventUrl   String?
+  discordSyncStatus DiscordSyncStatus   @default(NOT_REQUESTED)
+  discordSyncError  String?
+  discordSyncedAt   DateTime?
+  reminderSentAt    DateTime?
+  venue             String?
+  city              String?
+  country           String?
+  organizerId       String
+  communityId       String?
+  organizer         User                @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  community         Community?          @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  registrations     EventRegistration[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   @@index([status, startsAt])
   @@index([communityId, startsAt])
