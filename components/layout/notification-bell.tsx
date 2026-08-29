@@ -22,9 +22,12 @@ const POLL_MS = 15000;
 /** Cloche de notifications : badge de non-lues, panneau, et toasts en temps réel (polling). */
 export function NotificationBell({
   align = "end",
+  side = "bottom",
 }: {
   /** Direction d'ouverture du panneau : "end" (droite) ou "start" (gauche). */
   align?: "start" | "end";
+  /** Ouvre le panneau au-dessus lorsque la cloche est placée en bas de l'écran. */
+  side?: "top" | "bottom";
 }) {
   const [count, setCount] = useState(0);
   const [items, setItems] = useState<Notif[]>([]);
@@ -126,8 +129,9 @@ export function NotificationBell({
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-2 w-80 overflow-hidden rounded-lg border border-border bg-background shadow-lg",
-            align === "start" ? "left-0" : "right-0",
+            "absolute z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-border bg-background shadow-lg",
+            side === "top" ? "bottom-full mb-2" : "top-full mt-2",
+            align === "start" ? "left-0" : "-right-11 md:right-0",
           )}
         >
           <div className="flex items-center justify-between border-b border-border px-4 py-2">
