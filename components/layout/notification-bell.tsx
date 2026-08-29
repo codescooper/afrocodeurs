@@ -20,7 +20,12 @@ type Notif = {
 const POLL_MS = 15000;
 
 /** Cloche de notifications : badge de non-lues, panneau, et toasts en temps réel (polling). */
-export function NotificationBell() {
+export function NotificationBell({
+  align = "end",
+}: {
+  /** Direction d'ouverture du panneau : "end" (droite) ou "start" (gauche). */
+  align?: "start" | "end";
+}) {
   const [count, setCount] = useState(0);
   const [items, setItems] = useState<Notif[]>([]);
   const [open, setOpen] = useState(false);
@@ -119,7 +124,12 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-lg border border-border bg-background shadow-lg">
+        <div
+          className={cn(
+            "absolute z-50 mt-2 w-80 overflow-hidden rounded-lg border border-border bg-background shadow-lg",
+            align === "start" ? "left-0" : "right-0",
+          )}
+        >
           <div className="flex items-center justify-between border-b border-border px-4 py-2">
             <span className="text-sm font-semibold">Notifications</span>
             {count > 0 && (
