@@ -18,6 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/afromakers",
     "/projects",
     "/opportunities",
+    "/events",
+    "/contact",
     "/confidentialite",
     "/conditions",
     "/mentions-legales",
@@ -27,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(),
   }));
 
-  const [problems, knowledge, solutions, questions, communities, projects] =
+  const [problems, knowledge, solutions, questions, communities, projects, events] =
     await Promise.all([
       db.problem.findMany({ select: { slug: true, updatedAt: true }, take: 2000 }),
       db.knowledge.findMany({
@@ -39,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       db.question.findMany({ select: { slug: true, updatedAt: true }, take: 2000 }),
       db.community.findMany({ select: { slug: true, updatedAt: true }, take: 2000 }),
       db.project.findMany({ select: { slug: true, updatedAt: true }, take: 2000 }),
+      db.event.findMany({ select: { slug: true, updatedAt: true }, take: 2000 }),
     ]);
 
   const dynamicRoutes: MetadataRoute.Sitemap = [
@@ -65,6 +68,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...projects.map((p) => ({
       url: `${base}/projects/${p.slug}`,
       lastModified: p.updatedAt,
+    })),
+    ...events.map((event) => ({
+      url: `${base}/events/${event.slug}`,
+      lastModified: event.updatedAt,
     })),
   ];
 

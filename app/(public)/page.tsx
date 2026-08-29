@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { ExternalLink, MessageCircle, Search } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { AfricaPresenceMap } from "@/components/presence/africa-presence-map";
@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { getLeaderboard } from "@/features/reputation/queries";
 import { DiscoveryCard } from "@/components/molecules/discovery-card";
 import { auth } from "@/lib/auth";
+import { DISCORD_INVITE_URL } from "@/lib/community-links";
 
 export default async function HomePage() {
   const [session, problems, knowledge, communities, makers, counts, countries] = await Promise.all([
@@ -86,6 +87,29 @@ export default async function HomePage() {
             </div>
           )}
         </div>
+      </section>
+
+      <section className="mb-12 flex flex-col items-start justify-between gap-5 rounded-2xl border border-[#5865f2]/30 bg-[#5865f2]/10 p-6 sm:flex-row sm:items-center md:p-8">
+        <div className="flex gap-4">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#5865f2] text-white">
+            <MessageCircle className="size-6" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold">Rejoins AfroCodeurs sur Discord</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Échange en direct avec la communauté, participe aux cours, lives,
+              ateliers et reçois les rappels des prochains événements.
+            </p>
+          </div>
+        </div>
+        <a
+          href={DISCORD_INVITE_URL}
+          target="_blank"
+          rel="noreferrer"
+          className={buttonVariants({ size: "lg" })}
+        >
+          Rejoindre le Discord <ExternalLink />
+        </a>
       </section>
 
       {/* Découverte — alimentée en temps réel */}

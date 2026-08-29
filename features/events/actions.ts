@@ -7,6 +7,7 @@ import { guard, invalidMessage } from "@/lib/guard";
 import { orNull, uniqueSlug } from "@/lib/utils";
 import { notify } from "@/features/notifications/notify";
 import { eventSchema } from "./validators";
+import { syncEventToDiscord } from "./discord-sync";
 
 export type EventFormState = { error?: string; success?: string } | undefined;
 
@@ -17,8 +18,18 @@ export async function createEventAction(_: EventFormState, formData: FormData): 
   const d = parsed.data;
   if (d.communityId && !await db.communityMember.findUnique({ where: { userId_communityId: { userId: g.user.id, communityId: d.communityId } } })) return { error: "Vous devez appartenir à cette communauté." };
   const slug = await uniqueSlug(d.title, "evenement", async value => Boolean(await db.event.findUnique({ where: { slug: value }, select: { id: true } })));
-  await db.event.create({ data: { title: d.title, slug, summary: d.summary, description: d.description, type: d.type, format: d.format, startsAt: d.startsAt, endsAt: d.endsAt, timezone: d.timezone, capacity: d.capacity ?? null, platform: orNull(d.platform), accessUrl: orNull(d.accessUrl), venue: orNull(d.venue), city: orNull(d.city), country: orNull(d.country), communityId: orNull(d.communityId), organizerId: g.user.id } });
+  const event = await db.event.create({ data: { title: d.title, slug, summary: d.summary, description: d.description, type: d.type, format: d.format, startsAt: d.startsAt, endsAt: d.endsAt, timezone: d.timezone, capacity: d.capacity ?? null, platform: orNull(d.platform), accessUrl: orNull(d.accessUrl), venue: orNull(d.venue), city: orNull(d.city), country: orNull(d.country), communityId: orNull(d.communityId), organizerId: g.user.id, discordSyncStatus: d.syncToDiscord ? "PENDING" : "NOT_REQUESTED" } });
+  if (d.syncToDiscord) await syncEventToDiscord(event.id);
   revalidatePath("/events"); redirect(`/events/${slug}`);
+}
+
+export async function retryDiscordEventSyncAction(formData: FormData) {
+  const g = await guard({ verified: true }); if (!g.ok) return;
+  const eventId = String(formData.get("eventId") ?? "");
+  const event = await db.event.findUnique({ where: { id: eventId }, select: { id: true, slug: true, organizerId: true } });
+  if (!event || event.organizerId !== g.user.id) return;
+  await syncEventToDiscord(event.id);
+  revalidatePath(`/events/${event.slug}`);
 }
 
 export async function toggleEventRegistrationAction(formData: FormData) {
