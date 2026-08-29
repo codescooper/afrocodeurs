@@ -23,7 +23,7 @@ export async function SiteSidebar() {
       <div className="mt-auto border-t border-border p-4">
         <div className="mb-3 flex items-center justify-center gap-1">
           <ThemeToggle />
-          {session?.user && <NotificationBell align="start" />}
+          {session?.user && <NotificationBell align="start" side="top" />}
         </div>
 
         {session?.user ? (
