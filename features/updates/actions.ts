@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/db";
 import { guard } from "@/lib/guard";
-import { notify } from "@/features/notifications/notify";
+import { notifyPublishedUpdate } from "./publish";
 import { platformUpdateSchema } from "./validators";
 
 export async function createPlatformUpdateAction(formData: FormData) {
@@ -13,10 +13,7 @@ export async function createPlatformUpdateAction(formData: FormData) {
   const parsed = platformUpdateSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const update = await db.platformUpdate.create({ data: { ...parsed.data, published: true, publishedAt: new Date() } });
-  const users = await db.user.findMany({ where: { emailVerified: { not: null } }, select: { id: true }, take: 2000 });
-  for (let index = 0; index < users.length; index += 50) {
-    await Promise.all(users.slice(index, index + 50).map((user) => notify({ userId: user.id, actorId: g.user.id, type: "PLATFORM_UPDATE", title: update.title, body: update.summary, link: "/updates" })));
-  }
+  await notifyPublishedUpdate(update, g.user.id);
   revalidatePath("/updates");
   revalidatePath("/dashboard");
   revalidatePath("/admin");

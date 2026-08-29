@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Markdown } from "@/components/shared/markdown";
 import { Button } from "@/components/ui/button";
+import { feedbackAttribution } from "@/features/product-feedback/workflow";
 import { markPlatformUpdatesReadAction } from "@/features/updates/actions";
 
 export const metadata = { title: "Nouveautés & feuille de route" };
@@ -46,8 +47,9 @@ export default async function UpdatesPage() {
           select: {
             submittedByLabel: true,
             sourceUrl: true,
-            author: { select: { username: true } },
+            author: { select: { username: true, name: true } },
           },
+          orderBy: { createdAt: "asc" },
         },
       },
       orderBy: [{ status: "asc" }, { priority: "desc" }, { createdAt: "desc" }],
@@ -98,7 +100,7 @@ export default async function UpdatesPage() {
       <section id="roadmap" className="scroll-mt-24 pt-16">
         <div className="flex items-center gap-3"><CircleDot className="size-6 text-primary" /><div><h2 className="text-2xl font-bold">Feuille de route communautaire</h2><p className="text-sm text-muted-foreground">Les demandes validées deviennent des objectifs suivis publiquement.</p></div></div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {goals.map((goal) => <article key={goal.id} className="rounded-xl border border-border bg-card p-5"><div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-primary/15 px-2 py-1">{GOAL_STATUS[goal.status]}</span><span className="rounded-full bg-muted px-2 py-1">Priorité {goal.priority}/5</span></div><h3 className="mt-3 text-lg font-semibold">{goal.title}</h3><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{goal.summary}</p><Attribution label={goal.feedback.submittedByLabel} username={goal.feedback.author?.username} sourceUrl={goal.feedback.sourceUrl} /></article>)}
+          {goals.map((goal) => <article key={goal.id} className="rounded-xl border border-border bg-card p-5"><div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-primary/15 px-2 py-1">{GOAL_STATUS[goal.status]}</span><span className="rounded-full bg-muted px-2 py-1">Priorité {goal.priority}/5</span></div><h3 className="mt-3 text-lg font-semibold">{goal.title}</h3><p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{goal.summary}</p><Attributions feedback={goal.feedback} /></article>)}
           {goals.length === 0 && <Empty text="Les premiers objectifs validés apparaîtront ici." />}
         </div>
       </section>
@@ -116,6 +118,12 @@ export default async function UpdatesPage() {
 
 function Attribution({ label, username, sourceUrl }: { label?: string | null; username?: string | null; sourceUrl?: string | null }) {
   const author = label ?? (username ? `@${username}` : "la communauté");
+  return <p className="mt-4 text-xs text-muted-foreground">Proposé par {author}{sourceUrl && <> · <Link href={sourceUrl} className="underline">Contexte</Link></>}</p>;
+}
+
+function Attributions({ feedback }: { feedback: Array<{ submittedByLabel: string | null; sourceUrl: string | null; author: { username: string; name: string | null } | null }> }) {
+  const sourceUrl = feedback.find((item) => item.sourceUrl)?.sourceUrl;
+  const author = feedbackAttribution(feedback);
   return <p className="mt-4 text-xs text-muted-foreground">Proposé par {author}{sourceUrl && <> · <Link href={sourceUrl} className="underline">Contexte</Link></>}</p>;
 }
 

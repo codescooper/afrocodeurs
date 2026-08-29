@@ -97,6 +97,9 @@ enum EntityType {
   MESSAGE
   EVENT
   OPPORTUNITY
+  PRODUCT_FEEDBACK
+  DEVELOPMENT_GOAL
+  PLATFORM_UPDATE
 }
 
 enum ChallengeDifficulty {
@@ -255,45 +258,45 @@ model User {
   passwordHash  String?
   role          UserRole  @default(USER)
 
-  profile       Profile?
-  accounts      Account[]
-  sessions      Session[]
-  communities   CommunityMember[]
-  knowledge     Knowledge[]
-  problems      Problem[]
-  questions     Question[]
-  answers       Answer[]
-  comments      Comment[]
-  votes         Vote[]
-  solutions     Solution[]
-  projects      Project[]
-  reports       Report[] @relation("ReporterReports")
-  reputation    ReputationEvent[]
-  relations     EntityRelation[] @relation("RelationCreator")
-  notifications Notification[]
-  pushSubscriptions PushSubscription[]
-  following     Follow[] @relation("Following")
-  followers     Follow[] @relation("Followers")
-  bookmarks     Bookmark[]
-  notificationOptOut String[] @default([])
-  challengesAuthored Challenge[] @relation("ChallengeAuthor")
-  challengeAttempts ChallengeAttempt[]
-  challengeSolves ChallengeSolve[]
-  challengeHints ChallengeHintUnlock[]
-  challengeProgress ChallengeProgress[]
+  profile                 Profile?
+  accounts                Account[]
+  sessions                Session[]
+  communities             CommunityMember[]
+  knowledge               Knowledge[]
+  problems                Problem[]
+  questions               Question[]
+  answers                 Answer[]
+  comments                Comment[]
+  votes                   Vote[]
+  solutions               Solution[]
+  projects                Project[]
+  reports                 Report[]              @relation("ReporterReports")
+  reputation              ReputationEvent[]
+  relations               EntityRelation[]      @relation("RelationCreator")
+  notifications           Notification[]
+  pushSubscriptions       PushSubscription[]
+  following               Follow[]              @relation("Following")
+  followers               Follow[]              @relation("Followers")
+  bookmarks               Bookmark[]
+  notificationOptOut      String[]              @default([])
+  challengesAuthored      Challenge[]           @relation("ChallengeAuthor")
+  challengeAttempts       ChallengeAttempt[]
+  challengeSolves         ChallengeSolve[]
+  challengeHints          ChallengeHintUnlock[]
+  challengeProgress       ChallengeProgress[]
   conversationMemberships ConversationMember[]
-  sentMessages Message[]
-  opportunities Opportunity[]
-  opportunityResponses OpportunityResponse[]
-  updateReads PlatformUpdateRead[]
-  auditLogs AuditLog[]
-  productFeedback ProductFeedback[]
-  developmentGoals DevelopmentGoal[] @relation("GoalCreator")
-  eventsAuthored Event[] @relation("EventOrganizer")
-  eventRegistrations EventRegistration[]
+  sentMessages            Message[]
+  opportunities           Opportunity[]
+  opportunityResponses    OpportunityResponse[]
+  updateReads             PlatformUpdateRead[]
+  auditLogs               AuditLog[]
+  productFeedback         ProductFeedback[]
+  developmentGoals        DevelopmentGoal[]     @relation("GoalCreator")
+  eventsAuthored          Event[]               @relation("EventOrganizer")
+  eventRegistrations      EventRegistration[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([username])
   @@index([role])
@@ -316,58 +319,62 @@ model AuditLog {
 }
 
 model ProductFeedback {
-  id              String           @id @default(cuid())
-  title           String
-  description     String
-  category        FeedbackCategory
-  status          FeedbackStatus   @default(NEW)
-  priorityScore   Int              @default(1)
-  analysis        String
-  sourceUrl       String?
-  sourceType      EntityType?
-  sourceId        String?
-  authorId        String?
-  author          User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  submittedByLabel String?
-  developmentGoal DevelopmentGoal?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                String           @id @default(cuid())
+  title             String
+  description       String
+  category          FeedbackCategory
+  status            FeedbackStatus   @default(NEW)
+  priorityScore     Int              @default(1)
+  analysis          String
+  sourceUrl         String?
+  sourceType        EntityType?
+  sourceId          String?
+  authorId          String?
+  author            User?            @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  submittedByLabel  String?
+  developmentGoalId String?
+  developmentGoal   DevelopmentGoal? @relation(fields: [developmentGoalId], references: [id], onDelete: SetNull)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@index([status, priorityScore, createdAt])
   @@index([sourceType, sourceId])
   @@index([authorId])
+  @@index([developmentGoalId])
 }
 
 model DevelopmentGoal {
-  id          String                @id @default(cuid())
-  title       String
-  summary     String
-  status      DevelopmentGoalStatus @default(PLANNED)
-  priority    Int                   @default(1)
-  feedbackId  String                @unique
-  feedback    ProductFeedback       @relation(fields: [feedbackId], references: [id], onDelete: Restrict)
-  createdById String?
-  createdBy   User?                 @relation("GoalCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  id             String                @id @default(cuid())
+  title          String
+  summary        String
+  status         DevelopmentGoalStatus @default(PLANNED)
+  priority       Int                   @default(1)
+  feedback       ProductFeedback[]
+  platformUpdate PlatformUpdate?
+  createdById    String?
+  createdBy      User?                 @relation("GoalCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
 
   @@index([status, priority, createdAt])
 }
 
 model PlatformUpdate {
-  id          String               @id @default(cuid())
-  version     String
-  title       String
-  summary     String
-  content     String
-  category    String               @default("NOUVEAUTÉ")
-  requestedBy String?
-  sourceUrl   String?
-  published   Boolean              @default(false)
-  publishedAt DateTime?
-  reads       PlatformUpdateRead[]
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  id                String               @id @default(cuid())
+  version           String
+  title             String
+  summary           String
+  content           String
+  category          String               @default("NOUVEAUTÉ")
+  requestedBy       String?
+  sourceUrl         String?
+  developmentGoalId String?              @unique
+  developmentGoal   DevelopmentGoal?     @relation(fields: [developmentGoalId], references: [id], onDelete: SetNull)
+  published         Boolean              @default(false)
+  publishedAt       DateTime?
+  reads             PlatformUpdateRead[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 
   @@index([published, publishedAt])
 }
@@ -385,17 +392,17 @@ model PlatformUpdateRead {
 }
 
 model Conversation {
-  id        String           @id @default(cuid())
-  type      ConversationType
-  title     String?
-  directKey String?          @unique
-  slug      String?          @unique
-  communityId String?        @unique
-  community Community?       @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  members   ConversationMember[]
-  messages  Message[]
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id          String               @id @default(cuid())
+  type        ConversationType
+  title       String?
+  directKey   String?              @unique
+  slug        String?              @unique
+  communityId String?              @unique
+  community   Community?           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  members     ConversationMember[]
+  messages    Message[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
   @@index([updatedAt])
 }
@@ -407,8 +414,8 @@ model ConversationMember {
   userId         String
   user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   role           ConversationMemberRole @default(MEMBER)
-  lastReadAt     DateTime                @default(now())
-  joinedAt       DateTime                @default(now())
+  lastReadAt     DateTime               @default(now())
+  joinedAt       DateTime               @default(now())
 
   @@unique([conversationId, userId])
   @@index([userId, lastReadAt])
@@ -430,24 +437,24 @@ model Message {
 }
 
 model Opportunity {
-  id           String            @id @default(cuid())
+  id           String                @id @default(cuid())
   title        String
-  slug         String            @unique
+  slug         String                @unique
   organization String
   type         OpportunityType
-  status       OpportunityStatus @default(ACTIVE)
+  status       OpportunityStatus     @default(ACTIVE)
   summary      String
   description  String
   requirements String?
   location     String?
-  isRemote     Boolean           @default(false)
+  isRemote     Boolean               @default(false)
   externalUrl  String?
   deadline     DateTime?
   authorId     String
-  author       User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author       User                  @relation(fields: [authorId], references: [id], onDelete: Cascade)
   responses    OpportunityResponse[]
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
 
   @@index([status, createdAt])
   @@index([type])
@@ -472,32 +479,32 @@ model OpportunityResponse {
 }
 
 model Challenge {
-  id                  String              @id @default(cuid())
+  id                  String                @id @default(cuid())
   title               String
-  slug                String              @unique
+  slug                String                @unique
   story               String?
   instructions        String
   difficulty          ChallengeDifficulty
-  status              ChallengeStatus     @default(DRAFT)
-  mode                ChallengeMode       @default(CLASSIC)
-  basePoints           Int
-  answerHash           String
-  answerSalt           String
-  completionCode       String?
+  status              ChallengeStatus       @default(DRAFT)
+  mode                ChallengeMode         @default(CLASSIC)
+  basePoints          Int
+  answerHash          String
+  answerSalt          String
+  completionCode      String?
   solutionExplanation String
-  maxAttempts          Int                 @default(30)
-  publishAt            DateTime?
-  closeAt              DateTime?
-  publishedAt          DateTime?
-  authorId             String
-  author               User                @relation("ChallengeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  hints                ChallengeHint[]
-  attempts             ChallengeAttempt[]
-  solves               ChallengeSolve[]
-  hintUnlocks          ChallengeHintUnlock[]
-  progress             ChallengeProgress[]
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
+  maxAttempts         Int                   @default(30)
+  publishAt           DateTime?
+  closeAt             DateTime?
+  publishedAt         DateTime?
+  authorId            String
+  author              User                  @relation("ChallengeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  hints               ChallengeHint[]
+  attempts            ChallengeAttempt[]
+  solves              ChallengeSolve[]
+  hintUnlocks         ChallengeHintUnlock[]
+  progress            ChallengeProgress[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 
   @@index([status, publishAt])
   @@index([difficulty])
@@ -505,25 +512,25 @@ model Challenge {
 }
 
 model ChallengeProgress {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   challengeId String
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   userId      String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  step        Int      @default(0)
-  inventory   String[] @default([])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step        Int       @default(0)
+  inventory   String[]  @default([])
   completedAt DateTime?
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
 
   @@unique([challengeId, userId])
   @@index([userId])
 }
 
 model ChallengeHint {
-  id          String   @id @default(cuid())
+  id          String                @id @default(cuid())
   challengeId String
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challenge   Challenge             @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   position    Int
   content     String
   penalty     Int
@@ -533,41 +540,41 @@ model ChallengeHint {
 }
 
 model ChallengeHintUnlock {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   challengeId String
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challenge   Challenge     @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   hintId      String
   hint        ChallengeHint @relation(fields: [hintId], references: [id], onDelete: Cascade)
   userId      String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
 
   @@unique([hintId, userId])
   @@index([challengeId, userId])
 }
 
 model ChallengeAttempt {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   challengeId String
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   userId      String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  correct     Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  correct     Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 
   @@index([challengeId, userId, createdAt])
 }
 
 model ChallengeSolve {
-  id            String   @id @default(cuid())
-  challengeId   String
-  challenge     Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  score         Int
-  attemptsUsed  Int
-  hintsUsed     Int
-  solvedAt      DateTime @default(now())
+  id           String    @id @default(cuid())
+  challengeId  String
+  challenge    Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score        Int
+  attemptsUsed Int
+  hintsUsed    Int
+  solvedAt     DateTime  @default(now())
 
   @@unique([challengeId, userId])
   @@index([score, solvedAt])
@@ -612,10 +619,10 @@ model Profile {
   websiteUrl   String?
   portfolioUrl String?
 
-  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([githubLogin])
 }
@@ -634,7 +641,7 @@ model Account {
   id_token          String?
   session_state     String?
 
-  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -645,7 +652,7 @@ model Session {
   userId       String
   expires      DateTime
 
-  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -694,16 +701,16 @@ model Community {
   city        String?
   geoKey      String?       @unique
 
-  members     CommunityMember[]
-  projects    Project[]
-  knowledge   Knowledge[]
-  problems    Problem[]
-  questions   Question[]
-  chat        Conversation?
-  events      Event[]
+  members   CommunityMember[]
+  projects  Project[]
+  knowledge Knowledge[]
+  problems  Problem[]
+  questions Question[]
+  chat      Conversation?
+  events    Event[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([type])
@@ -733,32 +740,32 @@ enum EventStatus {
 }
 
 model Event {
-  id          String      @id @default(cuid())
-  title       String
-  slug        String      @unique
-  summary     String
-  description String
-  type        EventType
-  format      EventFormat
-  status      EventStatus @default(PUBLISHED)
-  startsAt    DateTime
-  endsAt      DateTime
-  timezone    String      @default("Africa/Abidjan")
-  capacity    Int?
-  platform    String?
-  accessUrl   String?
-  replayUrl   String?
+  id             String              @id @default(cuid())
+  title          String
+  slug           String              @unique
+  summary        String
+  description    String
+  type           EventType
+  format         EventFormat
+  status         EventStatus         @default(PUBLISHED)
+  startsAt       DateTime
+  endsAt         DateTime
+  timezone       String              @default("Africa/Abidjan")
+  capacity       Int?
+  platform       String?
+  accessUrl      String?
+  replayUrl      String?
   reminderSentAt DateTime?
-  venue       String?
-  city        String?
-  country     String?
-  organizerId String
-  communityId String?
-  organizer  User        @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
-  community  Community?  @relation(fields: [communityId], references: [id], onDelete: SetNull)
-  registrations EventRegistration[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  venue          String?
+  city           String?
+  country        String?
+  organizerId    String
+  communityId    String?
+  organizer      User                @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  community      Community?          @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  registrations  EventRegistration[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([status, startsAt])
   @@index([communityId, startsAt])
@@ -791,7 +798,7 @@ enum CompensationPeriod {
 }
 
 model CompensationReport {
-  id              String @id @default(cuid())
+  id              String             @id @default(cuid())
   kind            CompensationKind
   role            String
   country         String
@@ -800,10 +807,10 @@ model CompensationReport {
   amountMax       Int
   currency        String
   period          CompensationPeriod
-  remote          Boolean @default(false)
+  remote          Boolean            @default(false)
   clientType      String?
-  technologies    String[] @default([])
-  createdAt       DateTime @default(now())
+  technologies    String[]           @default([])
+  createdAt       DateTime           @default(now())
 
   @@index([country, role])
   @@index([kind, createdAt])
@@ -815,11 +822,11 @@ model CommunityMember {
   communityId String
   role        CommunityMemberRole @default(MEMBER)
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
-  joinedAt    DateTime @default(now())
-  chatLastReadAt DateTime @default(now())
+  joinedAt       DateTime  @default(now())
+  chatLastReadAt DateTime  @default(now())
   chatMutedUntil DateTime?
 
   @@unique([userId, communityId])
@@ -840,15 +847,15 @@ model Problem {
   status          ProblemStatus @default(PROPOSED)
   views           Int           @default(0)
 
-  createdById     String
-  createdBy       User          @relation(fields: [createdById], references: [id])
-  communityId     String?
-  community       Community?    @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  createdById String
+  createdBy   User       @relation(fields: [createdById], references: [id])
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
-  projects        Project[]
+  projects Project[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([sector])
@@ -858,34 +865,34 @@ model Problem {
 }
 
 model Knowledge {
-  id          String        @id @default(cuid())
-  title       String
-  slug        String        @unique
-  summary     String?
-  content     String
-  type        KnowledgeType
-  language    String        @default("fr")
-  level       String?
-  externalUrl String?
-  provider    String?
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  summary         String?
+  content         String
+  type            KnowledgeType
+  language        String        @default("fr")
+  level           String?
+  externalUrl     String?
+  provider        String?
   durationMinutes Int?
-  isFree      Boolean       @default(true)
-  lastVerifiedAt DateTime?
-  status      ContentStatus @default(DRAFT)
-  views       Int           @default(0)
+  isFree          Boolean       @default(true)
+  lastVerifiedAt  DateTime?
+  status          ContentStatus @default(DRAFT)
+  views           Int           @default(0)
 
   authorId    String
-  author      User          @relation(fields: [authorId], references: [id])
+  author      User       @relation(fields: [authorId], references: [id])
   communityId String?
-  community   Community?    @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
   originalContentId String?
   originalContent   Knowledge?  @relation("KnowledgeTranslations", fields: [originalContentId], references: [id])
   translations      Knowledge[] @relation("KnowledgeTranslations")
 
   publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([slug])
   @@index([type])
@@ -896,19 +903,19 @@ model Knowledge {
 }
 
 model Question {
-  id        String         @id @default(cuid())
-  title     String
-  slug      String         @unique
-  body      String
-  status    QuestionStatus @default(OPEN)
-  views     Int            @default(0)
+  id     String         @id @default(cuid())
+  title  String
+  slug   String         @unique
+  body   String
+  status QuestionStatus @default(OPEN)
+  views  Int            @default(0)
 
-  authorId   String
-  author     User           @relation(fields: [authorId], references: [id])
+  authorId    String
+  author      User       @relation(fields: [authorId], references: [id])
   communityId String?
-  community   Community?    @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
-  answers   Answer[]
+  answers Answer[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -920,51 +927,51 @@ model Question {
 }
 
 model Answer {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   questionId String
   body       String
-  isAccepted Boolean  @default(false)
+  isAccepted Boolean @default(false)
 
-  authorId   String
-  author     User     @relation(fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
 
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([questionId])
   @@index([authorId])
 }
 
 model Comment {
-  id         String     @id @default(cuid())
-  body       String
+  id   String @id @default(cuid())
+  body String
 
-  authorId   String
-  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   targetType EntityType
   targetId   String
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([targetType, targetId])
   @@index([authorId])
 }
 
 model Vote {
-  id         String    @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   targetType EntityType
   targetId   String
   value      VoteValue
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([userId, targetType, targetId])
   @@index([targetType, targetId])
@@ -983,11 +990,11 @@ model Solution {
   license          String?
   views            Int          @default(0)
 
-  createdById      String
-  createdBy        User         @relation(fields: [createdById], references: [id])
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([type])
@@ -996,10 +1003,10 @@ model Solution {
 }
 
 model Tag {
-  id        String  @id @default(cuid())
-  name      String
-  slug      String  @unique
-  type      TagType
+  id   String  @id @default(cuid())
+  name String
+  slug String  @unique
+  type TagType
 
   createdAt DateTime @default(now())
 
@@ -1008,7 +1015,7 @@ model Tag {
 }
 
 model EntityRelation {
-  id           String       @id @default(cuid())
+  id String @id @default(cuid())
 
   sourceType   EntityType
   sourceId     String
@@ -1016,10 +1023,10 @@ model EntityRelation {
   targetType   EntityType
   targetId     String
 
-  createdById  String?
-  createdBy    User?        @relation("RelationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById String?
+  createdBy   User?   @relation("RelationCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
-  createdAt    DateTime     @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([sourceType, sourceId, relationType, targetType, targetId])
   @@index([sourceType, sourceId])
@@ -1028,19 +1035,19 @@ model EntityRelation {
 }
 
 model ReputationEvent {
-  id          String              @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId      String
-  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  action      String
-  points      Int
-  dimension   ReputationDimension
+  action    String
+  points    Int
+  dimension ReputationDimension
 
-  targetType  EntityType?
-  targetId    String?
+  targetType EntityType?
+  targetId   String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([dimension])
@@ -1048,20 +1055,20 @@ model ReputationEvent {
 }
 
 model Report {
-  id          String       @id @default(cuid())
+  id String @id @default(cuid())
 
-  reporterId  String
-  reporter    User         @relation("ReporterReports", fields: [reporterId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User   @relation("ReporterReports", fields: [reporterId], references: [id], onDelete: Cascade)
 
-  targetType  EntityType
-  targetId    String
-  reason      ReportReason
-  details     String?
-  status      ReportStatus @default(OPEN)
-  resolution  String?
+  targetType EntityType
+  targetId   String
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(OPEN)
+  resolution String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([reporterId])
   @@index([targetType, targetId])
@@ -1069,16 +1076,16 @@ model Report {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type      String
-  title     String
-  body      String
-  link      String?
-  read      Boolean  @default(false)
+  type  String
+  title String
+  body  String
+  link  String?
+  read  Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -1086,14 +1093,14 @@ model Notification {
 }
 
 model PushSubscription {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
+  endpoint String @unique
+  p256dh   String
+  auth     String
 
   createdAt DateTime @default(now())
 
@@ -1114,19 +1121,19 @@ model Project {
   views        Int           @default(0)
   lastSyncedAt DateTime?
 
-  problemId    String?
-  problem      Problem?      @relation(fields: [problemId], references: [id], onDelete: SetNull)
-  communityId  String?
-  community    Community?    @relation(fields: [communityId], references: [id], onDelete: SetNull)
+  problemId   String?
+  problem     Problem?   @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
-  createdById  String
-  createdBy    User          @relation(fields: [createdById], references: [id])
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
 
-  milestones   RoadmapMilestone[]
-  tasks        RoadmapTask[]
+  milestones RoadmapMilestone[]
+  tasks      RoadmapTask[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([status])
@@ -1136,10 +1143,10 @@ model Project {
 
 // Milestone GitHub mis en cache = « phase » de la roadmap.
 model RoadmapMilestone {
-  id          String    @id @default(cuid())
+  id String @id @default(cuid())
 
-  projectId   String
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   githubId    Int
   title       String
@@ -1148,7 +1155,7 @@ model RoadmapMilestone {
   dueOn       DateTime?
   ordinal     Int       @default(0)
 
-  tasks       RoadmapTask[]
+  tasks RoadmapTask[]
 
   @@unique([projectId, githubId])
   @@index([projectId])
@@ -1158,29 +1165,29 @@ model RoadmapMilestone {
 // dépendance (DAG) sont curatées via RoadmapDependency ; le statut dérivé
 // (Prête / Bloquée / En cours / Fait) est calculé à la lecture.
 model RoadmapTask {
-  id              String     @id @default(cuid())
+  id String @id @default(cuid())
 
-  projectId       String
-  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  githubNumber    Int
-  title           String
-  url             String
-  state           TaskState  @default(OPEN)
-  labels          String[]   @default([])
-  assignees       String[]   @default([])
-  isGoodFirst     Boolean    @default(false)
-  githubUpdatedAt DateTime?
-  completionAwarded Boolean  @default(false)
+  githubNumber      Int
+  title             String
+  url               String
+  state             TaskState @default(OPEN)
+  labels            String[]  @default([])
+  assignees         String[]  @default([])
+  isGoodFirst       Boolean   @default(false)
+  githubUpdatedAt   DateTime?
+  completionAwarded Boolean   @default(false)
 
-  milestoneId     String?
-  milestone       RoadmapMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  milestoneId String?
+  milestone   RoadmapMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
 
-  dependencies    RoadmapDependency[] @relation("dependent")
-  dependents      RoadmapDependency[] @relation("prerequisite")
+  dependencies RoadmapDependency[] @relation("dependent")
+  dependents   RoadmapDependency[] @relation("prerequisite")
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([projectId, githubNumber])
   @@index([projectId])
@@ -1190,17 +1197,17 @@ model RoadmapTask {
 // Arête du DAG : `task` dépend de `dependsOn` (prérequis). Curatée sur la
 // plateforme (GitHub n'expose pas proprement les dépendances).
 model RoadmapDependency {
-  id          String      @id @default(cuid())
+  id String @id @default(cuid())
 
-  taskId      String
-  task        RoadmapTask @relation("dependent", fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+  task   RoadmapTask @relation("dependent", fields: [taskId], references: [id], onDelete: Cascade)
 
   dependsOnId String
   dependsOn   RoadmapTask @relation("prerequisite", fields: [dependsOnId], references: [id], onDelete: Cascade)
 
   createdById String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([taskId, dependsOnId])
   @@index([taskId])
