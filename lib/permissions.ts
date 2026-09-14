@@ -47,6 +47,7 @@ export const PERMISSIONS = {
   "user:manage": "ADMIN",
   "content:manage": "ADMIN",
   "community:manage": "ADMIN",
+  "newsletter:manage": "ADMIN",
   "system:manage": "ADMIN",
 } as const satisfies Record<string, Role>;
 

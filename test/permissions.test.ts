@@ -24,6 +24,8 @@ describe("can", () => {
     expect(can("MODERATOR", "report:handle")).toBe(true);
     expect(can("USER", "report:handle")).toBe(false);
     expect(can("ADMIN", "user:manage")).toBe(true);
+    expect(can("ADMIN", "newsletter:manage")).toBe(true);
+    expect(can("MODERATOR", "newsletter:manage")).toBe(false);
   });
 
   it("traite l'absence de rôle comme VISITOR", () => {
