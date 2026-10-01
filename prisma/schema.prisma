@@ -1226,3 +1226,40 @@ model RoadmapDependency {
   @@index([taskId])
   @@index([dependsOnId])
 }
+
+
+/// Configuration éditable du Brand Hub. Une seule ligne ("main") sert de source de vérité.
+model BrandSettings {
+  id String @id @default("main")
+
+  version   String @default("1.0")
+  tagline   String @default("Des problèmes aux solutions, ensemble.")
+  mantra    String @default("Build Before Consume.")
+  intro     String @default("Une identité panafricaine contemporaine pour celles et ceux qui construisent.")
+
+  gold      String @default("#F5B800")
+  black     String @default("#111111")
+  green     String @default("#22C55E")
+  ivory     String @default("#FAFAF8")
+  night     String @default("#0D0C0A")
+  stone     String @default("#5C5C54")
+
+  visualPrinciple String @default("Signal + Structure + Humain")
+  visualGuidance  String @default("Grilles, blocs, lignes, nœuds, code et personnes réelles. Les références africaines doivent avoir du sens, jamais servir de remplissage folklorique.")
+
+  graphicGuidance String @default("Grille, hiérarchie, photo, illustration, exports et fichiers sources.")
+  motionGuidance  String @default("Mouvement, lower thirds, transitions, titres, sous-titres et safe areas.")
+  devGuidance     String @default("Tokens, composants, accessibilité, responsive, dark mode et reduced motion.")
+  socialGuidance  String @default("Déclinaisons par canal, lisibilité mobile, CTA, alt text et campagne.")
+
+  webinarLabel String @default("WEBINAR #01")
+  webinarTitle String @default("COMPRENDRE.\nCONSTRUIRE.\nPARTAGER.")
+  webinarMeta  String @default("15 OCT · 18:30 GMT · EN LIGNE")
+
+  figmaUrl String?
+  canvaUrl String?
+  assetsUrl String?
+
+  updatedById String?
+  updatedAt DateTime @updatedAt
+}
