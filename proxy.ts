@@ -13,6 +13,12 @@ export function proxy(request: NextRequest) {
       : NextResponse.next();
   }
 
+  // La charte publique reste consultable pendant la phase de construction.
+  // Les routes d'administration restent derrière la gate et leur RBAC.
+  if (pathname === "/brand") {
+    return NextResponse.next();
+  }
+
   if (!previewEnabled) {
     return NextResponse.redirect(new URL("/construction", request.url));
   }
