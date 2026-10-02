@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Braces, Clapperboard, Code2, LayoutTemplate, Palette, Users } from "lucide-react";
-import { BrandActions } from "@/components/brand/brand-actions";\nimport { getBrandSettings } from "@/features/brand/settings";
+import { BrandActions } from "@/components/brand/brand-actions";
+import { getBrandSettings } from "@/features/brand/settings";
 export const metadata:Metadata={title:"Brand Hub — AfroCodeurs",description:"Charte graphique et système de production officiel AfroCodeurs."};
 const nav=[["Fondations","#fondations"],["Couleurs","#couleurs"],["Typographie","#typographie"],["Langage visuel","#langage"],["Métiers","#metiers"],["Webinars","#webinars"],["DO / DON'T","#rules"],["Production","#production"]];
 export default async function BrandPage(){const b=await getBrandSettings(); const palette=[["Gold 500",b.gold,"Signal · marque · CTA"],["Black 950",b.black,"Structure · texte · premium"],["Green 500",b.green,"Actif · contribution · succès"],["Ivory 50",b.ivory,"Fond clair"],["Night 1000",b.night,"Fond sombre"],["Stone 600",b.stone,"Texte secondaire"]]; return <div className="brand-page bg-[#FAFAF8] text-[#111111]">
