@@ -1263,3 +1263,53 @@ model BrandSettings {
   updatedById String?
   updatedAt DateTime @updatedAt
 }
+
+
+/// Symbole original AfroCodeurs administrable depuis le Brand Studio.
+model BrandSymbolAsset {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  family    String
+  meaning   String
+  svg       String
+  uses      String[] @default([])
+  status    String   @default("DRAFT")
+  version   String   @default("1.0")
+  createdById String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([family])
+  @@index([status])
+}
+
+/// Référence patrimoniale proposée/documentée. Publication et droit d'usage restent séparés.
+model HeritageRecord {
+  id                  String   @id @default(cuid())
+  code                String   @unique
+  name                String
+  system              String
+  people              String
+  geography           String
+  region              String
+  kind                String
+  meaning             String
+  documentationStatus String   @default("proposed")
+  communityStatus     String   @default("recommended")
+  usagePolicy         String   @default("reference-only")
+  sourceLabel         String
+  sourceUrl           String
+  note                String?
+  svg                 String?
+  status              String   @default("DRAFT")
+  contributorId       String?
+  validatorId         String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([system])
+  @@index([region])
+  @@index([status])
+  @@index([documentationStatus])
+}
