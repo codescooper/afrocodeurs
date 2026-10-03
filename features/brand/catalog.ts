@@ -1,0 +1,5 @@
+import {db} from "@/lib/db";
+import {brandSymbols} from "@/features/brand/symbols";
+import {heritageEntries} from "@/features/brand/heritage";
+export async function getPublicBrandSymbols(){const rows=await db.brandSymbolAsset.findMany({where:{status:"PUBLISHED"},orderBy:{name:"asc"}});return [...brandSymbols,...rows.map(x=>({id:x.id,slug:x.slug,name:x.name,family:x.family as typeof brandSymbols[number]["family"],meaning:x.meaning,svg:x.svg,uses:x.uses}))]}
+export async function getPublicHeritage(){const rows=await db.heritageRecord.findMany({where:{status:"PUBLISHED"},orderBy:{name:"asc"}});return [...heritageEntries,...rows.map(x=>({id:x.code,name:x.name,system:x.system,people:x.people,geography:x.geography,region:x.region,kind:x.kind,meaning:x.meaning,documentationStatus:x.documentationStatus as typeof heritageEntries[number]["documentationStatus"],communityStatus:x.communityStatus as typeof heritageEntries[number]["communityStatus"],usagePolicy:x.usagePolicy as typeof heritageEntries[number]["usagePolicy"],sourceLabel:x.sourceLabel,sourceUrl:x.sourceUrl,note:x.note??undefined}))]}
