@@ -1,0 +1,10 @@
+CREATE TABLE "BrandSymbolAsset" ("id" TEXT NOT NULL,"slug" TEXT NOT NULL,"name" TEXT NOT NULL,"family" TEXT NOT NULL,"meaning" TEXT NOT NULL,"svg" TEXT NOT NULL,"uses" TEXT[] DEFAULT ARRAY[]::TEXT[],"status" TEXT NOT NULL DEFAULT 'DRAFT',"version" TEXT NOT NULL DEFAULT '1.0',"createdById" TEXT,"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"updatedAt" TIMESTAMP(3) NOT NULL,CONSTRAINT "BrandSymbolAsset_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "BrandSymbolAsset_slug_key" ON "BrandSymbolAsset"("slug");
+CREATE INDEX "BrandSymbolAsset_family_idx" ON "BrandSymbolAsset"("family");
+CREATE INDEX "BrandSymbolAsset_status_idx" ON "BrandSymbolAsset"("status");
+CREATE TABLE "HeritageRecord" ("id" TEXT NOT NULL,"code" TEXT NOT NULL,"name" TEXT NOT NULL,"system" TEXT NOT NULL,"people" TEXT NOT NULL,"geography" TEXT NOT NULL,"region" TEXT NOT NULL,"kind" TEXT NOT NULL,"meaning" TEXT NOT NULL,"documentationStatus" TEXT NOT NULL DEFAULT 'proposed',"communityStatus" TEXT NOT NULL DEFAULT 'recommended',"usagePolicy" TEXT NOT NULL DEFAULT 'reference-only',"sourceLabel" TEXT NOT NULL,"sourceUrl" TEXT NOT NULL,"note" TEXT,"svg" TEXT,"status" TEXT NOT NULL DEFAULT 'DRAFT',"contributorId" TEXT,"validatorId" TEXT,"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"updatedAt" TIMESTAMP(3) NOT NULL,CONSTRAINT "HeritageRecord_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "HeritageRecord_code_key" ON "HeritageRecord"("code");
+CREATE INDEX "HeritageRecord_system_idx" ON "HeritageRecord"("system");
+CREATE INDEX "HeritageRecord_region_idx" ON "HeritageRecord"("region");
+CREATE INDEX "HeritageRecord_status_idx" ON "HeritageRecord"("status");
+CREATE INDEX "HeritageRecord_documentationStatus_idx" ON "HeritageRecord"("documentationStatus");
