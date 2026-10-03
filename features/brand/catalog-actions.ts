@@ -1,0 +1,10 @@
+"use server";
+import {revalidatePath} from "next/cache";
+import {auth} from "@/lib/auth";
+import {can} from "@/lib/permissions";
+import {db} from "@/lib/db";
+const val=(f:FormData,k:string,n=2000)=>String(f.get(k)??"").trim().slice(0,n);
+async function admin(){const s=await auth();if(!s?.user||!can(s.user.role,"system:manage"))throw new Error("Non autorisé");return s.user}
+export async function createBrandSymbolAction(f:FormData){const u=await admin();const slug=val(f,"slug",80).toLowerCase().replace(/[^a-z0-9-]+/g,"-");if(!slug||!val(f,"name")||!val(f,"svg",12000))throw new Error("Nom, slug et SVG requis");await db.brandSymbolAsset.create({data:{slug,name:val(f,"name",120),family:val(f,"family",40),meaning:val(f,"meaning",500),svg:val(f,"svg",12000),uses:val(f,"uses",300).split(",").map(x=>x.trim()).filter(Boolean),status:val(f,"status",20)||"DRAFT",createdById:u.id}});revalidatePath("/admin/brand")}
+export async function createHeritageRecordAction(f:FormData){const u=await admin();const sourceUrl=val(f,"sourceUrl",500);if(!/^https?:\/\//.test(sourceUrl))throw new Error("Source URL requise");await db.heritageRecord.create({data:{code:val(f,"code",40),name:val(f,"name",120),system:val(f,"system",120),people:val(f,"people",200),geography:val(f,"geography",200),region:val(f,"region",120),kind:val(f,"kind",120),meaning:val(f,"meaning",1000),documentationStatus:val(f,"documentationStatus",40)||"proposed",communityStatus:val(f,"communityStatus",40)||"recommended",usagePolicy:val(f,"usagePolicy",60)||"reference-only",sourceLabel:val(f,"sourceLabel",160),sourceUrl,note:val(f,"note",1000)||null,svg:val(f,"svg",12000)||null,status:"DRAFT",contributorId:u.id}});revalidatePath("/admin/brand")}
+export async function setCatalogStatusAction(f:FormData){await admin();const id=val(f,"id",80),kind=val(f,"kind",20),status=val(f,"status",20);if(!["DRAFT","PUBLISHED","ARCHIVED"].includes(status))throw new Error("Statut invalide");if(kind==="symbol")await db.brandSymbolAsset.update({where:{id},data:{status}});else if(kind==="heritage")await db.heritageRecord.update({where:{id},data:{status}});revalidatePath("/admin/brand");revalidatePath("/brand")}
