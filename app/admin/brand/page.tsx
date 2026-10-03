@@ -5,6 +5,7 @@ import { can } from "@/lib/permissions";
 import { getBrandSettings } from "@/features/brand/settings";
 import { updateBrandSettingsAction } from "@/features/brand/actions";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { BrandCatalogAdmin } from "@/components/brand/catalog-admin";
 export const metadata={title:"Brand Hub · Administration"};
 const field="rounded-md border border-border bg-background px-3 py-2 text-sm";
 export default async function AdminBrandPage(){
@@ -19,7 +20,7 @@ export default async function AdminBrandPage(){
   <Section title="Exemple Webinar"><Grid><F n="webinarLabel" l="Label" v={b.webinarLabel}/><F n="webinarMeta" l="Date / meta" v={b.webinarMeta}/></Grid><TA n="webinarTitle" l="Titre (une ligne par niveau)" v={b.webinarTitle}/></Section>
   <Section title="Ressources externes"><Grid><F n="figmaUrl" l="Figma" v={b.figmaUrl??""} type="url"/><F n="canvaUrl" l="Canva" v={b.canvaUrl??""} type="url"/><F n="assetsUrl" l="Brand assets / Drive" v={b.assetsUrl??""} type="url"/></Grid></Section>
   <div className="sticky bottom-4 flex justify-end"><Button type="submit" size="lg">Enregistrer la charte</Button></div>
- </form></div>
+ </form><BrandCatalogAdmin/></div>
 }
 function Section({title,children}:{title:string;children:React.ReactNode}){return <section className="grid gap-4 rounded-xl border border-border bg-card p-5"><h2 className="text-lg font-semibold">{title}</h2>{children}</section>}
 function Grid({children}:{children:React.ReactNode}){return <div className="grid gap-4 md:grid-cols-3">{children}</div>}
