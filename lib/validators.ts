@@ -145,6 +145,7 @@ export const projectSchema = z.object({
     ])
     .default("IDEA"),
   problemId: z.string().optional().or(z.literal("")),
+  solutionId: z.string().optional().or(z.literal("")),
   communityId: z.string().optional().or(z.literal("")),
 });
 

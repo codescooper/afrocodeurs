@@ -1,11 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, Eye, Globe, MapPin, Scale } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Eye,
+  GitBranch,
+  Globe,
+  MapPin,
+  Scale,
+} from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { can } from "@/lib/permissions";
 import { SOLUTION_TYPE_LABELS } from "@/features/solutions/constants";
+import { PROJECT_STATUS_LABELS } from "@/features/projects/constants";
 import { ReportForm } from "@/features/admin/report-form";
+import { buttonVariants } from "@/components/ui/button";
 
 /** Page détail d'une solution de l'AfroAtlas (Sprint 6). */
 export default async function SolutionDetailPage({
@@ -18,7 +29,13 @@ export default async function SolutionDetailPage({
 
   const solution = await db.solution.findUnique({
     where: { slug },
-    include: { createdBy: { select: { username: true, name: true } } },
+    include: {
+      createdBy: { select: { username: true, name: true } },
+      projects: {
+        orderBy: { createdAt: "desc" },
+        select: { id: true, name: true, slug: true, status: true },
+      },
+    },
   });
 
   if (!solution) notFound();
@@ -27,6 +44,28 @@ export default async function SolutionDetailPage({
     where: { id: solution.id },
     data: { views: { increment: 1 } },
   });
+
+  const problemRelations = await db.entityRelation.findMany({
+    where: {
+      sourceType: "SOLUTION",
+      sourceId: solution.id,
+      relationType: "SOLVES",
+      targetType: "PROBLEM",
+    },
+    orderBy: { createdAt: "asc" },
+    select: { targetId: true },
+  });
+  const problems = problemRelations.length
+    ? await db.problem.findMany({
+        where: { id: { in: problemRelations.map((item) => item.targetId) } },
+        orderBy: { createdAt: "asc" },
+        select: { id: true, title: true, slug: true },
+      })
+    : [];
+  const canCreateProject = can(session?.user?.role, "project:create");
+  const projectHref = `/projects/new?solution=${encodeURIComponent(solution.id)}${
+    problems[0] ? `&problem=${encodeURIComponent(problems[0].id)}` : ""
+  }`;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
@@ -97,6 +136,72 @@ export default async function SolutionDetailPage({
           </a>
         )}
       </dl>
+
+      <section className="mt-10 rounded-2xl border border-border bg-muted/30 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Problème → Solution → Projet
+            </p>
+            <h2 className="mt-1 text-xl font-bold">Passer à la construction</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Transformez cette solution en projet collaboratif, reliez-la à un
+              dépôt GitHub et rendez sa progression visible par toute la
+              communauté.
+            </p>
+          </div>
+          {canCreateProject && (
+            <Link href={projectHref} className={buttonVariants({ size: "sm" })}>
+              Créer le projet
+              <ArrowRight className="size-4" />
+            </Link>
+          )}
+        </div>
+
+        {problems.length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-medium text-muted-foreground">
+              Problème{problems.length > 1 ? "s" : ""} traité
+              {problems.length > 1 ? "s" : ""}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {problems.map((problem) => (
+                <Link
+                  key={problem.id}
+                  href={`/explorer/${problem.slug}`}
+                  className="rounded-full border border-border bg-background px-3 py-1.5 text-sm hover:bg-muted"
+                >
+                  {problem.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {solution.projects.length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-medium text-muted-foreground">
+              Projet{solution.projects.length > 1 ? "s" : ""} issu
+              {solution.projects.length > 1 ? "s" : ""} de cette solution
+            </p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {solution.projects.map((project) => (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.slug}`}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-background p-3 font-medium hover:bg-muted"
+                >
+                  <GitBranch className="size-4 text-primary" />
+                  <span className="min-w-0 flex-1 truncate">{project.name}</span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                    {PROJECT_STATUS_LABELS[project.status]}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {session?.user && (
         <div className="mt-10 border-t border-border pt-4">

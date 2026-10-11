@@ -10,6 +10,7 @@ import { hasRank } from "@/lib/permissions";
 import { rateLimit } from "@/lib/rate-limit";
 import { dependencySchema, projectSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
+import { notify } from "@/features/notifications/notify";
 import { syncProject } from "./sync";
 
 export type ProjectFormState = { error?: string } | undefined;
@@ -32,36 +33,120 @@ export async function createProjectAction(
     websiteUrl: formData.get("websiteUrl") || "",
     status: formData.get("status") || "IDEA",
     problemId: formData.get("problemId") || "",
+    solutionId: formData.get("solutionId") || "",
     communityId: formData.get("communityId") || "",
   });
   if (!parsed.success) return { error: invalidMessage(parsed.error) };
 
   const d = parsed.data;
+  const solutionId = orNull(d.solutionId);
+  let problemId = orNull(d.problemId);
+  let solutionAuthorId: string | null = null;
+
+  if (solutionId) {
+    const solution = await db.solution.findUnique({
+      where: { id: solutionId },
+      select: { id: true, createdById: true },
+    });
+    if (!solution) return { error: "Solution introuvable." };
+    solutionAuthorId = solution.createdById;
+
+    if (!problemId) {
+      const relation = await db.entityRelation.findFirst({
+        where: {
+          sourceType: "SOLUTION",
+          sourceId: solutionId,
+          relationType: "SOLVES",
+          targetType: "PROBLEM",
+        },
+        orderBy: { createdAt: "asc" },
+        select: { targetId: true },
+      });
+      problemId = relation?.targetId ?? null;
+    }
+  }
+
   const slug = await uniqueSlug(d.name, "projet", async (s) =>
     Boolean(
       await db.project.findUnique({ where: { slug: s }, select: { id: true } }),
     ),
   );
 
-  const project = await db.project.create({
-    data: {
-      name: d.name,
-      slug,
-      description: d.description,
-      githubRepo: d.githubRepo,
-      websiteUrl: orNull(d.websiteUrl),
-      status: d.status,
-      problemId: orNull(d.problemId),
-      communityId: orNull(d.communityId),
-      createdById: g.user.id,
-    },
+  const project = await db.$transaction(async (tx) => {
+    const created = await tx.project.create({
+      data: {
+        name: d.name,
+        slug,
+        description: d.description,
+        githubRepo: d.githubRepo,
+        websiteUrl: orNull(d.websiteUrl),
+        status: d.status,
+        problemId,
+        solutionId,
+        communityId: orNull(d.communityId),
+        createdById: g.user.id,
+      },
+    });
+
+    if (solutionId && problemId) {
+      await tx.entityRelation.upsert({
+        where: {
+          sourceType_sourceId_relationType_targetType_targetId: {
+            sourceType: "SOLUTION",
+            sourceId: solutionId,
+            relationType: "SOLVES",
+            targetType: "PROBLEM",
+            targetId: problemId,
+          },
+        },
+        update: {},
+        create: {
+          sourceType: "SOLUTION",
+          sourceId: solutionId,
+          relationType: "SOLVES",
+          targetType: "PROBLEM",
+          targetId: problemId,
+          createdById: g.user.id,
+        },
+      });
+    }
+
+    return created;
   });
   await award(g.user.id, "PROJECT_CREATED", { type: "PROJECT", id: project.id });
 
   // Synchro initiale (best-effort — ne bloque pas la création si GitHub échoue).
   await syncProject(project.id);
 
+  const problemAuthor = problemId
+    ? await db.problem.findUnique({
+        where: { id: problemId },
+        select: { createdById: true },
+      })
+    : null;
+  const recipients = [
+    ...new Set(
+      [solutionAuthorId, problemAuthor?.createdById].filter(
+        (userId): userId is string => Boolean(userId),
+      ),
+    ),
+  ];
+  await Promise.all(
+    recipients.map((userId) =>
+      notify({
+        userId,
+        actorId: g.user.id,
+        type: "PROJECT_LAUNCHED",
+        title: "Une solution passe à la construction 🚀",
+        body: `Le projet « ${project.name} » relie maintenant un problème à une solution et ouvre sa roadmap à la communauté.`,
+        link: `/projects/${project.slug}`,
+      }),
+    ),
+  );
+
   revalidatePath("/projects");
+  if (solutionId) revalidatePath("/atlas/[slug]", "page");
+  if (problemId) revalidatePath("/explorer/[slug]", "page");
   redirect(`/projects/${slug}`);
 }
 
@@ -103,6 +188,7 @@ export async function updateProjectAction(
     websiteUrl: formData.get("websiteUrl") || "",
     status: formData.get("status") || "IDEA",
     problemId: formData.get("problemId") || "",
+    solutionId: formData.get("solutionId") || "",
     communityId: formData.get("communityId") || "",
   });
   if (!parsed.success) return { error: invalidMessage(parsed.error) };
@@ -117,6 +203,7 @@ export async function updateProjectAction(
       websiteUrl: orNull(d.websiteUrl),
       status: d.status,
       problemId: orNull(d.problemId),
+      solutionId: orNull(d.solutionId),
       communityId: orNull(d.communityId),
     },
     select: { slug: true },
