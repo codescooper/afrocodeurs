@@ -1006,6 +1006,8 @@ model Solution {
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id])
 
+  projects Project[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1136,6 +1138,8 @@ model Project {
 
   problemId   String?
   problem     Problem?   @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  solutionId  String?
+  solution    Solution?  @relation(fields: [solutionId], references: [id], onDelete: SetNull)
   communityId String?
   community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
 
@@ -1152,6 +1156,7 @@ model Project {
   @@index([status])
   @@index([githubRepo])
   @@index([createdById])
+  @@index([solutionId])
 }
 
 // Milestone GitHub mis en cache = « phase » de la roadmap.

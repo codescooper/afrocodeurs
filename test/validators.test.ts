@@ -5,6 +5,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   knowledgeSchema,
+  projectSchema,
 } from "@/lib/validators";
 
 describe("signUpSchema", () => {
@@ -43,6 +44,23 @@ describe("signUpSchema", () => {
       password: "court",
     });
     expect(r.success).toBe(false);
+  });
+});
+
+describe("projectSchema", () => {
+  it("accepte la transformation d'une solution en projet", () => {
+    const result = projectSchema.safeParse({
+      name: "Santé rurale mobile",
+      description: "Un projet collaboratif issu d'une solution validée.",
+      githubRepo: "afrocodeurs/sante-rurale",
+      websiteUrl: "",
+      status: "IDEA",
+      problemId: "problem-1",
+      solutionId: "solution-1",
+      communityId: "",
+    });
+
+    expect(result.success).toBe(true);
   });
 });
 

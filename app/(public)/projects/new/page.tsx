@@ -10,15 +10,25 @@ export const metadata = { title: "Référencer un projet" };
 export const dynamic = "force-dynamic";
 
 /** Référencement d'un projet — réservé aux contributeurs (email vérifié). */
-export default async function NewProjectPage() {
+export default async function NewProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ problem?: string; solution?: string }>;
+}) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   if (!can(session.user.role, "project:create")) redirect("/projects");
 
-  const [problems, communities] = await Promise.all([
+  const query = await searchParams;
+  const [problems, solutions, communities] = await Promise.all([
     db.problem.findMany({
       orderBy: { createdAt: "desc" },
       select: { id: true, title: true },
+      take: 200,
+    }),
+    db.solution.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
       take: 200,
     }),
     db.community.findMany({
@@ -27,6 +37,27 @@ export default async function NewProjectPage() {
       take: 200,
     }),
   ]);
+
+  const initialSolution = solutions.find((item) => item.id === query.solution);
+  let initialProblemId = problems.some((item) => item.id === query.problem)
+    ? query.problem
+    : undefined;
+
+  if (initialSolution && !initialProblemId) {
+    const relation = await db.entityRelation.findFirst({
+      where: {
+        sourceType: "SOLUTION",
+        sourceId: initialSolution.id,
+        relationType: "SOLVES",
+        targetType: "PROBLEM",
+      },
+      orderBy: { createdAt: "asc" },
+      select: { targetId: true },
+    });
+    if (relation && problems.some((item) => item.id === relation.targetId)) {
+      initialProblemId = relation.targetId;
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12">
@@ -38,7 +69,13 @@ export default async function NewProjectPage() {
         issue.
       </p>
       <div className="mt-8">
-        <ProjectForm problems={problems} communities={communities} />
+        <ProjectForm
+          problems={problems}
+          solutions={solutions}
+          communities={communities}
+          initialProblemId={initialProblemId}
+          initialSolutionId={initialSolution?.id}
+        />
       </div>
     </div>
   );
