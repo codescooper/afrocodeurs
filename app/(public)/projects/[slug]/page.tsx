@@ -73,6 +73,7 @@ export default async function ProjectDetailPage({
     where: { slug },
     include: {
       problem: { select: { title: true, slug: true } },
+      solution: { select: { name: true, slug: true } },
       community: { select: { name: true, slug: true } },
       createdBy: { select: { username: true, name: true } },
     },
@@ -167,6 +168,14 @@ export default async function ProjectDetailPage({
             className="inline-flex items-center rounded-md border border-border px-3 py-1.5 hover:bg-muted"
           >
             Résout : {project.problem.title}
+          </Link>
+        )}
+        {project.solution && (
+          <Link
+            href={`/atlas/${project.solution.slug}`}
+            className="inline-flex items-center rounded-md border border-border px-3 py-1.5 hover:bg-muted"
+          >
+            Issu de : {project.solution.name}
           </Link>
         )}
         {project.community && (

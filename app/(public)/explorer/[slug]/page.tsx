@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Eye, Globe, TrendingUp } from "lucide-react";
+import { Eye, GitBranch, Globe, TrendingUp } from "lucide-react";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -18,6 +18,7 @@ import { isBookmarked } from "@/features/bookmarks/queries";
 import { ContentActions } from "@/features/content-management/content-actions";
 import { promoteContentToFeedbackAction } from "@/features/product-feedback/actions";
 import { CommentSection } from "@/features/comments/comment-section";
+import { PROJECT_STATUS_LABELS } from "@/features/projects/constants";
 
 /** Page détail d'un problème (Sprint 3). */
 export default async function ProblemDetailPage({
@@ -40,8 +41,16 @@ export default async function ProblemDetailPage({
     data: { views: { increment: 1 } },
   });
 
-  const linked = await getProblemRelations(problem.id);
+  const [linked, projects] = await Promise.all([
+    getProblemRelations(problem.id),
+    db.project.findMany({
+      where: { problemId: problem.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, name: true, slug: true, status: true },
+    }),
+  ]);
   const canLink = can(session?.user?.role, "relation:create");
+  const canCreateProject = can(session?.user?.role, "project:create");
   const isStaff = session?.user
     ? hasRank(session.user.role, "MODERATOR")
     : false;
@@ -162,6 +171,14 @@ export default async function ProblemDetailPage({
                       {item.kind === "SOLUTION" ? "Solution" : "Ressource"} ·{" "}
                       {item.badge}
                     </span>
+                    {item.kind === "SOLUTION" && canCreateProject && (
+                      <Link
+                        href={`/projects/new?solution=${encodeURIComponent(item.sourceId)}&problem=${encodeURIComponent(problem.id)}`}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Lancer un projet
+                      </Link>
+                    )}
                     {canUnlink && (
                       <form action={unlinkFromProblemAction}>
                         <input
@@ -195,6 +212,33 @@ export default async function ProblemDetailPage({
           </div>
         )}
       </section>
+
+      {projects.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold">Projets en construction</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Les initiatives concrètes lancées par la communauté pour répondre à
+            ce problème.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {projects.map((project) => (
+              <Link
+                key={project.id}
+                href={`/projects/${project.slug}`}
+                className="flex items-center gap-3 rounded-xl border border-border p-4 hover:bg-muted"
+              >
+                <GitBranch className="size-5 text-primary" />
+                <span className="min-w-0 flex-1 font-medium">
+                  {project.name}
+                </span>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                  {PROJECT_STATUS_LABELS[project.status]}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {session?.user && (
         <div className="mt-10 border-t border-border pt-4">

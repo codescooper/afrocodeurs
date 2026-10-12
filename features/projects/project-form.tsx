@@ -12,10 +12,16 @@ const inputClass =
 /** Formulaire de référencement d'un projet (branche la roadmap sur un dépôt GitHub). */
 export function ProjectForm({
   problems,
+  solutions,
   communities,
+  initialProblemId = "",
+  initialSolutionId = "",
 }: {
   problems: { id: string; title: string }[];
+  solutions: { id: string; name: string }[];
   communities: { id: string; name: string }[];
+  initialProblemId?: string;
+  initialSolutionId?: string;
 }) {
   const [state, formAction, pending] = useActionState(
     createProjectAction,
@@ -87,10 +93,33 @@ export function ProjectForm({
         </label>
       </div>
 
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        Solution à transformer (optionnel)
+        <select
+          name="solutionId"
+          defaultValue={initialSolutionId}
+          className={inputClass}
+        >
+          <option value="">— Aucune —</option>
+          {solutions.map((solution) => (
+            <option key={solution.id} value={solution.id}>
+              {solution.name}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs font-normal text-muted-foreground">
+          Conserve la trace de la solution communautaire à l’origine du projet.
+        </span>
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm font-medium">
           Problème résolu (optionnel)
-          <select name="problemId" defaultValue="" className={inputClass}>
+          <select
+            name="problemId"
+            defaultValue={initialProblemId}
+            className={inputClass}
+          >
             <option value="">— Aucun —</option>
             {problems.map((p) => (
               <option key={p.id} value={p.id}>
