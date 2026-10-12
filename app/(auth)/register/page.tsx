@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(registerAction, undefined);
   const [usernameNormalized, setUsernameNormalized] = useState(false);
+  const [powReady, setPowReady] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,14 +81,18 @@ export default function RegisterPage() {
         </label>
 
         <TurnstileWidget />
-        <PowWidget />
+        <PowWidget onReadyChange={setPowReady} />
 
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>
         )}
 
-        <Button type="submit" disabled={pending} size="lg">
-          {pending ? "Création…" : "Créer mon compte"}
+        <Button type="submit" disabled={pending || !powReady} size="lg">
+          {pending
+            ? "Création…"
+            : !powReady
+              ? "Vérification en cours…"
+              : "Créer mon compte"}
         </Button>
       </form>
 
