@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Copy, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { publicShareUrl, whatsappShareUrl } from "@/lib/content-share";
+import { isShareCancellation, publicShareUrl, whatsappShareUrl } from "@/lib/content-share";
 
 export function ContentShare({ title, path }: { title: string; path: string }) {
   const [message, setMessage] = useState("");
@@ -31,7 +31,7 @@ export function ContentShare({ title, path }: { title: string; path: string }) {
     try {
       await navigator.share({ title, url: url() });
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") return;
+      if (isShareCancellation(error)) return;
       await copy();
     }
   }

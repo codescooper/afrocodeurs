@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { publicShareUrl, whatsappShareUrl } from "../lib/content-share";
+import { isShareCancellation, publicShareUrl, whatsappShareUrl } from "../lib/content-share";
 import { ContentShare } from "../components/shared/content-share";
 
 describe("public content sharing", () => {
+  it("recognizes cancellation without requiring an Error prototype", () => {
+    expect(isShareCancellation({ name: "AbortError" })).toBe(true);
+    expect(isShareCancellation(new DOMException("Cancelled", "AbortError"))).toBe(true);
+    expect(isShareCancellation({ name: "NotAllowedError" })).toBe(false);
+    expect(isShareCancellation(null)).toBe(false);
+    expect(isShareCancellation("AbortError")).toBe(false);
+  });
   it("renders accessible controls without accessing browser APIs on the server", () => {
     const html = renderToStaticMarkup(createElement(ContentShare, {
       title: "AfroCodeurs",

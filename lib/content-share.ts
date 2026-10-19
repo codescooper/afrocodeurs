@@ -15,3 +15,8 @@ export function publicShareUrl(path: string, origin: string): string {
 export function whatsappShareUrl(title: string, url: string): string {
   return `https://wa.me/?text=${encodeURIComponent(`${title.trim()}\n${url}`)}`;
 }
+
+export function isShareCancellation(error: unknown): boolean {
+  return typeof error === "object" && error !== null &&
+    "name" in error && error.name === "AbortError";
+}
