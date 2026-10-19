@@ -13,6 +13,8 @@ import { USER_ROLE_LABELS } from "./constants";
 export type ReportFormState = { error?: string; success?: boolean } | undefined;
 
 const REPORTABLE: EntityType[] = [
+  "MENTORSHIP_OFFER",
+  "MENTORSHIP_REQUEST",
   "PROBLEM",
   "KNOWLEDGE",
   "QUESTION",
@@ -156,6 +158,15 @@ export async function createReportAction(
     return { error: "Cible invalide." };
   }
   if (typeof targetId !== "string") return { error: "Cible invalide." };
+
+  if (rawType === "MENTORSHIP_REQUEST") {
+    const request = await db.mentorshipRequest.findFirst({ where: { id: targetId, OR: [{ menteeId: g.user.id }, { offer: { mentorId: g.user.id } }] }, select: { id: true } });
+    if (!request) return { error: "Cible invalide." };
+  }
+  if (rawType === "MENTORSHIP_OFFER") {
+    const offer = await db.mentorshipOffer.findFirst({ where: { id: targetId, OR: [{ active: true, suspendedAt: null }, { requests: { some: { menteeId: g.user.id } } }] }, select: { id: true } });
+    if (!offer) return { error: "Cible invalide." };
+  }
 
   await db.report.create({
     data: {

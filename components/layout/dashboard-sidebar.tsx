@@ -30,6 +30,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
       { label: "Mes contributions", href: "/dashboard/contributions", icon: FileText },
       { label: "Historique", href: "/dashboard/activity", icon: History },
       { label: "Mes communautés", href: "/dashboard/communities", icon: Users },
+      { label: "Mon mentorat", href: "/dashboard/mentorship", icon: Users },
       { label: "Messagerie", href: "/messages", icon: MessagesSquare },
       { label: "Nouveautés", href: "/updates", icon: Megaphone },
       { label: "Mes favoris", href: "/dashboard/saved", icon: Bookmark },
