@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 import {
   CalendarDays,
@@ -77,6 +78,7 @@ export default async function EventPage({
       </div>
 
       <h1 className="mt-4 text-4xl font-bold">{event.title}</h1>
+      <ContentShare title={event.title} path={`/events/${encodeURIComponent(event.slug)}`} />
       <p className="mt-3 text-lg text-muted-foreground">{event.summary}</p>
 
       <div className="mt-6 grid gap-3 rounded-xl border p-5 sm:grid-cols-2">

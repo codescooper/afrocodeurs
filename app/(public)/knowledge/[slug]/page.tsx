@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 import { Clock, ExternalLink, Eye, ShieldCheck, ShieldQuestion, Zap } from "lucide-react";
 
@@ -97,6 +98,7 @@ export default async function KnowledgeDetailPage({
       </div>
 
       <h1 className="mt-1 text-3xl font-bold tracking-tight">{item.title}</h1>
+      <ContentShare title={item.title} path={`/knowledge/${encodeURIComponent(item.slug)}`} />
       <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
         <span>
           Par{" "}

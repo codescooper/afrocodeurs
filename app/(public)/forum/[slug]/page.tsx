@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 import { Check, CheckCircle2, Eye } from "lucide-react";
 
@@ -91,6 +92,7 @@ export default async function QuestionDetailPage({
           <h1 className="mt-2 text-2xl font-bold tracking-tight">
             {question.title}
           </h1>
+          <ContentShare title={question.title} path={`/forum/${encodeURIComponent(question.slug)}`} />
           <p className="mt-1 text-sm text-muted-foreground">
             Par{" "}
             <Link

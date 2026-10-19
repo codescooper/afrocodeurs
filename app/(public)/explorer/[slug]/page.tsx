@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 import { Eye, GitBranch, Globe, TrendingUp } from "lucide-react";
 
@@ -90,6 +91,7 @@ export default async function ProblemDetailPage({
       <h1 className="mt-1 text-3xl font-bold tracking-tight">
         {problem.title}
       </h1>
+      <ContentShare title={problem.title} path={`/explorer/${encodeURIComponent(problem.slug)}`} />
       <p className="mt-2 text-sm text-muted-foreground">
         Proposé par{" "}
         <Link
