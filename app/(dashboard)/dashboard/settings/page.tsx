@@ -7,6 +7,8 @@ import {
 } from "@/features/settings/settings-forms";
 import { signOutAction } from "@/features/settings/actions";
 import { USER_ROLE_LABELS } from "@/features/admin/constants";
+import { SocialButtons } from "@/features/auth/social-buttons";
+import { socialProviderConfig } from "@/lib/oauth-config";
 
 export const metadata = { title: "Paramètres" };
 
@@ -21,6 +23,8 @@ export default async function SettingsPage() {
       email: true,
       role: true,
       passwordHash: true,
+      emailVerified: true,
+      accounts: { select: { provider: true } },
     },
   });
 
@@ -64,6 +68,11 @@ export default async function SettingsPage() {
       </section>
 
       <section className="flex flex-col gap-3 border-t border-border pt-6">
+        {socialProviderConfig().length > 0 && <div className="flex flex-col gap-3">
+          <h2 className="font-semibold">Comptes associés</h2>
+          {!user.emailVerified && <p className="text-sm text-muted-foreground">Confirme ton email AfroCodeurs avant d&apos;associer un compte externe.</p>}
+          <SocialButtons linking linked={user.accounts.map(({ provider }) => provider)} disabled={!user.emailVerified} />
+        </div>}
         <h2 className="font-semibold">Session</h2>
         <form action={signOutAction}>
           <Button type="submit" variant="outline">
