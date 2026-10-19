@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { AfroCodeursAdapter } from "./auth-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { db } from "./db";
 import { minimizeAuthToken } from "./auth-token";
+import { socialProviderConfig } from "./oauth-config";
 import type { UserRole } from "@prisma/client";
 
 const credentialsSchema = z.object({
@@ -16,16 +17,18 @@ const credentialsSchema = z.object({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
+  adapter: AfroCodeursAdapter(db),
   // Credentials impose la stratégie JWT ; l'adapter Prisma reste utilisé
   // pour le linking des comptes OAuth (Account/User).
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   providers: [
-    Google({ allowDangerousEmailAccountLinking: true }),
-    GitHub({ allowDangerousEmailAccountLinking: true }),
+    ...socialProviderConfig().map(({ id, clientId, clientSecret }) =>
+      id === "google" ? Google({ clientId, clientSecret }) : GitHub({ clientId, clientSecret }),
+    ),
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -53,10 +56,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
+  events: {
     // À la connexion GitHub, on mémorise le login GitHub sur le profil
     // AfroMaker (pont d'identité pour la réputation des tâches de roadmap).
-    // Best-effort : n'empêche jamais la connexion.
+    // L'evenement arrive apres creation/liaison : l'id est celui de la base.
     async signIn({ user, account, profile }) {
       if (account?.provider === "github" && user?.id) {
         const login = (profile as { login?: string } | null)?.login;
@@ -70,6 +73,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           } catch {
             /* le pont d'identité ne doit pas bloquer la connexion */
           }
+        }
+      }
+    },
+  },
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google" || account?.provider === "github") {
+        if (!user.email?.trim()) return "/login?error=EmailRequired";
+        if (account.provider === "google" && profile?.email_verified !== true) {
+          return "/login?error=EmailNotVerified";
+        }
+        // Enforce linking eligibility on the callback too, not only our form.
+        const current = await auth();
+        if (current?.user && !current.user.isEmailVerified) {
+          return "/dashboard/settings?error=EmailNotVerified";
         }
       }
       return true;

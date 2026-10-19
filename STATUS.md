@@ -11,7 +11,16 @@
 - #27 : activation OAuth insuffisante sans gestion du pseudo obligatoire et verification de la liaison des comptes.
 - Neuf alertes npm audit sur le lockfile existant, a traiter dans un lot separe sans mise a jour forcee.
 - Verification initiale du lot : TypeScript, lint cible et build Next.js 16.4 verts. Revue #86 : detection des annulations de partage sans dependance au prototype Error corrigee ; 81 tests passent. Validation interactive mobile/ordinateur encore a effectuer.
-- Deploiement demande le 19 octobre : bloque avant toute modification du serveur par les regles de main (approbation independante du dernier push et discussions resolues). Aucun contournement des protections effectue.
+- PR #86 fusionnee par le mainteneur puis deployee le 19 octobre. Controles publics application/base et livraison des bundles reussis ; correctifs d'inscription preserves. Test interactif mobile encore a faire.
+
+## Lot OAuth #27 - 19 octobre 2026
+
+- Connexion/inscription : boutons Google et GitHub uniquement si une paire complete de cles est configuree. Variables historiques et noms Auth.js standards acceptes sans melanger les paires.
+- Adaptateur : creation du pseudo obligatoire, email normalise, collisions de pseudo bornees et aucune fusion d'email automatique.
+- Comptes existants : liaison explicite dans les parametres apres confirmation email ; controle egalement au callback. Login GitHub sauvegarde apres creation/connexion reussie.
+- Aucun changement du formulaire anti-robot d'inscription ni du schema de base. Documentation de configuration et recette : `docs/OAUTH.md`.
+- 105 tests, TypeScript, lint cible et build de production passent. Smoke HTTP du build standalone avec identifiants fictifs : trois providers declares, callbacks conformes, secrets absents de la reponse et gate construction preservee. Serveur de test arrete apres verification.
+- Activation et recette reelle chez Google/GitHub encore a effectuer ; aucun deploiement de ce lot, ne pas clore #27 avant ces validations.
 
 ## 🎯 Phase
 
@@ -43,7 +52,7 @@
 
 ## ⏭️ Prochaine action
 
-**Obtenir la revue independante requise sur la PR #86 avant fusion et deploiement.**
+**Faire relire la PR OAuth #27 avant de configurer et tester les applications Google/GitHub reelles.**
 
 ## ⚠️ Risques
 
