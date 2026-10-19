@@ -1,7 +1,16 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-08-17**
-> Statut actualisé à partir du dépôt, de Railway, de GitHub Actions, de Resend et de contrôles HTTP réels.
+**Dernière MAJ : 2026-10-19**
+> Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Lot issues - 19 octobre 2026
+
+- Six issues ouvertes inspectees, aucune PR ouverte au moment du triage.
+- #28 : partage WhatsApp, partage natif et copie du lien ajoutes a sept types de pages publiques. Notifications WhatsApp non implementees : issue a conserver ouverte.
+- Coordination des propositions anglaises (#25) et Meilisearch (#32/#63) preservee ; details et criteres dans `docs/TRIAGE-ISSUES-2026-10-19.md`.
+- #27 : activation OAuth insuffisante sans gestion du pseudo obligatoire et verification de la liaison des comptes.
+- Neuf alertes npm audit sur le lockfile existant, a traiter dans un lot separe sans mise a jour forcee.
+- Verification du lot : 80 tests passes, TypeScript, lint cible et build Next.js 16.4 verts. Validation interactive mobile/ordinateur encore a effectuer.
 
 ## 🎯 Phase
 
@@ -33,7 +42,7 @@
 
 ## ⏭️ Prochaine action
 
-**Choisir/configurer le domaine public, puis le vérifier dans Resend et effectuer un test réel de réception d'email.**
+**Valider la PR de partage #28 sur mobile et ordinateur avant integration.**
 
 ## ⚠️ Risques
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 import {
   ArrowRight,
@@ -82,6 +83,7 @@ export default async function SolutionDetailPage({
       <h1 className="mt-1 text-3xl font-bold tracking-tight">
         {solution.name}
       </h1>
+      <ContentShare title={solution.name} path={`/atlas/${encodeURIComponent(solution.slug)}`} />
       <p className="mt-2 text-sm text-muted-foreground">
         Référencé par{" "}
         <Link

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 import { GitBranch, ExternalLink, Sparkles, ArrowRight, Rocket } from "lucide-react";
 
@@ -123,6 +124,7 @@ export default async function ProjectDetailPage({
           <h1 className="mt-2 text-3xl font-bold tracking-tight">
             {project.name}
           </h1>
+          <ContentShare title={project.name} path={`/projects/${encodeURIComponent(project.slug)}`} />
           <p className="mt-1 text-sm text-muted-foreground">
             Référencé par{" "}
             <Link

@@ -1,5 +1,6 @@
 import { BookOpen, CircleHelp, MapPin, Settings, TriangleAlert, Users } from "lucide-react";
 import Link from "next/link";
+import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ export default async function CommunityDetailPage({
           <h1 className="mt-1 text-3xl font-bold tracking-tight">
             {community.name}
           </h1>
+          <ContentShare title={community.name} path={`/communities/${encodeURIComponent(community.slug)}`} />
           <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Users className="size-4" />
