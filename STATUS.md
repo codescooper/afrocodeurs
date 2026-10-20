@@ -1,6 +1,6 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-20**
+**Dernière MAJ : 2026-10-21**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
 ## Lot issues - 19 octobre 2026
@@ -33,6 +33,8 @@
 - Limites : une proposition par membre/realisation ; pas de preuve automatique de propriete du domaine ni interface de remise en ligne apres suspension. Recette complete des formulaires connectes encore a effectuer.
 - Non deploye. PR mentorat #88 toujours ouverte et distincte de ce lot.
 - Livraison demandee : PR #89 verte en CI, mais approbation independante obligatoire avant fusion. Correctif de concurrence a l'ouverture des discussions ajoute avec trois tests de regression ; annonce communautaire retenue jusqu'au controle de production.
+- PR #89 fusionnee puis deployee avec migration additive et sauvegarde prealable. Correctifs d'inscription existants preserves. Application et base confirment leur sante via HTTP.
+- Recette en production : page Constellation et formulaire direct accessibles, mais le bouton de creation en navigation Next est intercepte comme un slug et produit une 404. Correctif par navigation documentaire propose ; annonce non envoyee tant que ce point n'est pas livre.
 
 ## 🎯 Phase
 
@@ -64,7 +66,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire relire le lot Constellation avant sa fusion et son deploiement avec migration.**
+**Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
 
 ## ⚠️ Risques
 
