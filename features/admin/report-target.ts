@@ -20,6 +20,22 @@ export async function resolveReportTarget(
   id: string,
 ): Promise<ReportTarget | null> {
   switch (type) {
+    case "COMMUNITY_VENTURE": {
+      const v = await db.communityVenture.findUnique({ where: { id }, include: { owner: { select: { username: true } } } });
+      if (!v) return null;
+      return { kind: "Réalisation de la communauté", title: v.name, href: `/constellation/${v.slug}`, snippet: v.description, canHide: true, authorLabel: `@${v.owner.username}`, authorId: v.ownerId };
+    }
+    case "VENTURE_COLLABORATION": {
+      const c = await db.ventureCollaboration.findUnique({ where: { id }, include: { applicant: { select: { username: true } }, venture: { select: { name: true } } } });
+      if (!c) return null;
+      return { kind: "Proposition privée de collaboration", title: c.venture.name, href: "/dashboard/constellation", snippet: c.message, canHide: true, authorLabel: `@${c.applicant.username}`, authorId: c.applicantId };
+    }
+    case "COMMENT": {
+      const c = await db.comment.findFirst({ where: { id, targetType: "COMMUNITY_VENTURE" }, include: { author: { select: { username: true } } } });
+      if (!c) return null;
+      const v = await db.communityVenture.findUnique({ where: { id: c.targetId }, select: { name: true, slug: true } });
+      return { kind: "Commentaire Constellation", title: v?.name ?? "Réalisation retirée", href: v ? `/constellation/${v.slug}` : "/constellation", snippet: c.body, canHide: false, authorLabel: `@${c.author.username}`, authorId: c.authorId };
+    }
     case "KNOWLEDGE": {
       const k = await db.knowledge.findUnique({
         where: { id },
@@ -163,6 +179,17 @@ export async function resolveReportTarget(
 
 /** Masque un contenu (archive / fermeture) — pour les types qui le supportent. */
 export async function hideTarget(type: EntityType, id: string): Promise<void> {
+  if (type === "COMMUNITY_VENTURE") {
+    await db.$transaction([
+      db.communityVenture.updateMany({ where: { id }, data: { status: "SUSPENDED", revision: { increment: 1 } } }),
+      db.ventureCollaboration.updateMany({ where: { ventureId: id, status: "PENDING" }, data: { status: "CANCELLED" } }),
+    ], { isolationLevel: "Serializable" });
+    return;
+  }
+  if (type === "VENTURE_COLLABORATION") {
+    await db.ventureCollaboration.updateMany({ where: { id, status: { in: ["PENDING", "ACCEPTED"] } }, data: { status: "CANCELLED" } });
+    return;
+  }
   if (type === "KNOWLEDGE") {
     await db.knowledge.updateMany({ where: { id }, data: { status: "ARCHIVED" } });
   } else if (type === "PROBLEM") {
@@ -176,6 +203,8 @@ export async function hideTarget(type: EntityType, id: string): Promise<void> {
 
 /** Supprime définitivement un contenu signalé (idempotent). */
 export async function deleteTarget(type: EntityType, id: string): Promise<void> {
+  if (type === "COMMUNITY_VENTURE" || type === "VENTURE_COLLABORATION") { await hideTarget(type, id); return; }
+  if (type === "COMMENT") { await db.comment.deleteMany({ where: { id, targetType: "COMMUNITY_VENTURE" } }); return; }
   switch (type) {
     case "KNOWLEDGE":
       await db.knowledge.deleteMany({ where: { id } });
