@@ -28,6 +28,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
     items: [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
       { label: "Mes contributions", href: "/dashboard/contributions", icon: FileText },
+      { label: "Mes réalisations", href: "/dashboard/constellation", icon: Users },
       { label: "Historique", href: "/dashboard/activity", icon: History },
       { label: "Mes communautés", href: "/dashboard/communities", icon: Users },
       { label: "Messagerie", href: "/messages", icon: MessagesSquare },

@@ -1,6 +1,6 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-19**
+**Dernière MAJ : 2026-10-20**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
 ## Lot issues - 19 octobre 2026
@@ -21,6 +21,18 @@
 - Aucun changement du formulaire anti-robot d'inscription ni du schema de base. Documentation de configuration et recette : `docs/OAUTH.md`.
 - 105 tests, TypeScript, lint cible et build de production passent. Smoke HTTP du build standalone avec identifiants fictifs : trois providers declares, callbacks conformes, secrets absents de la reponse et gate construction preservee. Serveur de test arrete apres verification.
 - Activation et recette reelle chez Google/GitHub encore a effectuer ; aucun deploiement de ce lot, ne pas clore #27 avant ces validations.
+
+## Lot Constellation - 20 octobre 2026
+
+- Catalogue de realisations deployees separe des projets open source GitHub : nuee de bulles, drapeaux locaux, recherche pays/secteur, vue liste et fiches en overlay partageables.
+- Depot par membres verifies, validation independante par moderation, modification remise en attente, signalement et suspension. Aucun envoi de masse aux membres.
+- Commentaires, propositions privees, decisions notifiees et blocage bidirectionnel propres a Constellation. Messagerie existante accessible apres acceptation.
+- Migration additive testee sur base PostgreSQL locale isolee. Documentation : `docs/CONSTELLATION.md`.
+- Verification finale : 127 tests passes, dont neuf tests PostgreSQL ; lint cible et build Next.js 16.4 (TypeScript inclus) reussis.
+- Recette navigateur : ordinateur 1440px et mobile 390px, aucune collision des 18 bulles ; filtres conserves au retour de l'overlay, URL directe sans modale, vue liste fonctionnelle. Debordement de l'en-tete mobile corrige.
+- Limites : une proposition par membre/realisation ; pas de preuve automatique de propriete du domaine ni interface de remise en ligne apres suspension. Recette complete des formulaires connectes encore a effectuer.
+- Non deploye. PR mentorat #88 toujours ouverte et distincte de ce lot.
+- Livraison demandee : PR #89 verte en CI, mais approbation independante obligatoire avant fusion. Correctif de concurrence a l'ouverture des discussions ajoute avec trois tests de regression ; annonce communautaire retenue jusqu'au controle de production.
 
 ## 🎯 Phase
 
@@ -52,7 +64,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire relire la PR OAuth #27 avant de configurer et tester les applications Google/GitHub reelles.**
+**Faire relire le lot Constellation avant sa fusion et son deploiement avec migration.**
 
 ## ⚠️ Risques
 

@@ -22,7 +22,10 @@
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "d3-force": "^3.0.0",
     "d3-geo": "^3.1.1",
+    "flag-icons": "^7.6.0",
+    "i18n-iso-countries": "^7.14.0",
     "lucide-react": "^1.17.0",
     "meilisearch": "^0.58.0",
     "next": "16.4.0",
@@ -42,6 +45,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/d3-force": "^3.0.10",
     "@types/d3-geo": "^3.1.1",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
