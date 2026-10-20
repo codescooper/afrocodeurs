@@ -55,3 +55,21 @@ Les demonstrations navigateur sont uniquement dans cette base locale.
 Recette : filtre pays/secteur/recherche, overlay et retour aux filtres, URL directe,
 mobile/ordinateur sans collision, moderation independante, confidentialite des
 propositions, refus/acceptation/annulation/blocage, commentaires et signalements.
+
+## Annonce communautaire - a publier apres verification en production
+
+Vous avez deja mis un produit ou un service en ligne ? Venez le presenter dans
+Constellation, le nouvel espace AfroCodeurs pour decouvrir ce que construisent
+les membres et trouver des personnes avec qui avancer.
+
+Ajoutez votre logo, le pays de lancement, votre secteur, le lien du service et
+les coups de main dont vous avez besoin. Votre code n'a pas besoin d'etre public :
+les projets open source gardent leur espace dedie.
+
+Vous pouvez aussi decouvrir les realisations, commenter et proposer une
+collaboration en prive. Les fiches sont examinees avant publication.
+
+Pour essayer et proposer votre realisation : https://afrocodeurs.org/constellation
+
+Testez depuis votre telephone ou votre ordinateur et partagez ce qui vous bloque
+ou ce qui manque. Vos retours vont nous aider a rendre cet espace vraiment utile.

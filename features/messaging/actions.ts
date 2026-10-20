@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { guard, invalidMessage } from "@/lib/guard";
@@ -61,9 +62,17 @@ export async function startDirectConversationAction(formData: FormData) {
   const directKey = memberIds.join(":");
   const existing = await db.conversation.findUnique({ where: { directKey }, select: { id: true } });
   if (existing) redirect(`/messages/${existing.id}`);
-  const conversation = await db.conversation.create({
-    data: { type: "DIRECT", directKey, members: { create: memberIds.map((userId) => ({ userId, role: userId === g.user.id ? "OWNER" : "MEMBER" })) } },
-    select: { id: true },
-  });
+  let conversation: { id: string };
+  try {
+    conversation = await db.conversation.create({
+      data: { type: "DIRECT", directKey, members: { create: memberIds.map((userId) => ({ userId, role: userId === g.user.id ? "OWNER" : "MEMBER" })) } },
+      select: { id: true },
+    });
+  } catch (error) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
+    const concurrent = await db.conversation.findUnique({ where: { directKey }, select: { id: true } });
+    if (!concurrent) throw error;
+    conversation = concurrent;
+  }
   redirect(`/messages/${conversation.id}`);
 }
