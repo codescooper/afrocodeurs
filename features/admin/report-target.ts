@@ -29,6 +29,7 @@ export async function resolveReportTarget(
       const request = await db.mentorshipRequest.findUnique({ where: { id }, include: { mentee: { select: { username: true } }, offer: { select: { title: true } } } });
       if (!request) return null;
       return { kind: "Demande privée de mentorat", title: request.offer.title, href: "/dashboard/mentorship", snippet: request.message, canHide: true, authorLabel: `@${request.mentee.username}`, authorId: request.menteeId };
+    }
     case "COMMUNITY_VENTURE": {
       const v = await db.communityVenture.findUnique({ where: { id }, include: { owner: { select: { username: true } } } });
       if (!v) return null;
@@ -197,6 +198,8 @@ export async function hideTarget(type: EntityType, id: string): Promise<void> {
   }
   if (type === "MENTORSHIP_REQUEST") {
     await db.mentorshipRequest.updateMany({ where: { id, status: { in: ["PENDING", "ACCEPTED"] } }, data: { status: "CANCELLED" } });
+    return;
+  }
   if (type === "COMMUNITY_VENTURE") {
     await db.$transaction([
       db.communityVenture.updateMany({ where: { id }, data: { status: "SUSPENDED", revision: { increment: 1 } } }),

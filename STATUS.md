@@ -1,7 +1,13 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-21**
+**Dernière MAJ : 2026-10-22**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Correction CI mentorat - 22 octobre 2026
+
+- PR #88 : deux accolades perdues lors de l'integration Constellation restaurees dans `resolveReportTarget` et `hideTarget`. Retour explicite apres annulation d'une demande de mentorat.
+- Lint complet : aucune erreur, quatre avertissements preexistants conserves. Trois tests de regression couvrent la resolution d'une demande, son annulation et la suspension independante d'une fiche Constellation.
+- 152 tests passent, 15 tests PostgreSQL non executes faute de base isolee active. Build de production et TypeScript reussis ; aucun deploiement.
 
 ## Livraison Constellation - 21 octobre 2026
 
