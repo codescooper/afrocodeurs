@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { MessageCircle, MessagesSquare, Plus, X } from "lucide-react";
 import { ChatRoom } from "./chat-room";
+import { Avatar } from "@/components/shared/avatar";
 
 type Summary = {
   authenticated: boolean;
@@ -46,8 +47,8 @@ export function ChatDock() {
 
     <div className="hidden items-center gap-2 sm:flex">
       <Link href="/messages/new" title="Nouvelle conversation" className="grid size-10 place-items-center rounded-full border border-border bg-background shadow-lg hover:bg-muted"><Plus className="size-4" /></Link>
-      {summary.conversations.slice(0, 3).reverse().map((conversation) => <Link key={conversation.id} href={`/messages/${conversation.id}`} title={`${conversation.title} — ${conversation.preview}`} className="relative grid size-11 place-items-center overflow-hidden rounded-full border-2 border-background bg-secondary text-xs font-bold shadow-lg">
-        {conversation.image ? <span className="size-full bg-cover bg-center" style={{ backgroundImage: `url(${conversation.image})` }} /> : conversation.title.slice(0, 2).toUpperCase()}
+      {summary.conversations.slice(0, 3).reverse().map((conversation) => <Link key={conversation.id} href={`/messages/${conversation.id}`} aria-label={conversation.title} title={`${conversation.title} — ${conversation.preview}`} className="relative grid size-11 place-items-center rounded-full border-2 border-background bg-background shadow-lg">
+        <Avatar image={conversation.image} name={conversation.title} size={40} />
         {conversation.unread > 0 && <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">{Math.min(conversation.unread, 99)}</span>}
       </Link>)}
     </div>
