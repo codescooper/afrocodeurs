@@ -1,7 +1,13 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-21**
+**Dernière MAJ : 2026-10-22**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Correction CI mentorat - 22 octobre 2026
+
+- PR #88 : deux accolades perdues lors de l'integration Constellation restaurees dans `resolveReportTarget` et `hideTarget`. Retour explicite apres annulation d'une demande de mentorat.
+- Lint complet : aucune erreur, quatre avertissements preexistants conserves. Trois tests de regression couvrent la resolution d'une demande, son annulation et la suspension independante d'une fiche Constellation.
+- 152 tests passent, 15 tests PostgreSQL non executes faute de base isolee active. Build de production et TypeScript reussis ; aucun deploiement.
 
 ## Livraison Constellation - 21 octobre 2026
 
@@ -37,7 +43,15 @@
 - Comptes existants : liaison explicite dans les parametres apres confirmation email ; controle egalement au callback. Login GitHub sauvegarde apres creation/connexion reussie.
 - Aucun changement du formulaire anti-robot d'inscription ni du schema de base. Documentation de configuration et recette : `docs/OAUTH.md`.
 - 105 tests, TypeScript, lint cible et build de production passent. Smoke HTTP du build standalone avec identifiants fictifs : trois providers declares, callbacks conformes, secrets absents de la reponse et gate construction preservee. Serveur de test arrete apres verification.
-- Activation et recette reelle chez Google/GitHub encore a effectuer ; aucun deploiement de ce lot, ne pas clore #27 avant ces validations.
+- PR #87 fusionnee puis deployee le 19 octobre. Google/GitHub ne sont pas configures : boutons masques, recette reelle encore necessaire ; ne pas clore #27 avant ces validations.
+
+## Lot mentorat #26 - 19 octobre 2026
+
+- Annuaire, offres avec sujets/langues/disponibilites/capacite et espace prive de demandes/suivis.
+- Acceptation/refus, annulation/fin, pause, blocage propre au mentorat et signalements a la moderation. Motivations non publiques ; aucune coordonnee privee affichee.
+- Capacite et decisions protegees par transactions Serializable. Notifications internes atomiques, push apres commit et preferences Social respectees.
+- Migration additive testee sur un PostgreSQL temporaire distinct ; 134 tests passent avec six integrations reelles, dont doubles demandes et acceptations concurrentes. Recette navigateur mobile avec comptes fictifs reussie.
+- Aucun deploiement ni migration de production. Procedure et limites dans `docs/MENTORSHIP.md`. Web Push reel et grand ecran encore a verifier ; ecart historique BrandSettings.updatedAt laisse intact.
 
 ## Lot Constellation - 20 octobre 2026
 
@@ -83,6 +97,7 @@
 
 ## ⏭️ Prochaine action
 
+**Faire relire la PR mentorat et sa migration avant integration et recette sur l'environnement cible.**
 **Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
 
 ## ⚠️ Risques
