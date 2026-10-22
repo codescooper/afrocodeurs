@@ -20,6 +20,16 @@ export async function resolveReportTarget(
   id: string,
 ): Promise<ReportTarget | null> {
   switch (type) {
+    case "MENTORSHIP_OFFER": {
+      const offer = await db.mentorshipOffer.findUnique({ where: { id }, include: { mentor: { select: { id: true, username: true } } } });
+      if (!offer) return null;
+      return { kind: "Offre de mentorat", title: offer.title, href: `/mentorship/${offer.id}`, snippet: offer.description, canHide: true, authorLabel: `@${offer.mentor.username}`, authorId: offer.mentorId };
+    }
+    case "MENTORSHIP_REQUEST": {
+      const request = await db.mentorshipRequest.findUnique({ where: { id }, include: { mentee: { select: { username: true } }, offer: { select: { title: true } } } });
+      if (!request) return null;
+      return { kind: "Demande privée de mentorat", title: request.offer.title, href: "/dashboard/mentorship", snippet: request.message, canHide: true, authorLabel: `@${request.mentee.username}`, authorId: request.menteeId };
+    }
     case "COMMUNITY_VENTURE": {
       const v = await db.communityVenture.findUnique({ where: { id }, include: { owner: { select: { username: true } } } });
       if (!v) return null;
@@ -179,6 +189,17 @@ export async function resolveReportTarget(
 
 /** Masque un contenu (archive / fermeture) — pour les types qui le supportent. */
 export async function hideTarget(type: EntityType, id: string): Promise<void> {
+  if (type === "MENTORSHIP_OFFER") {
+    await db.$transaction([
+      db.mentorshipOffer.updateMany({ where: { id }, data: { active: false, suspendedAt: new Date() } }),
+      db.mentorshipRequest.updateMany({ where: { offerId: id, status: { in: ["PENDING", "ACCEPTED"] } }, data: { status: "CANCELLED" } }),
+    ], { isolationLevel: "Serializable" });
+    return;
+  }
+  if (type === "MENTORSHIP_REQUEST") {
+    await db.mentorshipRequest.updateMany({ where: { id, status: { in: ["PENDING", "ACCEPTED"] } }, data: { status: "CANCELLED" } });
+    return;
+  }
   if (type === "COMMUNITY_VENTURE") {
     await db.$transaction([
       db.communityVenture.updateMany({ where: { id }, data: { status: "SUSPENDED", revision: { increment: 1 } } }),
@@ -203,6 +224,10 @@ export async function hideTarget(type: EntityType, id: string): Promise<void> {
 
 /** Supprime définitivement un contenu signalé (idempotent). */
 export async function deleteTarget(type: EntityType, id: string): Promise<void> {
+  if (type === "MENTORSHIP_OFFER" || type === "MENTORSHIP_REQUEST") {
+    await hideTarget(type, id);
+    return;
+  }
   if (type === "COMMUNITY_VENTURE" || type === "VENTURE_COLLABORATION") { await hideTarget(type, id); return; }
   if (type === "COMMENT") { await db.comment.deleteMany({ where: { id, targetType: "COMMUNITY_VENTURE" } }); return; }
   switch (type) {

@@ -37,7 +37,7 @@ export const NOTIFICATION_CATEGORIES: {
   {
     key: "SOCIAL",
     label: "Social",
-    description: "Nouveaux abonnés à ton profil",
+    description: "Nouveaux abonnés à ton profil et suivi des mentorats",
   },
   { key: "ACCOUNT", label: "Compte", description: "Changements de rôle" },
   {
@@ -64,6 +64,7 @@ const TYPE_TO_CATEGORY: Record<string, NotificationCategory> = {
   PROJECT_LAUNCHED: "PROBLEMS",
   COMMUNITY_JOIN: "COMMUNITY",
   FOLLOW: "SOCIAL",
+  MENTORSHIP: "SOCIAL",
   VENTURE_REQUEST: "SOCIAL",
   VENTURE_DECISION: "SOCIAL",
   VENTURE_PUBLISHED: "CONTRIBUTIONS",
