@@ -82,6 +82,8 @@ enum TagType {
 }
 
 enum EntityType {
+  MENTORSHIP_OFFER
+  MENTORSHIP_REQUEST
   COMMUNITY_VENTURE
   VENTURE_COLLABORATION
   USER
@@ -261,6 +263,10 @@ model User {
   role          UserRole  @default(USER)
 
   profile                 Profile?
+  mentorshipOffer         MentorshipOffer?
+  mentorshipRequests      MentorshipRequest[]
+  mentorshipBlocks        MentorshipBlock[] @relation("MentorshipBlocker")
+  mentorshipBlockedBy     MentorshipBlock[] @relation("MentorshipBlocked")
   communityVentures       CommunityVenture[]
   ventureCollaborations   VentureCollaboration[]
   ventureBlocks           VentureBlock[] @relation("VentureBlocker")
@@ -609,6 +615,61 @@ model Bookmark {
 
   @@unique([userId, targetType, targetId])
   @@index([userId])
+}
+
+enum MentorshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  COMPLETED
+}
+
+model MentorshipOffer {
+  id           String @id @default(cuid())
+  mentorId     String @unique
+  mentor       User @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  topics       String[]
+  languages    String[]
+  availability String
+  capacity     Int @default(2)
+  active       Boolean @default(true)
+  suspendedAt  DateTime?
+  requests     MentorshipRequest[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([active, suspendedAt])
+}
+
+model MentorshipRequest {
+  id        String @id @default(cuid())
+  offerId   String
+  offer     MentorshipOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  menteeId  String
+  mentee    User @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+  message   String
+  status    MentorshipStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([offerId, menteeId])
+  @@index([menteeId, createdAt])
+  @@index([offerId, status])
+}
+
+model MentorshipBlock {
+  id        String @id @default(cuid())
+  blockerId String
+  blockedId String
+  blocker   User @relation("MentorshipBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User @relation("MentorshipBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
 }
 
 model Profile {
