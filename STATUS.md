@@ -83,7 +83,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire relire et fusionner le correctif des images avant sa livraison et la verification des medias existants.**
+**Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
 
 ## ⚠️ Risques
 
