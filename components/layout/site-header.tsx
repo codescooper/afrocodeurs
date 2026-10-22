@@ -31,7 +31,7 @@ export async function SiteHeader() {
           <>
             <Link
               href="/login"
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
+              className={`${buttonVariants({ variant: "ghost", size: "sm" })} hidden min-[420px]:inline-flex`}
             >
               Connexion
             </Link>
@@ -39,7 +39,7 @@ export async function SiteHeader() {
               href="/register"
               className={buttonVariants({ size: "sm", shape: "pill" })}
             >
-              Créer un compte
+              Rejoindre
             </Link>
           </>
         )}

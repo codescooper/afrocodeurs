@@ -84,6 +84,8 @@ enum TagType {
 enum EntityType {
   MENTORSHIP_OFFER
   MENTORSHIP_REQUEST
+  COMMUNITY_VENTURE
+  VENTURE_COLLABORATION
   USER
   PROBLEM
   KNOWLEDGE
@@ -265,6 +267,10 @@ model User {
   mentorshipRequests      MentorshipRequest[]
   mentorshipBlocks        MentorshipBlock[] @relation("MentorshipBlocker")
   mentorshipBlockedBy     MentorshipBlock[] @relation("MentorshipBlocked")
+  communityVentures       CommunityVenture[]
+  ventureCollaborations   VentureCollaboration[]
+  ventureBlocks           VentureBlock[] @relation("VentureBlocker")
+  ventureBlockedBy        VentureBlock[] @relation("VentureBlocked")
   accounts                Account[]
   sessions                Session[]
   communities             CommunityMember[]
@@ -1186,6 +1192,77 @@ model PushSubscription {
 // Projet OSS référencé sur la plateforme. Sa roadmap est une vue synchronisée
 // du dépôt GitHub (`githubRepo` = "org/repo"). GitHub reste la source de vérité
 // des tâches ; la plateforme ajoute identité, graphe de dépendances et réputation.
+enum VentureStatus {
+  PENDING
+  PUBLISHED
+  ARCHIVED
+  SUSPENDED
+}
+
+enum VentureCollaborationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
+model CommunityVenture {
+  id                  String @id @default(cuid())
+  slug                String @unique
+  name                String
+  summary             String
+  description         String
+  country             String @db.Char(2)
+  sector              String
+  websiteUrl          String @unique
+  logoUrl             String?
+  screenshots         String[] @default([])
+  needs               String[] @default([])
+  status              VentureStatus @default(PENDING)
+  reviewNote          String?
+  revision            Int @default(1)
+  ownerId             String
+  owner               User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  openSourceProjectId String?
+  openSourceProject   Project? @relation(fields: [openSourceProjectId], references: [id], onDelete: SetNull)
+  collaborations      VentureCollaboration[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status, country, sector, createdAt])
+  @@index([status, sector, createdAt])
+  @@index([ownerId])
+  @@index([openSourceProjectId])
+}
+
+model VentureCollaboration {
+  id          String @id @default(cuid())
+  ventureId   String
+  venture     CommunityVenture @relation(fields: [ventureId], references: [id], onDelete: Cascade)
+  applicantId String
+  applicant   User @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  message     String
+  status      VentureCollaborationStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([ventureId, applicantId])
+  @@index([applicantId, status])
+  @@index([ventureId, status, createdAt])
+}
+
+model VentureBlock {
+  id        String @id @default(cuid())
+  blockerId String
+  blockedId String
+  blocker   User @relation("VentureBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User @relation("VentureBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
 model Project {
   id           String        @id @default(cuid())
   name         String
@@ -1208,6 +1285,7 @@ model Project {
   createdBy   User   @relation(fields: [createdById], references: [id])
 
   milestones RoadmapMilestone[]
+  communityVentures CommunityVenture[]
   tasks      RoadmapTask[]
 
   createdAt DateTime @default(now())

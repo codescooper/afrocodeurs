@@ -15,6 +15,9 @@ export type ReportFormState = { error?: string; success?: boolean } | undefined;
 const REPORTABLE: EntityType[] = [
   "MENTORSHIP_OFFER",
   "MENTORSHIP_REQUEST",
+  "COMMUNITY_VENTURE",
+  "VENTURE_COLLABORATION",
+  "COMMENT",
   "PROBLEM",
   "KNOWLEDGE",
   "QUESTION",
@@ -158,6 +161,18 @@ export async function createReportAction(
     return { error: "Cible invalide." };
   }
   if (typeof targetId !== "string") return { error: "Cible invalide." };
+  if (rawType === "COMMUNITY_VENTURE") {
+    const venture = await db.communityVenture.findFirst({ where: { id: targetId, OR: [{ status: "PUBLISHED" }, { ownerId: g.user.id }, { collaborations: { some: { applicantId: g.user.id } } }] }, select: { id: true } });
+    if (!venture) return { error: "Cible invalide." };
+  }
+  if (rawType === "VENTURE_COLLABORATION") {
+    const request = await db.ventureCollaboration.findFirst({ where: { id: targetId, OR: [{ applicantId: g.user.id }, { venture: { ownerId: g.user.id } }] }, select: { id: true } });
+    if (!request) return { error: "Cible invalide." };
+  }
+  if (rawType === "COMMENT") {
+    const comment = await db.comment.findFirst({ where: { id: targetId, targetType: "COMMUNITY_VENTURE" }, select: { targetId: true } });
+    if (!comment || !await db.communityVenture.findFirst({ where: { id: comment.targetId, OR: [{ status: "PUBLISHED" }, { ownerId: g.user.id }] }, select: { id: true } })) return { error: "Cible invalide." };
+  }
 
   if (rawType === "MENTORSHIP_REQUEST") {
     const request = await db.mentorshipRequest.findFirst({ where: { id: targetId, OR: [{ menteeId: g.user.id }, { offer: { mentorId: g.user.id } }] }, select: { id: true } });

@@ -29,6 +29,21 @@ export async function resolveReportTarget(
       const request = await db.mentorshipRequest.findUnique({ where: { id }, include: { mentee: { select: { username: true } }, offer: { select: { title: true } } } });
       if (!request) return null;
       return { kind: "Demande privée de mentorat", title: request.offer.title, href: "/dashboard/mentorship", snippet: request.message, canHide: true, authorLabel: `@${request.mentee.username}`, authorId: request.menteeId };
+    case "COMMUNITY_VENTURE": {
+      const v = await db.communityVenture.findUnique({ where: { id }, include: { owner: { select: { username: true } } } });
+      if (!v) return null;
+      return { kind: "Réalisation de la communauté", title: v.name, href: `/constellation/${v.slug}`, snippet: v.description, canHide: true, authorLabel: `@${v.owner.username}`, authorId: v.ownerId };
+    }
+    case "VENTURE_COLLABORATION": {
+      const c = await db.ventureCollaboration.findUnique({ where: { id }, include: { applicant: { select: { username: true } }, venture: { select: { name: true } } } });
+      if (!c) return null;
+      return { kind: "Proposition privée de collaboration", title: c.venture.name, href: "/dashboard/constellation", snippet: c.message, canHide: true, authorLabel: `@${c.applicant.username}`, authorId: c.applicantId };
+    }
+    case "COMMENT": {
+      const c = await db.comment.findFirst({ where: { id, targetType: "COMMUNITY_VENTURE" }, include: { author: { select: { username: true } } } });
+      if (!c) return null;
+      const v = await db.communityVenture.findUnique({ where: { id: c.targetId }, select: { name: true, slug: true } });
+      return { kind: "Commentaire Constellation", title: v?.name ?? "Réalisation retirée", href: v ? `/constellation/${v.slug}` : "/constellation", snippet: c.body, canHide: false, authorLabel: `@${c.author.username}`, authorId: c.authorId };
     }
     case "KNOWLEDGE": {
       const k = await db.knowledge.findUnique({
@@ -182,6 +197,15 @@ export async function hideTarget(type: EntityType, id: string): Promise<void> {
   }
   if (type === "MENTORSHIP_REQUEST") {
     await db.mentorshipRequest.updateMany({ where: { id, status: { in: ["PENDING", "ACCEPTED"] } }, data: { status: "CANCELLED" } });
+  if (type === "COMMUNITY_VENTURE") {
+    await db.$transaction([
+      db.communityVenture.updateMany({ where: { id }, data: { status: "SUSPENDED", revision: { increment: 1 } } }),
+      db.ventureCollaboration.updateMany({ where: { ventureId: id, status: "PENDING" }, data: { status: "CANCELLED" } }),
+    ], { isolationLevel: "Serializable" });
+    return;
+  }
+  if (type === "VENTURE_COLLABORATION") {
+    await db.ventureCollaboration.updateMany({ where: { id, status: { in: ["PENDING", "ACCEPTED"] } }, data: { status: "CANCELLED" } });
     return;
   }
   if (type === "KNOWLEDGE") {
@@ -201,6 +225,8 @@ export async function deleteTarget(type: EntityType, id: string): Promise<void> 
     await hideTarget(type, id);
     return;
   }
+  if (type === "COMMUNITY_VENTURE" || type === "VENTURE_COLLABORATION") { await hideTarget(type, id); return; }
+  if (type === "COMMENT") { await db.comment.deleteMany({ where: { id, targetType: "COMMUNITY_VENTURE" } }); return; }
   switch (type) {
     case "KNOWLEDGE":
       await db.knowledge.deleteMany({ where: { id } });

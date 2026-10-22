@@ -20,7 +20,7 @@ export function Avatar({
         role="img"
         aria-label={name}
         className="inline-block shrink-0 rounded-full bg-muted bg-cover bg-center"
-        style={{ width: size, height: size, backgroundImage: `url(${image})` }}
+        style={{ width: size, height: size, backgroundImage: `url(${JSON.stringify(image)})` }}
       />
     );
   }

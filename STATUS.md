@@ -1,7 +1,24 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-19**
+**Dernière MAJ : 2026-10-21**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Livraison Constellation - 21 octobre 2026
+
+- PR #89 puis correctif #90 fusionnes ; version `2026dd4` deployee. Migration Constellation appliquee, sauvegarde prealable disponible, medias et correctifs d'inscription preserves.
+- Build de production et CI reussis. Controle HTTP : application et base `ok`.
+- Recette navigateur en production : les deux boutons "Presenter ma realisation" ouvrent `/constellation/new` avec le formulaire visible, sans 404.
+- Annonce publiee dans les nouveautes du site avec le mecanisme de notification des membres ; invitation envoyee et distribuee dans le groupe WhatsApp AfroCodeurs.org.
+- Aucun envoi email de masse, aucune annonce Discord effectuee. Aucun exemple fictif ajoute en production. Le portail de construction reste actif pour les nouveaux visiteurs.
+- La beta attend les premieres fiches pour la moderation independante et les premiers retours reels. Les scenarios de collaboration ont ete testes sur base isolee ; aucun echange fictif entre membres reels n'a ete cree pour la recette de production.
+
+## Correctif images - 21 octobre 2026
+
+- Fiche La Ruche Digitale AwemA soumise sous @codescooper avec logo et capture ; validation independante encore requise.
+- Diagnostic : fichiers presents sur le volume persistant mais nouvelles URL `/uploads` en 404, car absentes du manifeste public de build Next. Route de lecture runtime ajoutee avec types limites, controle du chemin reel et protection contre les liens symboliques sortants ; portail de construction inchange.
+- Avatars de session recharges depuis la base sans reintroduire l'image dans le JWT ; affichage ajoute a la sidebar et URL CSS correctement delimitee.
+- Remise en service provisoire : redemarrage du seul web, logo existant a nouveau visible et fichier charge dans le navigateur, sante application/base HTTP OK. Aucun fichier perdu ni nouvel upload requis.
+- 126 tests passes, neuf tests PostgreSQL non executes faute de base de test active. Lint cible et build Next/TypeScript reussis sans avertissement de tracage des fichiers runtime. Correctif durable non deploye, en attente de revue et fusion.
 
 ## Lot issues - 19 octobre 2026
 
@@ -29,6 +46,20 @@
 - Capacite et decisions protegees par transactions Serializable. Notifications internes atomiques, push apres commit et preferences Social respectees.
 - Migration additive testee sur un PostgreSQL temporaire distinct ; 134 tests passent avec six integrations reelles, dont doubles demandes et acceptations concurrentes. Recette navigateur mobile avec comptes fictifs reussie.
 - Aucun deploiement ni migration de production. Procedure et limites dans `docs/MENTORSHIP.md`. Web Push reel et grand ecran encore a verifier ; ecart historique BrandSettings.updatedAt laisse intact.
+
+## Lot Constellation - 20 octobre 2026
+
+- Catalogue de realisations deployees separe des projets open source GitHub : nuee de bulles, drapeaux locaux, recherche pays/secteur, vue liste et fiches en overlay partageables.
+- Depot par membres verifies, validation independante par moderation, modification remise en attente, signalement et suspension. Aucun envoi de masse aux membres.
+- Commentaires, propositions privees, decisions notifiees et blocage bidirectionnel propres a Constellation. Messagerie existante accessible apres acceptation.
+- Migration additive testee sur base PostgreSQL locale isolee. Documentation : `docs/CONSTELLATION.md`.
+- Verification finale : 127 tests passes, dont neuf tests PostgreSQL ; lint cible et build Next.js 16.4 (TypeScript inclus) reussis.
+- Recette navigateur : ordinateur 1440px et mobile 390px, aucune collision des 18 bulles ; filtres conserves au retour de l'overlay, URL directe sans modale, vue liste fonctionnelle. Debordement de l'en-tete mobile corrige.
+- Limites : une proposition par membre/realisation ; pas de preuve automatique de propriete du domaine ni interface de remise en ligne apres suspension. Recette complete des formulaires connectes encore a effectuer.
+- Non deploye. PR mentorat #88 toujours ouverte et distincte de ce lot.
+- Livraison demandee : PR #89 verte en CI, mais approbation independante obligatoire avant fusion. Correctif de concurrence a l'ouverture des discussions ajoute avec trois tests de regression ; annonce communautaire retenue jusqu'au controle de production.
+- PR #89 fusionnee puis deployee avec migration additive et sauvegarde prealable. Correctifs d'inscription existants preserves. Application et base confirment leur sante via HTTP.
+- Recette en production : page Constellation et formulaire direct accessibles, mais le bouton de creation en navigation Next est intercepte comme un slug et produit une 404. Correctif par navigation documentaire propose ; annonce non envoyee tant que ce point n'est pas livre.
 
 ## 🎯 Phase
 
@@ -61,6 +92,7 @@
 ## ⏭️ Prochaine action
 
 **Faire relire la PR mentorat et sa migration avant integration et recette sur l'environnement cible.**
+**Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
 
 ## ⚠️ Risques
 
