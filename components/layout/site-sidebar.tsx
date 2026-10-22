@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { NotificationBell } from "./notification-bell";
 import { SiteSidebarNav } from "./site-sidebar-nav";
 import { ThemeToggle } from "./theme-toggle";
+import { Avatar } from "@/components/shared/avatar";
 
 /** Sidebar verticale publique (desktop) : logo, navigation, actions centrées en bas. */
 export async function SiteSidebar() {
@@ -35,6 +36,7 @@ export async function SiteSidebar() {
                 "w-full justify-center",
               )}
             >
+              <Avatar image={session.user.image} name={session.user.name ?? session.user.username} size={28} />
               @{session.user.username}
             </Link>
             <form

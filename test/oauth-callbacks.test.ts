@@ -2,9 +2,9 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NextAuthConfig } from "next-auth";
 
 const mocks = vi.hoisted(() => ({
-  auth: vi.fn(), upsert: vi.fn(), configure: vi.fn(),
+  auth: vi.fn(), upsert: vi.fn(), configure: vi.fn(), findUser: vi.fn(),
 }));
-vi.mock("@/lib/db", () => ({ db: { user: {}, profile: { upsert: mocks.upsert } } }));
+vi.mock("@/lib/db", () => ({ db: { user: { findUnique: mocks.findUser }, profile: { upsert: mocks.upsert } } }));
 vi.mock("next-auth", () => ({ default: (config: NextAuthConfig) => {
   mocks.configure(config);
   return { auth: mocks.auth, handlers: {}, signIn: vi.fn(), signOut: vi.fn() };
@@ -22,12 +22,27 @@ beforeAll(async () => {
 beforeEach(() => {
   mocks.auth.mockResolvedValue(null);
   mocks.upsert.mockReset();
+  mocks.findUser.mockReset();
 });
 const user = { id: "database-user", email: "amina@example.org", emailVerified: null };
 const google = { provider: "google", type: "oidc" as const, providerAccountId: "provider-user" };
 const github = { provider: "github", type: "oauth" as const, providerAccountId: "provider-user" };
 
 describe("OAuth callbacks and account policy", () => {
+  it("does not look up an avatar without an authenticated database user id", async () => {
+    await config.callbacks!.session!({ session: { user: {}, expires: "2030-01-01" }, token: {} } as never);
+    expect(mocks.findUser).not.toHaveBeenCalled();
+  });
+  it("restores the current avatar in the session without expanding the JWT", async () => {
+    const image = `data:image/jpeg;base64,${"a".repeat(20_000)}`;
+    mocks.findUser.mockResolvedValue({ name: "Amina", image });
+    const token = { id: "database-user", username: "amina", role: "USER", isEmailVerified: true };
+    const result = await config.callbacks!.session!({ session: { user: {}, expires: "2030-01-01" }, token } as never);
+    expect(result.user).toMatchObject({ name: "Amina", image });
+    expect(token).not.toHaveProperty("picture");
+    expect(token).not.toHaveProperty("image");
+    expect(mocks.findUser).toHaveBeenCalledWith({ where: { id: "database-user" }, select: { name: true, image: true } });
+  });
   it("never enables automatic email-based account linking", () => {
     for (const value of config.providers) {
       const provider = typeof value === "function" ? value() : value;

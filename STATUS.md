@@ -3,6 +3,23 @@
 **Dernière MAJ : 2026-10-21**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
+## Livraison Constellation - 21 octobre 2026
+
+- PR #89 puis correctif #90 fusionnes ; version `2026dd4` deployee. Migration Constellation appliquee, sauvegarde prealable disponible, medias et correctifs d'inscription preserves.
+- Build de production et CI reussis. Controle HTTP : application et base `ok`.
+- Recette navigateur en production : les deux boutons "Presenter ma realisation" ouvrent `/constellation/new` avec le formulaire visible, sans 404.
+- Annonce publiee dans les nouveautes du site avec le mecanisme de notification des membres ; invitation envoyee et distribuee dans le groupe WhatsApp AfroCodeurs.org.
+- Aucun envoi email de masse, aucune annonce Discord effectuee. Aucun exemple fictif ajoute en production. Le portail de construction reste actif pour les nouveaux visiteurs.
+- La beta attend les premieres fiches pour la moderation independante et les premiers retours reels. Les scenarios de collaboration ont ete testes sur base isolee ; aucun echange fictif entre membres reels n'a ete cree pour la recette de production.
+
+## Correctif images - 21 octobre 2026
+
+- Fiche La Ruche Digitale AwemA soumise sous @codescooper avec logo et capture ; validation independante encore requise.
+- Diagnostic : fichiers presents sur le volume persistant mais nouvelles URL `/uploads` en 404, car absentes du manifeste public de build Next. Route de lecture runtime ajoutee avec types limites, controle du chemin reel et protection contre les liens symboliques sortants ; portail de construction inchange.
+- Avatars de session recharges depuis la base sans reintroduire l'image dans le JWT ; affichage ajoute a la sidebar et URL CSS correctement delimitee.
+- Remise en service provisoire : redemarrage du seul web, logo existant a nouveau visible et fichier charge dans le navigateur, sante application/base HTTP OK. Aucun fichier perdu ni nouvel upload requis.
+- 126 tests passes, neuf tests PostgreSQL non executes faute de base de test active. Lint cible et build Next/TypeScript reussis sans avertissement de tracage des fichiers runtime. Correctif durable non deploye, en attente de revue et fusion.
+
 ## Lot issues - 19 octobre 2026
 
 - Six issues ouvertes inspectees, aucune PR ouverte au moment du triage.

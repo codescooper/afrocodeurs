@@ -121,6 +121,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = token.role as UserRole;
         session.user.username = token.username as string;
         session.user.isEmailVerified = Boolean(token.isEmailVerified);
+        // Read profile media from the database, never from the JWT cookie.
+        const profile = typeof token.id === "string" ? await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { name: true, image: true },
+        }) : null;
+        session.user.name = profile?.name ?? null;
+        session.user.image = profile?.image ?? null;
       }
       return session;
     },
