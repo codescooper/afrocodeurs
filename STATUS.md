@@ -1,7 +1,16 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-21**
+**Dernière MAJ : 2026-10-22**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Fiabilisation Constellation - 22 octobre 2026
+
+- PR #91 fusionnee ; son deploiement durable reste a verifier. Aucun deploiement effectue dans ce lot.
+- PR avatars : le dock utilise maintenant une vraie image de taille fixe, avec initiales contrastees si absente ou inaccessible. Le compteur sort du cercle sans etre rogne.
+- Formulaire de fiche et messages de collaboration conserves apres une erreur serveur ; double envoi bloque apres succes. Le test DOM a reproduit puis valide la correction des selections remises a zero.
+- Partage public affiche uniquement pour les fiches publiees, sans modifier les droits de moderation.
+- Port interne Docker change de 4190 (bloque par Fetch) a 3000. Adaptation du compose externe de production indispensable : procedure et retour arriere dans `docs/CONSTELLATION-DEPLOY-FIXES.md`.
+- 138 tests passes (suite de 137 puis test du dock), lint cible et build de production Next/TypeScript reussis. Neuf tests PostgreSQL non executes : cluster temporaire local incomplet (`pg_notify` absent). Recette navigateur et production encore requises.
 
 ## Livraison Constellation - 21 octobre 2026
 
@@ -83,7 +92,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
+**Faire revoir les PR de fiabilisation (avatars puis Constellation) avant de deployer avec la configuration de ports adaptee.**
 
 ## ⚠️ Risques
 
