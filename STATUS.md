@@ -3,6 +3,14 @@
 **Dernière MAJ : 2026-10-23**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
+## Messagerie persistante - 23 octobre 2026
+
+- Production inspectee en lecture seule : image web encore `constellation-button-2026dd4-20261020t223351z`, anterieure aux corrections fusionnees ; 25 comptes disposent d'une image. Aucune photo remplacee ou inventee.
+- Bulles transformees en boutons : fenetre compacte, reduction conservant le brouillon, fermeture explicite et lien vers la page complete. Etat dans le layout racine, conserve pendant la navigation Next ; pas de stockage des messages ou brouillons dans le navigateur.
+- Recents tries par date du dernier message, conversations vides exclues, salons communautaires lies a leur URL canonique. Anciennes URL `/messages/community-chat-*` redirigees seulement pour les membres autorises.
+- Polling suspendu pour les fenetres reduites, discussion inaccessible retiree, brouillon conserve en cas d'echec reseau a l'envoi, photos affichees aussi dans les messages.
+- 173 tests passent, dont les tests DOM du dock et des autorisations/recents ; 15 tests PostgreSQL ignores faute de base isolee. Build Next/TypeScript et lint cible reussis. PR #95 ouverte. Recette navigateur connectee et deploiement encore requis ; aucun deploiement effectue.
+
 ## Securite et CI - 23 octobre 2026
 
 - PR #94 : branche actualisee avec `main`, sans rebase force ni contournement des protections.
@@ -113,9 +121,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir les PR de fiabilisation (avatars puis Constellation) avant de deployer avec la configuration de ports adaptee.**
-**Faire relire la PR mentorat et sa migration avant integration et recette sur l'environnement cible.**
-**Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
+**Faire revoir et fusionner la PR #95 pour livrer ensuite une image a jour avec recette du chat et des avatars.**
 
 ## ⚠️ Risques
 

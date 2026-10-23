@@ -14,7 +14,7 @@ export async function GET() {
     select: { id: true, updatedAt: true },
   });
   const [memberships, communityMemberships] = await Promise.all([db.conversationMember.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, conversation: { type: { in: ["DIRECT", "GROUP"] }, communityId: null, messages: { some: { deletedAt: null } } } },
     orderBy: { conversation: { updatedAt: "desc" } },
     take: 6,
     select: {
@@ -28,23 +28,25 @@ export async function GET() {
       },
     },
   }), db.communityMember.findMany({
-    where: { userId: session.user.id, community: { chat: { isNot: null } } },
-    select: { chatLastReadAt: true, community: { select: { name: true, chat: { select: { id: true, updatedAt: true, messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 1, select: { body: true } } } } } } },
+    where: { userId: session.user.id, community: { chat: { is: { messages: { some: { deletedAt: null } } } } } },
+    select: { chatLastReadAt: true, community: { select: { name: true, slug: true, chat: { select: { id: true, updatedAt: true, messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 1, select: { body: true, createdAt: true } } } } } } },
   })]);
   const directConversations = await Promise.all(memberships.map(async ({ conversation, lastReadAt }) => ({
     id: conversation.id,
+    href: `/messages/${conversation.id}`,
     title: conversation.title ?? conversation.members.map(({ user }) => user.name ?? `@${user.username}`).join(", "),
-    image: conversation.members[0]?.user.image ?? null,
+    image: conversation.type === "DIRECT" ? conversation.members[0]?.user.image ?? null : null,
     preview: conversation.messages[0]?.body ?? "Nouvelle conversation",
-    updatedAt: conversation.updatedAt.toISOString(),
+    updatedAt: (conversation.messages[0]?.createdAt ?? conversation.updatedAt).toISOString(),
     unread: await db.message.count({ where: { conversationId: conversation.id, createdAt: { gt: lastReadAt }, authorId: { not: session.user.id }, deletedAt: null } }),
   })));
   const communityConversations = await Promise.all(communityMemberships.flatMap(({ community, chatLastReadAt }) => community.chat ? [{
     id: community.chat.id,
+    href: `/communities/${community.slug}#chat`,
     title: `Salon · ${community.name}`,
     image: null,
     preview: community.chat.messages[0]?.body ?? "Aucun message",
-    updatedAt: community.chat.updatedAt.toISOString(),
+    updatedAt: (community.chat.messages[0]?.createdAt ?? community.chat.updatedAt).toISOString(),
     unread: db.message.count({ where: { conversationId: community.chat.id, createdAt: { gt: chatLastReadAt }, authorId: { not: session.user.id }, deletedAt: null } }),
   }] : []).map(async (item) => ({ ...item, unread: await item.unread })));
   const conversations = [...directConversations, ...communityConversations]

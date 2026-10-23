@@ -140,7 +140,7 @@ export default async function CommunityDetailPage({
       </section>
 
       {isMember && community.chat && userId && (
-        <section className="mt-10 overflow-hidden rounded-xl border border-border">
+          <section id="chat" className="mt-10 overflow-hidden rounded-xl border border-border">
           <header className="border-b border-border bg-muted/40 px-5 py-4"><h2 className="font-semibold">Salon · {community.name}</h2><p className="text-xs text-muted-foreground">Réservé aux membres · historique complet</p></header>
           {session?.user?.isEmailVerified ? <ChatRoom conversationId={community.chat.id} currentUserId={userId} initialMessages={community.chat.messages.slice(0, 100).reverse().map((message) => ({ ...message, createdAt: message.createdAt.toISOString() }))} initialHasMore={community.chat.messages.length > 100} compact canModerate={canManage} /> : <p className="p-6 text-sm text-muted-foreground">Confirmez votre adresse e-mail pour participer au salon.</p>}
         </section>
