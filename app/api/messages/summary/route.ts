@@ -23,13 +23,13 @@ export async function GET() {
         select: {
           id: true, title: true, type: true, updatedAt: true,
           members: { where: { userId: { not: session.user.id } }, take: 3, select: { user: { select: { username: true, name: true, image: true } } } },
-          messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 1, select: { body: true, createdAt: true } },
+          messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 1, select: { body: true, createdAt: true, authorId: true } },
         },
       },
     },
   }), db.communityMember.findMany({
     where: { userId: session.user.id, community: { chat: { is: { messages: { some: { deletedAt: null } } } } } },
-    select: { chatLastReadAt: true, community: { select: { name: true, slug: true, chat: { select: { id: true, updatedAt: true, messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 1, select: { body: true, createdAt: true } } } } } } },
+    select: { chatLastReadAt: true, community: { select: { name: true, slug: true, chat: { select: { id: true, updatedAt: true, messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 1, select: { body: true, createdAt: true, authorId: true } } } } } } },
   })]);
   const directConversations = await Promise.all(memberships.map(async ({ conversation, lastReadAt }) => ({
     id: conversation.id,
@@ -37,6 +37,7 @@ export async function GET() {
     title: conversation.title ?? conversation.members.map(({ user }) => user.name ?? `@${user.username}`).join(", "),
     image: conversation.type === "DIRECT" ? conversation.members[0]?.user.image ?? null : null,
     preview: conversation.messages[0]?.body ?? "Nouvelle conversation",
+    lastMessageAuthorId: conversation.messages[0]?.authorId ?? null,
     updatedAt: (conversation.messages[0]?.createdAt ?? conversation.updatedAt).toISOString(),
     unread: await db.message.count({ where: { conversationId: conversation.id, createdAt: { gt: lastReadAt }, authorId: { not: session.user.id }, deletedAt: null } }),
   })));
@@ -46,6 +47,7 @@ export async function GET() {
     title: `Salon · ${community.name}`,
     image: null,
     preview: community.chat.messages[0]?.body ?? "Aucun message",
+    lastMessageAuthorId: community.chat.messages[0]?.authorId ?? null,
     updatedAt: (community.chat.messages[0]?.createdAt ?? community.chat.updatedAt).toISOString(),
     unread: db.message.count({ where: { conversationId: community.chat.id, createdAt: { gt: chatLastReadAt }, authorId: { not: session.user.id }, deletedAt: null } }),
   }] : []).map(async (item) => ({ ...item, unread: await item.unread })));

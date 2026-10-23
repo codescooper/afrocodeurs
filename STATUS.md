@@ -3,6 +3,25 @@
 **Dernière MAJ : 2026-10-23**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
+## Annuaire du chat et fermeture des bulles - 23 octobre 2026
+
+- Test reel en production avec deux comptes USER dedies et authentification normale : envoi A/B, reponse B/A, reception incrementale, compteur non lu et lecture valides. Aucun membre reel sollicite ; acces des comptes de test desactive en fin de recette.
+- Bouton Chat ouvrant general, membres en ligne et hors ligne ; recherche et pagination. Discussion compacte accessible aussi pour un membre hors ligne, sans message envoye au simple clic.
+- Croix des bulles et fenetres : masque sans supprimer les conversations ; fermeture conservee dans cet onglet, nouvelle bulle seulement pour nouveau message entrant non lu ou ouverture volontaire.
+- Presence limitee a l'activite d'un onglet visible ; signal toutes les 30 s et expiration a deux minutes. Ni email ni heure exacte d'activite exposes par l'annuaire ; pas de geolocalisation.
+- Migration additive `ChatPresence` testee avec les 31 migrations sur deux bases PostgreSQL locales isolees. 206 tests passent sans tests ignores ; build Next/TypeScript et lint cible reussis.
+- Documentation : `docs/CHAT-PRESENCE.md`. Nouveau panneau non deploye ; validation navigateur du panneau sur l'environnement cible encore requise. Les tests production portent sur l'envoi/reception deja en ligne, pas sur cette nouvelle interface.
+
+## Deploiement verifie - 23 octobre 2026
+
+- PR #96 fusionnee ; SHA `96894eb` deploye avec les correctifs d'inscription serveur preserves. Image `afrocodeurs-web:chat-overlays-96894eb-20261023t032242z`.
+- Sauvegardes base/configuration/patch inscription dans `/opt/afrocodeurs/backups/chat-overlays-20261023T032242Z`. Migration additive mentorat appliquee ; volumes conserves.
+- Port interne 3000 et mapping hote 14190 adaptes. La cible Traefik externe pointait encore vers 4190 : erreur 502 transitoire corrigee par mise a jour du seul upstream AfroCodeurs, sauvegarde du proxy incluse.
+- Controle final : conteneur healthy, HTTP public 200, application/base ok ; aucun message Error/bad port/PrismaClientKnownRequestError dans les logs du nouveau web pendant la recette.
+- Recette Chrome connectee en production : recherche de membres opaque en clair/sombre, photo Dylan chargee, six photos communautaires chargees, menus utilisateur/mobile opaques, logo existant 1254x1254 lisible avec la session autorisee.
+- Fenetres privee/generale/communautaire ouvertes sans navigation ; brouillon communautaire conserve apres navigation vers Ressources et reduction/reouverture ; ouverture page complete et ancien lien communautaire fonctionnels. Brouillon de test efface, aucun message reel envoye.
+- Les trois recents du compte teste n'ont pas de photo : initiales contrastees affichees, pas de photo inventee. La recette ne couvre pas l'envoi reel entre deux comptes.
+
 ## Surfaces superposees - 23 octobre 2026
 
 - Cause mesuree dans Chrome sur la recherche de membres en production : fond `rgba(0, 0, 0, 0)` ; tokens `popover` absents du theme.
@@ -129,7 +148,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir le correctif global des surfaces superposees avant livraison et recette sur le site.**
+**Faire revoir la PR de l'annuaire du chat avant application de sa migration et deploiement.**
 
 ## ⚠️ Risques
 

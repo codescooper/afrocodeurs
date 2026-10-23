@@ -263,6 +263,7 @@ model User {
   role          UserRole  @default(USER)
 
   profile                 Profile?
+  chatPresence            ChatPresence?
   mentorshipOffer         MentorshipOffer?
   mentorshipRequests      MentorshipRequest[]
   mentorshipBlocks        MentorshipBlock[] @relation("MentorshipBlocker")
@@ -312,6 +313,14 @@ model User {
 
   @@index([username])
   @@index([role])
+}
+
+model ChatPresence {
+  userId   String   @id
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastSeen DateTime @default(now())
+
+  @@index([lastSeen])
 }
 
 model AuditLog {
