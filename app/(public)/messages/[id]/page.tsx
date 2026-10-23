@@ -13,7 +13,15 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   if (!session?.user) redirect("/login");
   const { id } = await params;
   const membership = await db.conversationMember.findUnique({ where: { conversationId_userId: { conversationId: id, userId: session.user.id } }, include: { conversation: { include: { members: { include: { user: { select: { id: true, username: true, name: true } } } } } } } });
-  if (!membership) notFound();
+  if (!membership || membership.conversation.communityId || membership.conversation.type === "GLOBAL") {
+    const conversation = await db.conversation.findUnique({ where: { id }, select: { type: true, community: { select: { id: true, slug: true } } } });
+    if (conversation?.community) {
+      const communityMember = await db.communityMember.findUnique({ where: { userId_communityId: { userId: session.user.id, communityId: conversation.community.id } }, select: { id: true } });
+      if (communityMember) redirect(`/communities/${conversation.community.slug}#chat`);
+    }
+    if (conversation?.type === "GLOBAL") return <div className="mx-auto w-full max-w-5xl px-4 py-6"><h1 className="mb-4 text-xl font-semibold">Chat général</h1><ChatRoom conversationId={id} currentUserId={session.user.id} initialMessages={[]} /></div>;
+    notFound();
+  }
   const rawMessages = await db.message.findMany({ where: { conversationId: id }, orderBy: { createdAt: "desc" }, take: 101, select: { id: true, body: true, createdAt: true, authorId: true, author: { select: { username: true, name: true, image: true } } } });
   await db.conversationMember.update({ where: { id: membership.id }, data: { lastReadAt: new Date() } });
   const others = membership.conversation.members.filter((member) => member.userId !== session.user.id);
