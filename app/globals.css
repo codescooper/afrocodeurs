@@ -17,6 +17,8 @@
   --ring: #f5b800; /* jaune-or africain, cf. --primary */
   --card: #ffffff;
   --card-foreground: #111111;
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
   --destructive: #dc2626; /* rouge doux */
   --destructive-foreground: #ffffff;
   --radius: 0.75rem;
@@ -82,6 +84,8 @@
   --color-ring: var(--ring);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 

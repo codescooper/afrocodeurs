@@ -3,6 +3,14 @@
 **Dernière MAJ : 2026-10-23**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
+## Surfaces superposees - 23 octobre 2026
+
+- Cause mesuree dans Chrome sur la recherche de membres en production : fond `rgba(0, 0, 0, 0)` ; tokens `popover` absents du theme.
+- Correction globale des couleurs popover/texte, liees aux cartes opaques en clair/sombre/systeme. Menus utilisateur/mobile et sous-menus beneficient du meme correctif. Recherche des membres bornee en hauteur et deroulante.
+- Inventaire des dialogues, infobulles, notifications, dock, voiles et barres fixes dans `docs/OVERLAY-AUDIT.md`. Transparences intentionnelles preservees.
+- Banc local avec le vrai CSS Tailwind : sept familles verifiees dans Chrome en clair/sombre et mobile 390 px ; aucune surface transparente ni debordement horizontal. Les parcours metier complets restent a verifier apres deploiement.
+- Tests du theme et du CSS compile ajoutes : suite de 176 tests reussie puis cas sombre systeme supplementaire valide ; 15 tests PostgreSQL ignores localement. Build Next/TypeScript et lint cible reussis. Aucun deploiement effectue.
+
 ## Messagerie persistante - 23 octobre 2026
 
 - Production inspectee en lecture seule : image web encore `constellation-button-2026dd4-20261020t223351z`, anterieure aux corrections fusionnees ; 25 comptes disposent d'une image. Aucune photo remplacee ou inventee.
@@ -121,7 +129,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir et fusionner la PR #95 pour livrer ensuite une image a jour avec recette du chat et des avatars.**
+**Faire revoir le correctif global des surfaces superposees avant livraison et recette sur le site.**
 
 ## ⚠️ Risques
 
