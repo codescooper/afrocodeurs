@@ -6,7 +6,7 @@
 ## Annuaire du chat et fermeture des bulles - 23 octobre 2026
 
 - Test reel en production avec deux comptes USER dedies et authentification normale : envoi A/B, reponse B/A, reception incrementale, compteur non lu et lecture valides. Aucun membre reel sollicite ; acces des comptes de test desactive en fin de recette.
-- Bouton Chat ouvrant general, membres en ligne et hors ligne ; recherche et pagination. Discussion compacte accessible aussi pour un membre hors ligne, sans message envoye au simple clic.
+- Bouton Chat ouvrant general, membres en ligne et hors ligne ; recherche et pagination. Discussion compacte accessible aussi pour un membre hors ligne, sans message envoye au simple clic. Recents repliables pour retrouver les groupes et salons masques.
 - Croix des bulles et fenetres : masque sans supprimer les conversations ; fermeture conservee dans cet onglet, nouvelle bulle seulement pour nouveau message entrant non lu ou ouverture volontaire.
 - Presence limitee a l'activite d'un onglet visible ; signal toutes les 30 s et expiration a deux minutes. Ni email ni heure exacte d'activite exposes par l'annuaire ; pas de geolocalisation.
 - Migration additive `ChatPresence` testee avec les 31 migrations sur deux bases PostgreSQL locales isolees. 206 tests passent sans tests ignores ; build Next/TypeScript et lint cible reussis.
@@ -148,7 +148,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir la PR de l'annuaire du chat avant application de sa migration et deploiement.**
+**Faire revoir la PR #97 avant application de sa migration et deploiement.**
 
 ## ⚠️ Risques
 

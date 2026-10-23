@@ -3,6 +3,7 @@
 ## Comportement
 
 - Le bouton Chat ouvre le choix : chat general, membres en ligne puis hors ligne. Recherche par nom ou pseudo ; pagination des membres hors ligne.
+- La section repliable "Conversations recentes" permet de retrouver aussi un groupe ou salon dont la bulle a ete fermee, sans quitter la page.
 - Le contact ouvre une fenetre compacte sans quitter la page. Une presence en ligne n'est pas necessaire pour laisser un message. Les membres presentes ont un email confirme.
 - La croix d'une bulle ou de sa fenetre ferme l'affichage sans supprimer les messages, sans quitter un groupe et sans modifier les adhesions.
 - Une bulle fermee reste masquee dans cet onglet, y compris apres actualisation. Elle reapparait pour un nouveau message entrant non lu, ou lorsque le membre ouvre lui-meme la discussion. Les donnees de fermeture (identifiant/date) sont stockees en sessionStorage, separees par compte ; jamais le texte des messages ou brouillons.

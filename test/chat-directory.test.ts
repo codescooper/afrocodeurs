@@ -16,3 +16,12 @@ it("offers general chat and opens both online and offline members without naviga
   fireEvent.click(view.getByRole("button", { name: "Discuter avec Baba, hors ligne" }));
   await waitFor(() => expect(open).toHaveBeenCalledWith(conversation));
 });
+it("can reopen a closed group from recent conversations", () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ online: [], offline: [], nextOffset: null }) }));
+  const open = vi.fn();
+  const group = { id: "group", title: "Salon Dakar", image: null, preview: "", updatedAt: "2026-10-23", unread: 0 };
+  const view = render(createElement(ChatDirectory, { onGeneral: vi.fn(), onConversation: open, onClose: vi.fn(), recent: [group] }));
+  fireEvent.click(view.getByText("Conversations récentes"));
+  fireEvent.click(view.getByRole("button", { name: "Reprendre Salon Dakar" }));
+  expect(open).toHaveBeenCalledWith(group);
+});

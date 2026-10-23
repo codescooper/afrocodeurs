@@ -75,7 +75,7 @@ function DockSession({ summary, refresh }: { summary: Summary; refresh: () => Pr
   }
   return <aside className="fixed bottom-20 right-3 z-40 flex max-w-[calc(100vw-1.5rem)] items-end gap-2 md:bottom-4 md:right-4" aria-label="Messagerie instantanée">
     <ChatPresenceHeartbeat />
-    {directoryOpen && <ChatDirectory onClose={() => setDirectoryOpen(false)} onGeneral={() => open({ id: general.id, title: "Chat général", image: null, preview: "", updatedAt: general.updatedAt, unread: 0 })} onConversation={open} />}
+    {directoryOpen && <ChatDirectory recent={conversations} onClose={() => setDirectoryOpen(false)} onGeneral={() => open({ id: general.id, title: "Chat général", image: null, preview: "", updatedAt: general.updatedAt, unread: 0 })} onConversation={open} />}
     {rooms.map((room) => {
       const latest = conversations.find((item) => item.id === room.id) ?? room;
       return <section key={room.id} hidden={active !== room.id} aria-label={`Discussion : ${latest.title}`} className="absolute bottom-16 right-0 w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-lg border border-border bg-background shadow-2xl">

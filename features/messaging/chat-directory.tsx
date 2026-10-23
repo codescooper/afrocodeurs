@@ -6,7 +6,7 @@ import type { DockConversation } from "./chat-dock";
 
 type Contact = { id: string; username: string; name: string | null; image: string | null; online: boolean };
 type Contacts = { online: Contact[]; offline: Contact[]; nextOffset: number | null; moreOnline: boolean };
-export function ChatDirectory({ onGeneral, onConversation, onClose }: { onGeneral: () => void; onConversation: (conversation: DockConversation) => void; onClose: () => void }) {
+export function ChatDirectory({ onGeneral, onConversation, onClose, recent = [] }: { onGeneral: () => void; onConversation: (conversation: DockConversation) => void; onClose: () => void; recent?: DockConversation[] }) {
   const [query, setQuery] = useState("");
   const [contacts, setContacts] = useState<Contacts | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,6 +60,7 @@ export function ChatDirectory({ onGeneral, onConversation, onClose }: { onGenera
   return <section aria-label="Choisir une discussion" className="absolute bottom-16 right-0 flex max-h-[calc(100dvh-12rem)] w-[min(23rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-2xl">
     <header className="flex items-center justify-between border-b border-border px-4 py-3"><h2 className="font-semibold">Discussions</h2><button type="button" onClick={onClose} title="Fermer le panneau Chat" aria-label="Fermer le panneau Chat" className="rounded p-2 hover:bg-muted"><X className="size-4" /></button></header>
     <button type="button" onClick={onGeneral} className="flex items-center gap-3 border-b border-border px-4 py-3 text-left hover:bg-muted"><MessageCircle className="size-5 text-primary" /><span className="text-sm font-semibold">Chat général</span></button>
+    {recent.length > 0 && <details className="border-b border-border"><summary className="cursor-pointer px-4 py-3 text-sm font-medium">Conversations récentes</summary><div className="max-h-40 overflow-y-auto">{recent.map((conversation) => <button key={conversation.id} type="button" onClick={() => onConversation(conversation)} aria-label={`Reprendre ${conversation.title}`} className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-muted"><Avatar image={conversation.image} name={conversation.title} size={28} /><span className="min-w-0 flex-1 truncate text-sm">{conversation.title}</span>{conversation.unread > 0 && <span className="text-xs font-semibold">{conversation.unread}</span>}</button>)}</div></details>}
     <label className="relative m-3 block"><Search className="absolute left-3 top-3 size-4 text-muted-foreground" /><input aria-label="Rechercher un membre du chat" placeholder="Nom ou @utilisateur" value={query} onChange={(event) => { setQuery(event.target.value); setContacts(null); setLoading(true); }} className="w-full rounded-md border border-border bg-background py-2 pl-9 pr-3 text-sm" /></label>
     <div className="min-h-0 overflow-y-auto">
       {error && <p role="alert" className="px-4 py-2 text-sm text-destructive">{error}</p>}
