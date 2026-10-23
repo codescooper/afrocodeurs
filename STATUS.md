@@ -1,8 +1,24 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-22**
+**Dernière MAJ : 2026-10-23**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
+## Securite et CI - 23 octobre 2026
+
+- PR #94 : branche actualisee avec `main`, sans rebase force ni contournement des protections.
+- Next et ESLint Next 16.4.2 ; Sentry 10.76.2 ; Prisma/Client/adaptateur PostgreSQL 7.10.1 ; Vitest 4.1.12 et Vite 8.3.5 dans le lockfile.
+- Audit production : zero vulnerabilite signalee. Audit complet : cinq alertes elevees de la chaine ESLint/fast-glob/micromatch/braces, sans correctif compatible propose ; aucune retrogradation majeure forcee.
+- Healthcheck CI explicite : `pg_isready -U afrocodeurs -d afrocodeurs -h 127.0.0.1`. Test de regression ajoute ; audit bloquant et revue obligatoire conserves.
+- 165 tests passent ; 15 tests PostgreSQL non executes localement faute de base isolee active. Lint sans erreur (quatre avertissements existants), build Next/TypeScript reussi. CI relancee au push ; aucun deploiement.
+
+## Fiabilisation Constellation - 22 octobre 2026
+
+- PR #91 fusionnee ; son deploiement durable reste a verifier. Aucun deploiement effectue dans ce lot.
+- PR avatars : le dock utilise maintenant une vraie image de taille fixe, avec initiales contrastees si absente ou inaccessible. Le compteur sort du cercle sans etre rogne.
+- Formulaire de fiche et messages de collaboration conserves apres une erreur serveur ; double envoi bloque apres succes. Le test DOM a reproduit puis valide la correction des selections remises a zero.
+- Partage public affiche uniquement pour les fiches publiees, sans modifier les droits de moderation.
+- Port interne Docker change de 4190 (bloque par Fetch) a 3000. Adaptation du compose externe de production indispensable : procedure et retour arriere dans `docs/CONSTELLATION-DEPLOY-FIXES.md`.
+- 138 tests passes (suite de 137 puis test du dock), lint cible et build de production Next/TypeScript reussis. Neuf tests PostgreSQL non executes : cluster temporaire local incomplet (`pg_notify` absent). Recette navigateur et production encore requises.
 ## Correction CI mentorat - 22 octobre 2026
 
 - PR #88 : deux accolades perdues lors de l'integration Constellation restaurees dans `resolveReportTarget` et `hideTarget`. Retour explicite apres annulation d'une demande de mentorat.
@@ -97,6 +113,7 @@
 
 ## ⏭️ Prochaine action
 
+**Faire revoir les PR de fiabilisation (avatars puis Constellation) avant de deployer avec la configuration de ports adaptee.**
 **Faire relire la PR mentorat et sa migration avant integration et recette sur l'environnement cible.**
 **Faire approuver et fusionner le correctif de navigation Constellation avant de terminer la recette et d'envoyer l'annonce.**
 
