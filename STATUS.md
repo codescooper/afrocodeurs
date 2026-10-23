@@ -1,7 +1,15 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-22**
+**Dernière MAJ : 2026-10-23**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Securite et CI - 23 octobre 2026
+
+- PR #94 : branche actualisee avec `main`, sans rebase force ni contournement des protections.
+- Next et ESLint Next 16.4.2 ; Sentry 10.76.2 ; Prisma/Client/adaptateur PostgreSQL 7.10.1 ; Vitest 4.1.12 et Vite 8.3.5 dans le lockfile.
+- Audit production : zero vulnerabilite signalee. Audit complet : cinq alertes elevees de la chaine ESLint/fast-glob/micromatch/braces, sans correctif compatible propose ; aucune retrogradation majeure forcee.
+- Healthcheck CI explicite : `pg_isready -U afrocodeurs -d afrocodeurs -h 127.0.0.1`. Test de regression ajoute ; audit bloquant et revue obligatoire conserves.
+- 165 tests passent ; 15 tests PostgreSQL non executes localement faute de base isolee active. Lint sans erreur (quatre avertissements existants), build Next/TypeScript reussi. CI relancee au push ; aucun deploiement.
 
 ## Fiabilisation Constellation - 22 octobre 2026
 
