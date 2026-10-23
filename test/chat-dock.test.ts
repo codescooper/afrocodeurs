@@ -40,14 +40,14 @@ it("keeps closed bubbles hidden after remount and restores them for a new incomi
   let view = render(createElement(ChatDock));
   await waitFor(() => expect(view.getByRole("button", { name: "Fermer la bulle Awa" })).toBeTruthy());
   fireEvent.click(view.getByRole("button", { name: "Fermer la bulle Awa" }));
-  expect(view.queryByRole("button", { name: "Awa", exact: true })).toBeNull();
+  expect(view.queryByRole("button", { name: "Awa" })).toBeNull();
   view.unmount(); view = render(createElement(ChatDock));
   await waitFor(() => expect(view.getByRole("button", { name: "Ouvrir le panneau Chat" })).toBeTruthy());
-  expect(view.queryByRole("button", { name: "Awa", exact: true })).toBeNull();
+  expect(view.queryByRole("button", { name: "Awa" })).toBeNull();
   view.unmount();
   item.updatedAt = "2026-10-23T10:01:00Z";
   view = render(createElement(ChatDock));
-  await waitFor(() => expect(view.getByRole("button", { name: "Awa", exact: true })).toBeTruthy());
+  await waitFor(() => expect(view.getByRole("button", { name: "Awa" })).toBeTruthy());
 });
 
 it("opens the Chat chooser before entering general chat", async () => {
@@ -56,7 +56,7 @@ it("opens the Chat chooser before entering general chat", async () => {
   await waitFor(() => expect(view.getByRole("button", { name: "Ouvrir le panneau Chat" })).toBeTruthy());
   fireEvent.click(view.getByRole("button", { name: "Ouvrir le panneau Chat" }));
   expect(view.getByRole("region", { name: "Choisir une discussion" })).toBeTruthy();
-  fireEvent.click(view.getByRole("button", { name: "Chat général", exact: true }));
+  fireEvent.click(view.getByRole("button", { name: "Chat général" }));
   expect(view.getByRole("region", { name: "Discussion : Chat général" })).toBeTruthy();
   expect(view.queryByRole("region", { name: "Choisir une discussion" })).toBeNull();
 });
