@@ -1,14 +1,14 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { guard, invalidMessage } from "@/lib/guard";
-import { mentorshipSchema } from "./validators";
+import { guard } from "@/lib/guard";
+import { mentorshipSchema, mentorshipValidationMessage } from "./validators";
 import { MentorshipError, runMentorship } from "./service";
 import { rateLimit } from "@/lib/rate-limit";
 export type MentorshipState = { error?: string; success?: boolean } | undefined;
 export async function mentorshipAction(_: MentorshipState, form: FormData): Promise<MentorshipState> {
   const parsed = mentorshipSchema.safeParse({ ...Object.fromEntries(form), active: form.get("active") === "on" });
-  if (!parsed.success) return { error: invalidMessage(parsed.error) };
+  if (!parsed.success) return { error: mentorshipValidationMessage(parsed.error) };
   const command = parsed.data;
   const verified = command.command === "offer" || command.command === "request" || (command.command === "respond" && command.status !== "CANCELLED");
   const g = await guard({ verified });
