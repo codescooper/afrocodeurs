@@ -1,5 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { Prisma } from "@prisma/client";
+vi.mock("server-only", () => ({}));
 
 const mocks = vi.hoisted(() => ({ guard: vi.fn(), recipient: vi.fn(), find: vi.fn(), create: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: { user: { findUnique: mocks.recipient }, conversation: { findUnique: mocks.find, create: mocks.create } } }));

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@prisma/client";
+import { ensureDirectConversation } from "./direct-conversation";
 
 import { db } from "@/lib/db";
 import { guard, invalidMessage } from "@/lib/guard";
@@ -58,21 +58,6 @@ export async function startDirectConversationAction(formData: FormData) {
   if (typeof recipientId !== "string" || recipientId === g.user.id) redirect("/messages");
   const recipient = await db.user.findUnique({ where: { id: recipientId }, select: { id: true } });
   if (!recipient) redirect("/messages");
-  const memberIds = [g.user.id, recipient.id].sort();
-  const directKey = memberIds.join(":");
-  const existing = await db.conversation.findUnique({ where: { directKey }, select: { id: true } });
-  if (existing) redirect(`/messages/${existing.id}`);
-  let conversation: { id: string };
-  try {
-    conversation = await db.conversation.create({
-      data: { type: "DIRECT", directKey, members: { create: memberIds.map((userId) => ({ userId, role: userId === g.user.id ? "OWNER" : "MEMBER" })) } },
-      select: { id: true },
-    });
-  } catch (error) {
-    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
-    const concurrent = await db.conversation.findUnique({ where: { directKey }, select: { id: true } });
-    if (!concurrent) throw error;
-    conversation = concurrent;
-  }
+  const conversation = await ensureDirectConversation(g.user.id, recipient.id);
   redirect(`/messages/${conversation.id}`);
 }
