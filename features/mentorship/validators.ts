@@ -9,6 +9,21 @@ export const mentorshipSchema = z.discriminatedUnion("command", [
   z.object({ command: z.literal("block"), id }), z.object({ command: z.literal("unblock"), id }),
 ]);
 export type MentorshipCommand = z.infer<typeof mentorshipSchema>;
+export function mentorshipValidationMessage(error: z.ZodError): string {
+  const field = error.issues[0]?.path[0];
+  const messages: Record<string, string> = {
+    title: "Le titre doit contenir entre 5 et 100 caractères.",
+    description: "Décris ton accompagnement en 40 à 2 000 caractères.",
+    topics: "Indique entre 1 et 6 sujets de 2 à 40 caractères, séparés par des virgules (240 caractères maximum).",
+    languages: "Indique entre 1 et 6 langues de 2 à 40 caractères, séparées par des virgules (240 caractères maximum).",
+    availability: "Précise tes créneaux et ton fuseau horaire en 5 à 160 caractères.",
+    capacity: "Choisis un nombre entier de suivis simultanés entre 1 et 5.",
+    message: "Présente ta demande en 40 à 2 000 caractères.",
+  };
+  return typeof field === "string" && messages[field]
+    ? messages[field]
+    : "Cette demande est invalide. Vérifie les informations puis réessaie.";
+}
 export const STATUS_LABELS = { PENDING: "En attente", ACCEPTED: "En cours", DECLINED: "Refusée", CANCELLED: "Annulée", COMPLETED: "Terminée" };
 export function canTransition(current: string, next: string, isMentor: boolean): boolean {
   if (next === "CANCELLED") return current === "PENDING" || current === "ACCEPTED";

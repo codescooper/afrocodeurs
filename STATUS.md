@@ -5,12 +5,17 @@
 
 ## Annuaire du chat et fermeture des bulles - 23 octobre 2026
 
+- PR #97 fusionnee (`f2ad4c4`) et deployee : image `afrocodeurs-web:chat-presence-f2ad4c4-20261023t083850z`, migration `20261023060000_add_chat_presence` appliquee. Application et base ok, conteneur healthy. Sauvegarde dans `/opt/afrocodeurs/backups/chat-presence-20261023T083850Z` ; patch inscription et volumes preserves.
+- Recette Chrome production : panneau Chat, recherche, compte dedie A en ligne et B hors ligne, fermeture de bulle conservee apres rechargement, reouverture via recents, general ouvert sans quitter la page et brouillon conserve pendant navigation vers Ressources. Brouillon efface sans envoi.
+- Nouvelle recette HTTP production A/B : authentification, envoi/reponse, reception incrementale, non-lus et lecture reussis ; comptes de test desactives ensuite.
+- Correctif mentorat prepare separement : saisies conservees apres rejet serveur (offre et demande), erreurs de validation en francais. 22 tests cibles, TypeScript et lint cibles reussis ; pas encore deploye.
+
 - Test reel en production avec deux comptes USER dedies et authentification normale : envoi A/B, reponse B/A, reception incrementale, compteur non lu et lecture valides. Aucun membre reel sollicite ; acces des comptes de test desactive en fin de recette.
 - Bouton Chat ouvrant general, membres en ligne et hors ligne ; recherche et pagination. Discussion compacte accessible aussi pour un membre hors ligne, sans message envoye au simple clic. Recents repliables pour retrouver les groupes et salons masques.
 - Croix des bulles et fenetres : masque sans supprimer les conversations ; fermeture conservee dans cet onglet, nouvelle bulle seulement pour nouveau message entrant non lu ou ouverture volontaire.
 - Presence limitee a l'activite d'un onglet visible ; signal toutes les 30 s et expiration a deux minutes. Ni email ni heure exacte d'activite exposes par l'annuaire ; pas de geolocalisation.
 - Migration additive `ChatPresence` testee avec les 31 migrations sur deux bases PostgreSQL locales isolees. 206 tests passent sans tests ignores ; build Next/TypeScript et lint cible reussis.
-- Documentation : `docs/CHAT-PRESENCE.md`. Nouveau panneau non deploye ; validation navigateur du panneau sur l'environnement cible encore requise. Les tests production portent sur l'envoi/reception deja en ligne, pas sur cette nouvelle interface.
+- Documentation : `docs/CHAT-PRESENCE.md`. La recette initiale avant fusion a ete completee par les controles production decrits ci-dessus.
 
 ## Deploiement verifie - 23 octobre 2026
 
@@ -148,7 +153,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir la PR #97 avant application de sa migration et deploiement.**
+**Faire revoir et fusionner le correctif de conservation des saisies mentorat avant son deploiement.**
 
 ## ⚠️ Risques
 
