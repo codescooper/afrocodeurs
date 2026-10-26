@@ -23,7 +23,9 @@ it("protects every editable action form from implicit resets", () => {
       if (entry.isDirectory()) { scan(file); continue; }
       // A terminal command is deliberately cleared after execution, unlike a draft.
       if (!file.endsWith(".tsx") || file.endsWith("pixel-terminal-game.tsx")) continue;
-      const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+      const text = readFileSync(file, "utf8");
+      if (!text.includes("<form")) continue;
+      const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
       function visit(node: ts.Node) {
         if (ts.isJsxElement(node) && node.openingElement.tagName.getText() === "form") {
           const attrs = node.openingElement.attributes.properties;
