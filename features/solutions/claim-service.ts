@@ -9,6 +9,7 @@ export async function reviewSolutionClaim(database: PrismaClient, actor: { id: s
     const claim = await tx.solutionClaim.findUnique({ where: { id: input.id }, include: { solution: { select: { slug: true } } } });
     if (!claim || claim.status !== "PENDING") throw new SolutionAccessError("Cette demande n’est plus en attente.");
     if (claim.userId === actor.id) throw new SolutionAccessError("Un autre administrateur doit vérifier votre demande.");
+    await tx.$queryRaw`SELECT "id" FROM "Solution" WHERE "id" = ${claim.solutionId} FOR UPDATE`;
     const updated = await tx.solutionClaim.updateMany({ where: { id: claim.id, status: "PENDING" }, data: { status: input.status, reviewNote: input.note, reviewerId: actor.id, reviewedAt: new Date() } });
     if (updated.count !== 1) throw new SolutionAccessError("Cette demande vient d’être traitée. Rechargez la page.");
     if (input.status === "APPROVED") await tx.solutionMaintainer.upsert({ where: { solutionId_userId: { solutionId: claim.solutionId, userId: claim.userId } }, create: { solutionId: claim.solutionId, userId: claim.userId }, update: {} });

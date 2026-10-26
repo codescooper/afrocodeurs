@@ -19,7 +19,7 @@ import { SOLUTION_TYPE_LABELS } from "@/features/solutions/constants";
 import { PROJECT_STATUS_LABELS } from "@/features/projects/constants";
 import { ReportForm } from "@/features/admin/report-form";
 import { buttonVariants } from "@/components/ui/button";
-import { ClaimForm, LicenseReviewForm } from "@/features/solutions/claim-forms";
+import { ClaimForm, LicenseReviewForm, GithubProofForm } from "@/features/solutions/claim-forms";
 import { claimProofCode, LIFECYCLES, SECTORS } from "@/features/solutions/catalog";
 
 /** Page détail d'une solution de l'AfroAtlas (Sprint 6). */
@@ -106,10 +106,10 @@ export default async function SolutionDetailPage({
         {solution.maintainers.length ? <ul className="mt-2 flex flex-wrap gap-3">{solution.maintainers.map(member => <li key={member.userId}><Link href={`/u/${member.user.username}`} className="underline">{member.user.name ?? `@${member.user.username}`}</Link></li>)}</ul> : <p className="mt-2 text-sm">Référencée par la communauté — non revendiquée.</p>}
         <p className="mt-2 text-sm text-muted-foreground">La gestion vérifiée d’une fiche ne constitue pas une certification de la solution ni un transfert de propriété.</p>
         {canEdit && <Link href={`/atlas/${solution.slug}/edit`} className="mt-3 inline-block underline">Gérer la fiche</Link>}
-        {!solution.maintainers.some(member => member.userId === session?.user?.id) && <details className="mt-4"><summary className="cursor-pointer font-medium">Je maintiens cette solution</summary><div className="mt-4">{mine ? <><p>{mine.status === "PENDING" ? "Votre demande est en cours de vérification." : mine.status === "APPROVED" ? "Gestion accordée." : "Votre demande a été refusée. Contactez l’équipe pour une nouvelle vérification."}</p>{mine.reviewNote && <p className="mt-2 whitespace-pre-wrap">{mine.reviewNote}</p>}</> : session?.user ? <ClaimForm solutionId={solution.id} /> : <Link href="/login" className="underline">Se connecter pour demander la gestion</Link>}</div></details>}
+        {!solution.maintainers.some(member => member.userId === session?.user?.id) && <details className="mt-4"><summary className="cursor-pointer font-medium">Je maintiens cette solution</summary><div className="mt-4">{mine ? <><p>{mine.status === "PENDING" ? "Votre demande est en cours de vérification." : mine.status === "APPROVED" ? "Cette demande a été approuvée. Si votre accès a ensuite été retiré, contactez l’équipe." : "Votre demande a été refusée. Vous pouvez fournir de nouvelles preuves."}</p>{mine.reviewNote && <p className="mt-2 whitespace-pre-wrap">{mine.reviewNote}</p>}{mine.status === "REJECTED" && <div className="mt-4"><ClaimForm solutionId={solution.id} /></div>}</> : session?.user ? <ClaimForm solutionId={solution.id} /> : <Link href="/login" className="underline">Se connecter pour demander la gestion</Link>}</div></details>}
       </section>
 
-      {mine?.status === "PENDING" && session?.user && <aside className="mt-4 border-l-4 border-primary pl-4"><p className="text-sm">Placez ce code personnel à l’emplacement public indiqué dans votre demande (dépôt ou site officiel), puis laissez-le jusqu’à la décision :</p><code className="mt-2 block break-all text-sm">{claimProofCode(mine.id, session.user.id)}</code><p className="mt-2 text-sm">Sans accès à ces supports, contactez l’équipe pour une vérification manuelle alternative.</p></aside>}
+      {mine?.status === "PENDING" && session?.user && <aside className="mt-4 border-l-4 border-primary pl-4"><p className="text-sm">Placez ce code personnel à l’emplacement public indiqué dans votre demande (dépôt ou site officiel), puis laissez-le jusqu’à la décision :</p><code className="mt-2 block break-all text-sm">{claimProofCode(mine.id, session.user.id)}</code><p className="mt-2 text-sm">Pour GitHub : créez le fichier <code className="break-all">.afrocodeurs/claims/{mine.id}.txt</code> sur la branche par défaut du dépôt lié à la fiche, avec uniquement ce code.</p><GithubProofForm id={mine.id} /><p className="mt-2 text-sm">Sans accès à ces supports, contactez l’équipe pour une vérification manuelle alternative.</p></aside>}
 
       <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed">
         {solution.description}

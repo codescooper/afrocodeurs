@@ -6,7 +6,7 @@ vi.mock("@/lib/db", () => ({ db: { solution: { findUnique: mocks.solution, updat
 vi.mock("@/features/seo/metadata", () => ({ publicContentMetadata: vi.fn() }));
 vi.mock("@/features/admin/report-form", () => ({ ReportForm: () => null }));
 vi.mock("@/components/shared/content-share", () => ({ ContentShare: () => null }));
-vi.mock("@/features/solutions/claim-forms", () => ({ ClaimForm: () => "claim form", LicenseReviewForm: () => "admin license form" }));
+vi.mock("@/features/solutions/claim-forms", () => ({ ClaimForm: () => "claim form", LicenseReviewForm: () => "admin license form", GithubProofForm: () => "github proof form" }));
 import SolutionDetailPage from "../app/(public)/atlas/[slug]/page";
 
 const solution = { id: "solution", slug: "solution", name: "Solution", type: "SOFTWARE", description: "Description", country: "Bénin", license: "MIT", licenseVerified: false, lifecycle: "USABLE", sector: "EDUCATION", countriesServed: ["Sénégal"], languages: ["français"], projects: [], maintainers: [], createdBy: { username: "referencer", name: null }, views: 0, africanContext: "", contributionNeeds: "", revision: 1 };

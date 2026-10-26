@@ -285,6 +285,8 @@ model User {
   solutionMemberships     SolutionMaintainer[]
   solutionClaims          SolutionClaim[] @relation("SolutionClaimant")
   solutionClaimReviews    SolutionClaim[] @relation("SolutionReviewer")
+  solutionInvitesSent     SolutionInvitation[] @relation("SolutionInviter")
+  solutionInvitesReceived SolutionInvitation[] @relation("SolutionInvitee")
   projects                Project[]
   reports                 Report[]              @relation("ReporterReports")
   reputation              ReputationEvent[]
@@ -1091,6 +1093,7 @@ model Solution {
   revision         Int @default(1)
   maintainers      SolutionMaintainer[]
   claims           SolutionClaim[]
+  invitations      SolutionInvitation[]
   views            Int          @default(0)
 
   createdById String
@@ -1124,6 +1127,8 @@ model SolutionClaim {
   solution Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
   user User @relation("SolutionClaimant", fields: [userId], references: [id], onDelete: Cascade)
   evidence String
+  githubVerifiedAt DateTime?
+  githubVerifiedRepo String?
   status String @default("PENDING")
   reviewNote String?
   reviewerId String?
@@ -1135,6 +1140,24 @@ model SolutionClaim {
   @@index([status, createdAt])
   @@index([userId])
   @@index([reviewerId])
+}
+
+model SolutionInvitation {
+  id String @id @default(cuid())
+  solutionId String
+  solution Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  senderId String
+  sender User @relation("SolutionInviter", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient User @relation("SolutionInvitee", fields: [recipientId], references: [id], onDelete: Cascade)
+  kind String @default("COLLABORATE")
+  status String @default("PENDING")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([solutionId, status])
+  @@index([recipientId, status])
+  @@index([senderId])
 }
 
 model Tag {

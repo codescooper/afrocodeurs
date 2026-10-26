@@ -4,7 +4,7 @@ vi.mock("server-only", () => ({}));
 import { reviewSolutionClaim } from "../features/solutions/claim-service";
 import { catalogFilters, catalogSchema, claimSchema, normalizeCatalogParams, reviewClaimSchema } from "../features/solutions/catalog";
 
-const tx = { solutionClaim: { findUnique: vi.fn(), updateMany: vi.fn() }, solutionMaintainer: { upsert: vi.fn() }, auditLog: { create: vi.fn() } };
+const tx = { $queryRaw: vi.fn(), solutionClaim: { findUnique: vi.fn(), updateMany: vi.fn() }, solutionMaintainer: { upsert: vi.fn() }, auditLog: { create: vi.fn() } };
 const transaction = vi.fn();
 const db = { $transaction: transaction } as unknown as PrismaClient;
 const input = { id: "claim", status: "APPROVED" as const, note: "Code temporaire vérifié dans le dépôt officiel." };

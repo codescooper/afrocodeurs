@@ -1,14 +1,14 @@
 import { beforeEach, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ guard: vi.fn(), rateLimit: vi.fn(), notify: vi.fn(), transaction: vi.fn(), claimCreate: vi.fn(), solutionFind: vi.fn() }));
+const mocks = vi.hoisted(() => ({ guard: vi.fn(), rateLimit: vi.fn(), notify: vi.fn(), transaction: vi.fn(), claimCreate: vi.fn(), claimReopen: vi.fn(), solutionFind: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/guard", () => ({ guard: mocks.guard, invalidMessage: () => "Données invalides" }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: mocks.rateLimit }));
 vi.mock("@/features/notifications/notify", () => ({ notify: mocks.notify }));
-vi.mock("@/lib/db", () => ({ db: { $transaction: mocks.transaction, solution: { findUnique: mocks.solutionFind }, solutionClaim: { createMany: mocks.claimCreate } } }));
+vi.mock("@/lib/db", () => ({ db: { $transaction: mocks.transaction, solution: { findUnique: mocks.solutionFind }, solutionClaim: { createMany: mocks.claimCreate, updateMany: mocks.claimReopen } } }));
 import { requestSolutionClaimAction, updateSolutionCatalogAction, verifySolutionLicenseAction } from "../features/solutions/catalog-actions";
 
-const tx = { solution: { findUnique: vi.fn(), updateMany: vi.fn() }, solutionMaintainer: { findUnique: vi.fn() }, auditLog: { create: vi.fn() } };
+const tx = { $queryRaw: vi.fn(), solution: { findUnique: vi.fn(), updateMany: vi.fn() }, solutionMaintainer: { findUnique: vi.fn() }, auditLog: { create: vi.fn() } };
 const form = (extra: Record<string, string> = {}) => {
   const data = new FormData();
   for (const [key, value] of Object.entries({ id: "solution", revision: "1", name: "Une solution", description: "Une solution concrète utile aux réalités du continent.", type: "SOFTWARE", country: "Bénin", license: "MIT", repositoryUrl: "https://github.com/example/project", ...extra })) data.set(key, value);
@@ -19,6 +19,8 @@ beforeEach(() => {
   mocks.guard.mockResolvedValue({ ok: true, user: { id: "user", role: "USER" } });
   mocks.rateLimit.mockReturnValue({ ok: true });
   mocks.transaction.mockImplementation(work => work(tx));
+  tx.$queryRaw.mockResolvedValue([{ id: "solution" }]);
+  mocks.claimReopen.mockResolvedValue({ count: 0 });
   tx.solution.findUnique.mockResolvedValue({ id: "solution", slug: "solution", name: "Ancien nom", description: "Ancienne description", revision: 1, repositoryUrl: "https://github.com/example/project", license: "MIT", licenseVerified: true });
   tx.solution.updateMany.mockResolvedValue({ count: 1 });
   tx.solutionMaintainer.findUnique.mockResolvedValue({ userId: "user" });

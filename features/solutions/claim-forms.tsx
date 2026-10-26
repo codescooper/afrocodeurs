@@ -3,10 +3,15 @@
 import { useActionState } from "react";
 import { ActionForm } from "@/components/shared/action-form";
 import { Button } from "@/components/ui/button";
-import { requestSolutionClaimAction, reviewSolutionClaimAction, verifySolutionLicenseAction, type CatalogState } from "./catalog-actions";
+import { requestSolutionClaimAction, reviewSolutionClaimAction, verifySolutionLicenseAction, checkSolutionGithubProofAction, type CatalogState } from "./catalog-actions";
 
 const style = "w-full rounded-md border border-border bg-background px-3 py-2";
 function Feedback({ state }: { state: CatalogState }) { return <>{state?.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}{state?.success && <p role="status" className="text-sm">{state.success}</p>}</>; }
+
+export function GithubProofForm({ id }: { id: string }) {
+  const [state, action, pending] = useActionState(checkSolutionGithubProofAction, undefined);
+  return <ActionForm action={action} className="mt-3 space-y-3"><input type="hidden" name="id" value={id} /><Feedback state={state} /><Button disabled={pending || Boolean(state?.success)}>Vérifier mon marqueur GitHub</Button></ActionForm>;
+}
 
 export function ClaimForm({ solutionId }: { solutionId: string }) {
   const [state, action, pending] = useActionState(requestSolutionClaimAction, undefined);
