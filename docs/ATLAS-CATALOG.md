@@ -62,3 +62,18 @@ declare verifiees et aucun auteur ne devient automatiquement gestionnaire.
 Sauvegarder la base avant migration. Ne pas deployer le code avant la migration.
 Recette : referencer -> demander -> verifier independamment -> modifier ->
 controler anonymement la fiche, les filtres et la confidentialite des preuves.
+
+## Verification avant revue
+
+- Suite de 288 tests reussie sans test ignore, dont deux integrations Atlas sur
+  PostgreSQL, puis trois tests supplementaires de confidentialite reussis.
+- Les 32 migrations passent sur les deux bases isolees. Le diff de schema ne
+  signale pas d'ecart sur ce lot ; il signale le defaut historique de
+  `BrandSettings.updatedAt`, qui n'est pas modifie dans cette migration.
+- Build Next et TypeScript reussis dans un checkout a dependances propres.
+  Premier essai dans le checkout de travail refuse par Turbopack car node_modules
+  pointe hors de sa racine ; aucune modification de configuration pour le masquer.
+- Lint sans erreur et quatre avertissements preexistants. Recette navigateur,
+  revue des licences reelles, verification des demandes et production non faites.
+- PR #100 en brouillon et dependante de #99. Ne pas fusionner cette branche dans
+  celle de #99 : fusionner #99 d'abord, puis recibler #100 vers main et refaire la CI.

@@ -18,9 +18,11 @@
 - Migration additive preparee et appliquee sur deux bases locales isolees.
   Aucun deploiement ni changement de donnee de production. Perimetre et limites
   dans `docs/ATLAS-CATALOG.md` : invitations/transferts et OAuth restent a venir.
-- Verification : 288 tests reussis sans test ignore, dont concurrence PostgreSQL
-  et conservation des saisies ; controle TypeScript reussi. Build a verifier dans
-  le checkout propre (Turbopack refuse les dependances liees hors du dossier).
+- Verification : suite de 288 tests reussie sans test ignore, puis trois tests
+  supplementaires de confidentialite reussis ; TypeScript et build de production
+  reussis dans le checkout propre. Lint sans erreur, quatre avertissements anciens.
+- PR #100 ouverte en brouillon, empilee sur #99 : fusionner #99 d'abord puis
+  recibler #100 vers main. Recette navigateur et production encore a effectuer.
 
 ## Decouverte publique et SEO - 26 octobre 2026
 
