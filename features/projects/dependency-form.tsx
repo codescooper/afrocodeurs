@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { addDependencyAction } from "./actions";
@@ -28,7 +29,7 @@ export function DependencyForm({
   if (tasks.length < 2) return null;
 
   return (
-    <form action={formAction} className="flex flex-col gap-2">
+    <ActionForm action={formAction} className="flex flex-col gap-2">
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="slug" value={slug} />
       <div className="flex flex-wrap items-end gap-2">
@@ -69,6 +70,6 @@ export function DependencyForm({
         </Button>
       </div>
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-    </form>
+    </ActionForm>
   );
 }

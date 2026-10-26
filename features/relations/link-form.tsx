@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { linkToProblemAction } from "./actions";
@@ -26,7 +27,7 @@ export function LinkForm({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-2">
+    <ActionForm action={formAction} className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <input type="hidden" name="problemId" value={problemId} />
         <input type="hidden" name="slug" value={slug} />
@@ -63,6 +64,6 @@ export function LinkForm({
         </Button>
       </div>
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-    </form>
+    </ActionForm>
   );
 }

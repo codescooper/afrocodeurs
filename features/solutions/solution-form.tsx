@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { createSolutionAction } from "./actions";
@@ -17,7 +18,7 @@ export function SolutionForm() {
   );
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-4">
+    <ActionForm action={formAction} className="flex max-w-2xl flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm font-medium">
           Nom
@@ -93,6 +94,6 @@ export function SolutionForm() {
       <Button type="submit" disabled={pending} size="lg" className="self-start">
         {pending ? "Publication…" : "Ajouter à l'Atlas"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

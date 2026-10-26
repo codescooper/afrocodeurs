@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 import Link from "next/link";
 
@@ -18,7 +19,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form action={formAction} className="flex flex-col gap-4">
+      <ActionForm action={formAction} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm font-medium">
           Email
           <input
@@ -54,7 +55,7 @@ export function LoginForm() {
         <Button type="submit" disabled={pending} size="lg">
           {pending ? "Connexion…" : "Se connecter"}
         </Button>
-      </form>
+      </ActionForm>
 
       <p className="text-center text-sm text-muted-foreground">
         Pas encore de compte ?{" "}

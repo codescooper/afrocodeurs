@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ export function NewsletterAddForm() {
   );
 
   return (
-    <form action={action} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <ActionForm action={action} resetAfterSuccess={state?.success ? state : undefined} className="flex flex-col gap-3 sm:flex-row sm:items-end">
       <label className="flex flex-1 flex-col gap-1 text-sm font-medium">
         Ajouter une adresse
         <Input
@@ -32,6 +33,6 @@ export function NewsletterAddForm() {
         {state?.error && <span className="text-destructive">{state.error}</span>}
         {state?.success && <span className="text-emerald-600">{state.success}</span>}
       </p>
-    </form>
+    </ActionForm>
   );
 }

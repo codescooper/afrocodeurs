@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 import Link from "next/link";
 
@@ -27,7 +28,7 @@ export default function ForgotPasswordPage() {
           d&apos;être envoyé. Pense à vérifier tes spams.
         </p>
       ) : (
-        <form action={formAction} className="flex flex-col gap-4">
+        <ActionForm action={formAction} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm font-medium">
             Email
             <input
@@ -46,7 +47,7 @@ export default function ForgotPasswordPage() {
           <Button type="submit" disabled={pending} size="lg">
             {pending ? "Envoi…" : "Envoyer le lien"}
           </Button>
-        </form>
+        </ActionForm>
       )}
 
       <p className="text-center text-sm text-muted-foreground">

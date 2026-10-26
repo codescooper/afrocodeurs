@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState, useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export function NewConversationForm() {
     return () => { clearTimeout(timer); controller.abort(); };
   }, [query, selected]);
 
-  return <form action={action} className="flex flex-col gap-5">
+  return <ActionForm action={action} className="flex flex-col gap-5">
     <input type="hidden" name="usernames" value={selected.map((user) => user.username).join(",")} />
     <label className="flex flex-col gap-2 text-sm font-medium">Membres
       {selected.length > 0 && <div className="flex flex-wrap gap-2">{selected.map((user) => <span key={user.id} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs">@{user.username}<button type="button" aria-label={`Retirer ${user.username}`} onClick={() => setSelected((items) => items.filter((item) => item.id !== user.id))}><X className="size-3" /></button></span>)}</div>}
@@ -39,5 +40,5 @@ export function NewConversationForm() {
     <label className="flex flex-col gap-1 text-sm font-medium">Nom du groupe (optionnel)<input name="title" maxLength={80} placeholder="Ex. Équipe Défi Abidjan" className={field} /><span className="text-xs font-normal text-muted-foreground">Obligatoire uniquement lorsque vous invitez plusieurs personnes.</span></label>
     {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
     <Button type="submit" disabled={pending || selected.length === 0}>{pending ? "Création…" : "Commencer la conversation"}</Button>
-  </form>;
+  </ActionForm>;
 }

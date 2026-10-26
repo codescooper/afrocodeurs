@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { changePasswordAction, updateAccountAction } from "./actions";
@@ -16,7 +17,7 @@ export function AccountForm({ defaultName }: { defaultName: string }) {
   );
 
   return (
-    <form action={formAction} className="flex max-w-md flex-col gap-3">
+    <ActionForm action={formAction} className="flex max-w-md flex-col gap-3">
       <label className="flex flex-col gap-1 text-sm font-medium">
         Nom affiché
         <input
@@ -35,7 +36,7 @@ export function AccountForm({ defaultName }: { defaultName: string }) {
       <Button type="submit" disabled={pending} className="self-start">
         {pending ? "Enregistrement…" : "Enregistrer"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }
 
@@ -47,7 +48,7 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
   );
 
   return (
-    <form action={formAction} className="flex max-w-md flex-col gap-3">
+    <ActionForm action={formAction} resetAfterSuccess={state?.success ? state : undefined} className="flex max-w-md flex-col gap-3">
       {hasPassword && (
         <label className="flex flex-col gap-1 text-sm font-medium">
           Mot de passe actuel
@@ -77,6 +78,6 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
       <Button type="submit" disabled={pending} className="self-start">
         {pending ? "Mise à jour…" : "Changer le mot de passe"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

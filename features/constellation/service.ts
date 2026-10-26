@@ -67,9 +67,16 @@ export async function reviewVenture(db: PrismaClient, actor: { id: string; role:
   return atomic(db, async (tx, queue) => {
     const venture = await tx.communityVenture.findUnique({ where: { id: input.id } });
     if (!venture || venture.status !== "PENDING" || venture.revision !== input.revision) fail("La fiche a changé depuis son ouverture. Recharge la page.");
-    if (venture.ownerId === actor.id) fail("Une autre personne doit valider ta propre réalisation.");
+    const selfReview = venture.ownerId === actor.id;
+    if (selfReview && actor.role !== "ADMIN") fail("Une autre personne doit valider ta propre réalisation.");
     const result = await tx.communityVenture.updateMany({ where: { id: venture.id, status: "PENDING", revision: input.revision }, data: { status: input.status, reviewNote: input.note || null, revision: { increment: 1 } } });
     if (result.count !== 1) fail("La fiche vient d'être mise à jour.");
+    await tx.auditLog.create({ data: {
+      actorId: actor.id, action: "UPDATE", entityType: "COMMUNITY_VENTURE", entityId: venture.id,
+      before: { status: venture.status, revision: venture.revision },
+      after: { status: input.status, revision: input.revision + 1, reviewNote: input.note || null },
+      metadata: { operation: "review", selfReview, reviewerRole: actor.role },
+    } });
     await notice(tx, queue, venture.ownerId, actor.id, input.status === "PUBLISHED" ? "Ta réalisation rejoint la Constellation" : "Ta fiche nécessite des ajustements", "VENTURE_PUBLISHED");
   });
 }

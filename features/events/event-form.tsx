@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export function EventForm({
   const [accessUrl, setAccessUrl] = useState(DISCORD_INVITE_URL);
 
   return (
-    <form action={action} className="grid gap-5">
+    <ActionForm action={action} className="grid gap-5">
       <label className="grid gap-1 text-sm font-medium">
         Titre
         <input className={field} name="title" required />
@@ -159,6 +160,6 @@ export function EventForm({
       </label>
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
       <Button disabled={pending} className="justify-self-start">{pending ? "Publication…" : "Publier l’événement"}</Button>
-    </form>
+    </ActionForm>
   );
 }

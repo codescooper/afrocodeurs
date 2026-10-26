@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { createChallengeAction } from "./actions";
@@ -10,7 +11,7 @@ const field = "rounded-md border border-border bg-background px-3 py-2 text-sm o
 export function ChallengeForm() {
   const [state, action, pending] = useActionState(createChallengeAction, undefined);
   const [mode, setMode] = useState("CLASSIC");
-  return <form action={action} className="flex flex-col gap-5">
+  return <ActionForm action={action} className="flex flex-col gap-5">
     <label className="flex flex-col gap-1 text-sm font-medium">Titre<input name="title" required minLength={5} maxLength={140} className={field} /></label>
     <label className="flex flex-col gap-1 text-sm font-medium">Mise en situation (optionnelle)<textarea name="story" rows={3} maxLength={1000} className={field} placeholder="Plantez le décor sans révéler la réponse." /></label>
     <label className="flex flex-col gap-1 text-sm font-medium">Consigne<textarea name="instructions" required minLength={20} rows={7} className={field} /></label>
@@ -21,5 +22,5 @@ export function ChallengeForm() {
     <fieldset className="flex flex-col gap-3 rounded-lg border border-border p-4"><legend className="px-1 font-semibold">Indices progressifs</legend>{[1,2,3].map((n) => <label key={n} className="flex flex-col gap-1 text-sm font-medium">Indice {n} (optionnel)<textarea name={`hint${n}`} rows={2} maxLength={500} className={field} /></label>)}</fieldset>
     {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
     <div className="flex gap-3"><Button name="intent" value="draft" variant="outline" disabled={pending}>Enregistrer le brouillon</Button><Button name="intent" value="submit" disabled={pending}>Soumettre à la modération</Button></div>
-  </form>;
+  </ActionForm>;
 }

@@ -10,7 +10,7 @@ import { guard } from "@/lib/guard";
 import { hasRank } from "@/lib/permissions";
 import { recordAudit } from "@/features/audit/log";
 
-export type ContentMutationState = { error?: string } | undefined;
+export type ContentMutationState = { error?: string; success?: boolean } | undefined;
 type EditableType = Extract<EntityType, "QUESTION" | "ANSWER" | "COMMENT" | "KNOWLEDGE" | "PROBLEM">;
 
 const mutationSchema = z.object({
@@ -71,7 +71,7 @@ export async function updateUserContentAction(
 
   await recordAudit({ actorId: g.user.id, action: "UPDATE", entityType, entityId, before: current, after });
   revalidatePath(returnPath);
-  return undefined;
+  return { success: true };
 }
 
 export async function deleteUserContentAction(formData: FormData): Promise<void> {

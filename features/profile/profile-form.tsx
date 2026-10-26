@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { updateProfileAction } from "./actions";
@@ -43,7 +44,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: ProfileFormValue
   );
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-4">
+    <ActionForm action={formAction} className="flex max-w-2xl flex-col gap-4">
       <Field label="Bio">
         <textarea
           name="bio"
@@ -139,6 +140,6 @@ export function ProfileForm({ defaultValues }: { defaultValues: ProfileFormValue
       <Button type="submit" disabled={pending} size="lg" className="self-start">
         {pending ? "Enregistrement…" : "Enregistrer"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

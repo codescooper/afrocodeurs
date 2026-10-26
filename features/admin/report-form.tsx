@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { createReportAction } from "./actions";
@@ -32,7 +33,7 @@ export function ReportForm({
       <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
         Signaler
       </summary>
-      <form action={formAction} className="mt-2 flex flex-wrap items-center gap-2">
+      <ActionForm action={formAction} className="mt-2 flex flex-wrap items-center gap-2">
         <input type="hidden" name="targetType" value={targetType} />
         <input type="hidden" name="targetId" value={targetId} />
         <select name="reason" className={controlClass}>
@@ -59,7 +60,7 @@ export function ReportForm({
         {state?.error && (
           <p className="w-full text-xs text-destructive">{state.error}</p>
         )}
-      </form>
+      </ActionForm>
     </details>
   );
 }
