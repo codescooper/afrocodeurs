@@ -8,8 +8,9 @@ import { orNull, uniqueSlug } from "@/lib/utils";
 import { guard, invalidMessage } from "@/lib/guard";
 import { solutionSchema } from "@/lib/validators";
 import { award } from "@/features/reputation/award";
+import { catalogSchema, catalogValues } from "./catalog";
 
-export type SolutionFormState = { error?: string } | undefined;
+export type SolutionFormState = { error?: string; success?: string } | undefined;
 
 /** Proposition d'une solution à l'AfroAtlas (Sprint 6). */
 export async function createSolutionAction(
@@ -19,7 +20,8 @@ export async function createSolutionAction(
   const g = await guard({ permission: "solution:propose", verified: true });
   if (!g.ok) return { error: g.error };
 
-  const parsed = solutionSchema.safeParse({
+  const parsed = solutionSchema.merge(catalogSchema).safeParse({
+    ...catalogValues(formData),
     name: formData.get("name"),
     description: formData.get("description"),
     type: formData.get("type"),
@@ -49,6 +51,13 @@ export async function createSolutionAction(
       documentationUrl: orNull(d.documentationUrl),
       license: orNull(d.license),
       createdById: g.user.id,
+      repositoryUrl: orNull(d.repositoryUrl),
+      sector: d.sector,
+      lifecycle: d.lifecycle,
+      countriesServed: d.countriesServed,
+      languages: d.languages,
+      contributionNeeds: d.contributionNeeds,
+      africanContext: d.africanContext,
     },
   });
   await award(g.user.id, "SOLUTION_ADDED", {

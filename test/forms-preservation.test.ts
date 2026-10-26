@@ -7,6 +7,7 @@ const { save } = vi.hoisted(() => ({ save: vi.fn() }));
 vi.mock("@/features/problems/actions", () => ({ createProblemAction: save }));
 vi.mock("@/features/communities/actions", () => ({ createCommunityAction: save }));
 vi.mock("@/features/solutions/actions", () => ({ createSolutionAction: save }));
+vi.mock("@/features/solutions/catalog-actions", () => ({ updateSolutionCatalogAction: save, requestSolutionClaimAction: save, reviewSolutionClaimAction: save, verifySolutionLicenseAction: save }));
 vi.mock("@/features/projects/actions", () => ({ createProjectAction: save }));
 vi.mock("@/features/events/actions", () => ({ createEventAction: save }));
 vi.mock("@/features/compensation/actions", () => ({ createCompensationReportAction: save }));
@@ -17,6 +18,7 @@ vi.mock("@/features/auth/actions", () => ({ loginAction: save, registerAction: s
 import { ProblemForm } from "../features/problems/problem-form";
 import { CommunityForm } from "../features/communities/community-form";
 import { SolutionForm } from "../features/solutions/solution-form";
+import { ClaimForm, ClaimReviewForm, LicenseReviewForm } from "../features/solutions/claim-forms";
 import { ProjectForm } from "../features/projects/project-form";
 import { EventForm } from "../features/events/event-form";
 import { CompensationForm } from "../features/compensation/compensation-form";
@@ -31,6 +33,9 @@ const cases: [string, () => ReactElement][] = [
   ["problem", () => createElement(ProblemForm, {})],
   ["community", () => createElement(CommunityForm)],
   ["solution", () => createElement(SolutionForm)],
+  ["solution claim", () => createElement(ClaimForm, { solutionId: "solution" })],
+  ["solution claim review", () => createElement(ClaimReviewForm, { id: "claim", self: false })],
+  ["solution license review", () => createElement(LicenseReviewForm, { id: "solution", revision: 1 })],
   ["project", () => createElement(ProjectForm, { problems: [], solutions: [], communities: [] })],
   ["event", () => createElement(EventForm, { communities: [], discordConfigured: false })],
   ["compensation", () => createElement(CompensationForm)],

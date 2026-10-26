@@ -3,6 +3,25 @@
 **Dernière MAJ : 2026-10-26**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
 
+## Atlas des solutions - 26 octobre 2026
+
+- Premiere version sur branche distincte `codex/atlas-catalog-claims`, reposant
+  sur les ameliorations publiques de la PR #99. Fiches existantes enrichies :
+  depot, secteur, etat, pays desservis, langues, ancrage declare et besoins.
+- Filtres cumulables et licence open source verifiee uniquement par ADMIN avec
+  motif. Changer le depot ou la licence annule la verification.
+- Demande de gestion avec preuve et code personnel ; validation par un autre
+  ADMIN, decision et droits journalises dans la meme transaction. Plusieurs
+  gestionnaires possibles ; le referencement n'accorde aucun droit implicite.
+- Edition reservee aux gestionnaires verifies et ADMIN, controle de version et
+  conservation des saisies en cas d'erreur. Preuves non exposees publiquement.
+- Migration additive preparee et appliquee sur deux bases locales isolees.
+  Aucun deploiement ni changement de donnee de production. Perimetre et limites
+  dans `docs/ATLAS-CATALOG.md` : invitations/transferts et OAuth restent a venir.
+- Verification : 288 tests reussis sans test ignore, dont concurrence PostgreSQL
+  et conservation des saisies ; controle TypeScript reussi. Build a verifier dans
+  le checkout propre (Turbopack refuse les dependances liees hors du dossier).
+
 ## Decouverte publique et SEO - 26 octobre 2026
 
 - Suite decouverte : page publique `/participer`, parcours de premiere contribution,
