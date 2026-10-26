@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState, useState } from "react";
 import Link from "next/link";
 
@@ -22,7 +23,7 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <form action={formAction} className="flex flex-col gap-4">
+      <ActionForm action={formAction} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm font-medium">
           Nom (optionnel)
           <input
@@ -94,7 +95,7 @@ export default function RegisterPage() {
               ? "Vérification en cours…"
               : "Créer mon compte"}
         </Button>
-      </form>
+      </ActionForm>
 
       <p className="text-center text-sm text-muted-foreground">
         Déjà inscrit ?{" "}

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 import styles from "./construction.module.css";
@@ -135,7 +136,7 @@ export function ConstructionGate() {
       setOpening(true);
       setRiddleProgress(4);
       setRiddleMessage("La porte reconnaît un pionnier.");
-      window.setTimeout(() => window.location.assign("/"), 850);
+      window.setTimeout(() => window.location.assign("/register"), 850);
       return;
     }
     if (data.status === "progress") {
@@ -234,9 +235,9 @@ export function ConstructionGate() {
 
         <aside className={styles.join}>
           <div>
-            <p className={styles.eyebrow}>CERCLE FONDATEUR · 20 PLACES</p>
-            <h2>Entrez avant<br />tout le monde.</h2>
-            <p>Recevez l’annonce du lancement, les ressources et la future newsletter AfroCodeurs.</p>
+            <p className={styles.eyebrow}>ÉNIGME D’ENTRÉE</p>
+            <h2>La communauté<br />vous attend.</h2>
+            <p>Résolvez l’énigme pour créer votre compte. Vous pouvez aussi recevoir les nouvelles et ressources de la communauté par email.</p>
           </div>
           <form onSubmit={subscribe} className={styles.form}>
             <label htmlFor="launch-email">Votre adresse e-mail</label>
@@ -254,7 +255,7 @@ export function ConstructionGate() {
         </aside>
       </section>
 
-      <footer className={styles.footer}><span>Construit en Afrique, pour l’Afrique.</span><span className={styles.riddle}>◆ L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM ◆</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
+      <footer className={styles.footer}><Link href="/">Explorer le site sans s’inscrire</Link><span className={styles.riddle}>◆ L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM ◆</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
       <div className={styles.portal}>ACCESS GRANTED</div>
     </main>
   );

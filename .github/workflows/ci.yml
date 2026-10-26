@@ -52,10 +52,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Bloque le retour d'une vulnérabilité critique dans les dépendances
+      # Bloque le retour d'une vulnérabilité élevée ou critique dans les dépendances
       # exécutées en production, sans masquer les alertes non critiques.
       - name: Security audit (production dependencies)
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -63,10 +63,25 @@ jobs:
       - name: Apply database migrations
         run: npx prisma migrate deploy
 
+      - name: Prepare isolated integration databases
+        env:
+          PGPASSWORD: afrocodeurs
+        run: |
+          createdb --host=127.0.0.1 --port=5432 --username=afrocodeurs constellation_test
+          createdb --host=127.0.0.1 --port=5432 --username=afrocodeurs mentorship_test
+          DATABASE_URL=postgresql://afrocodeurs:afrocodeurs@127.0.0.1:5432/constellation_test npx prisma migrate deploy
+          DATABASE_URL=postgresql://afrocodeurs:afrocodeurs@127.0.0.1:5432/mentorship_test npx prisma migrate deploy
+
       - name: Lint
         run: ./run lint
 
+      - name: Test public discovery checker
+        run: node --test scripts/check-public-discovery.test.mjs
+
       - name: Test
+        env:
+          CONSTELLATION_TEST_DATABASE_URL: postgresql://afrocodeurs:afrocodeurs@127.0.0.1:5432/constellation_test
+          MENTORSHIP_TEST_DATABASE_URL: postgresql://afrocodeurs:afrocodeurs@127.0.0.1:5432/mentorship_test
         run: npm test
 
       - name: Build

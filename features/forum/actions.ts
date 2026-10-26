@@ -13,7 +13,7 @@ import { award, awardVote } from "@/features/reputation/award";
 import { recordAudit } from "@/features/audit/log";
 import { communityIdForMember } from "@/features/communities/posting";
 
-export type ForumFormState = { error?: string } | undefined;
+export type ForumFormState = { error?: string; success?: boolean } | undefined;
 
 /** Poser une question (Sprint 5). Statut initial : OPEN. */
 export async function createQuestionAction(
@@ -102,7 +102,7 @@ export async function createAnswerAction(
   });
 
   if (typeof slug === "string") revalidatePath(`/forum/${slug}`);
-  return undefined;
+  return { success: true };
 }
 
 /** Voter (UP/DOWN) sur une question ou une réponse — togglable (Sprint 5). */
@@ -270,5 +270,5 @@ export async function addCommentAction(
   });
 
   if (typeof slug === "string") revalidatePath(`/forum/${slug}`);
-  return undefined;
+  return { success: true };
 }

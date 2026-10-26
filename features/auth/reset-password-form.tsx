@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 import Link from "next/link";
 
@@ -24,7 +25,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <ActionForm action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="token" value={token} />
       <label className="flex flex-col gap-1 text-sm font-medium">
         Nouveau mot de passe
@@ -43,6 +44,6 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <Button type="submit" disabled={pending} size="lg">
         {pending ? "…" : "Réinitialiser le mot de passe"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

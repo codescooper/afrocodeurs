@@ -1,14 +1,14 @@
 import type { MetadataRoute } from "next";
 
-const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+import { siteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: "*",
+    rules: ["*", "OAI-SearchBot"].map((userAgent) => ({
+      userAgent,
       allow: "/",
-      disallow: ["/dashboard/", "/admin/", "/api/"],
-    },
-    sitemap: `${base}/sitemap.xml`,
+      disallow: ["/dashboard", "/admin", "/api/", "/messages", "/login", "/register", "/forgot-password", "/reset-password", "/search", "/labs/"],
+    })),
+    sitemap: siteUrl("/sitemap.xml"),
   };
 }

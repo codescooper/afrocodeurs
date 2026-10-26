@@ -1,10 +1,14 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Avatar } from "@/components/shared/avatar";
 import { blockedMentorshipIds, memberSelect } from "@/features/mentorship/queries";
 
-export const metadata = { title: "Mentorat" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/mentorship", page), "Mentorat pour développeurs et profils tech en Afrique", "Trouve un accompagnement, présente tes objectifs ou propose ton aide comme mentor au sein de la communauté AfroCodeurs.");
+}
 export default async function MentorshipPage({ searchParams }: { searchParams: Promise<{ q?: string; language?: string; page?: string }> }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().slice(0, 80) : "";

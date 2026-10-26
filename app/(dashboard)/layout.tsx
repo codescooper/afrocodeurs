@@ -6,6 +6,9 @@ import { db } from "@/lib/db";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { SidebarProvider } from "@/components/layout/sidebar-context";
+import { PRIVATE_ROBOTS } from "@/lib/seo";
+
+export const metadata = { robots: PRIVATE_ROBOTS };
 
 /** Layout dashboard : réservé aux utilisateurs connectés (cf. SDD §7). */
 export default async function DashboardLayout({

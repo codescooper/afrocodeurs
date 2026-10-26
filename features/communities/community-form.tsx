@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { createCommunityAction } from "./actions";
@@ -17,7 +18,7 @@ export function CommunityForm() {
   );
 
   return (
-    <form action={formAction} className="flex max-w-xl flex-col gap-4">
+    <ActionForm action={formAction} className="flex max-w-xl flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm font-medium">
         Nom
         <input
@@ -74,6 +75,6 @@ export function CommunityForm() {
       <Button type="submit" disabled={pending} size="lg" className="self-start">
         {pending ? "Création…" : "Créer la communauté"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

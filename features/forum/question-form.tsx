@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { createQuestionAction } from "./actions";
@@ -16,7 +17,7 @@ export function QuestionForm({ community }: { community?: { id: string; name: st
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <ActionForm action={formAction} className="flex flex-col gap-4">
       {community && <><input type="hidden" name="communityId" value={community.id} /><p className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">Publié depuis la communauté <strong>{community.name}</strong>. La discussion restera visible dans le Forum général.</p></>}
       <label className="flex flex-col gap-1 text-sm font-medium">
         Titre
@@ -48,6 +49,6 @@ export function QuestionForm({ community }: { community?: { id: string; name: st
       <Button type="submit" disabled={pending} size="lg" className="self-start">
         {pending ? "Publication…" : "Poser la question"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/shared/action-form";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { cn } from "@/lib/utils";
@@ -91,7 +92,7 @@ export default async function NotificationsPage() {
       <section className="mt-2 rounded-lg border border-border p-5">
         <h2 className="font-semibold">Préférences</h2>
 
-        <form
+        <ActionForm
           action={updateNotificationPrefsAction}
           className="mt-4 flex flex-col gap-3"
         >
@@ -123,7 +124,7 @@ export default async function NotificationsPage() {
           >
             Enregistrer les préférences
           </Button>
-        </form>
+        </ActionForm>
 
         <div className="mt-6 border-t border-border pt-4">
           <h3 className="text-sm font-semibold">

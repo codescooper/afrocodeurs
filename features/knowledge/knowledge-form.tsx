@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -51,7 +52,7 @@ export function KnowledgeForm({ community, defaultType = "ARTICLE" }: { communit
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <ActionForm action={formAction} className="flex flex-col gap-4">
       {community && <><input type="hidden" name="communityId" value={community.id} /><p className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">Publié depuis la communauté <strong>{community.name}</strong>. La ressource restera visible dans le Knowledge Hub général.</p></>}
       <label className="flex flex-col gap-1 text-sm font-medium">
         Titre
@@ -208,6 +209,6 @@ export function KnowledgeForm({ community, defaultType = "ARTICLE" }: { communit
           Soumettre à validation
         </Button>
       </div>
-    </form>
+    </ActionForm>
   );
 }

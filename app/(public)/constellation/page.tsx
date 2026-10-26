@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 /* eslint-disable @next/next/no-html-link-for-pages -- Creation uses document navigation to avoid the dynamic detail interceptor. */
 import Link from "next/link";
 import { Search, Plus, X, ArrowLeft, ArrowRight } from "lucide-react";
@@ -7,7 +8,10 @@ import { VentureCloud } from "@/features/constellation/cloud";
 import { ventureBlockedIds } from "@/features/constellation/queries";
 import { COUNTRIES, SECTORS, type Sector } from "@/features/constellation/constants";
 
-export const metadata = { title: "Constellation — Les réalisations de la communauté" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/constellation", page), "Constellation des projets déployés en Afrique", "Découvre les produits et services en ligne des membres d’AfroCodeurs. Explore par pays ou secteur et propose une collaboration.");
+}
 export default async function ConstellationPage({ searchParams }: { searchParams: Promise<{ q?: string; country?: string; sector?: string; page?: string }> }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().slice(0, 80) : "";

@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { addCommentAction } from "./actions";
@@ -24,7 +25,7 @@ export function CommentForm({
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-1">
+    <ActionForm action={formAction} resetAfterSuccess={state?.success ? state : undefined} className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <input type="hidden" name="targetType" value={targetType} />
         <input type="hidden" name="targetId" value={targetId} />
@@ -47,6 +48,6 @@ export function CommentForm({
         </button>
       </div>
       {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-    </form>
+    </ActionForm>
   );
 }

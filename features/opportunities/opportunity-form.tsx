@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { createOpportunityAction } from "./actions";
@@ -9,7 +10,7 @@ const field = "rounded-md border border-border bg-background px-3 py-2 text-sm o
 
 export function OpportunityForm() {
   const [state, action, pending] = useActionState(createOpportunityAction, undefined);
-  return <form action={action} className="flex flex-col gap-5">
+  return <ActionForm action={action} className="flex flex-col gap-5">
     <div className="grid gap-4 sm:grid-cols-2">
       <label className="flex flex-col gap-1 text-sm font-medium">Titre<input name="title" required minLength={5} maxLength={160} className={field} /></label>
       <label className="flex flex-col gap-1 text-sm font-medium">Organisation<input name="organization" required maxLength={120} className={field} /></label>
@@ -28,5 +29,5 @@ export function OpportunityForm() {
     </div>
     {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
     <Button type="submit" size="lg" disabled={pending} className="self-start">{pending ? "Publication…" : "Publier l’opportunité"}</Button>
-  </form>;
+  </ActionForm>;
 }

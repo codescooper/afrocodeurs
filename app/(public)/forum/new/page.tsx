@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { QuestionForm } from "@/features/forum/question-form";
 import { postingCommunityBySlug } from "@/features/communities/posting";
 
-export const metadata = { title: "Poser une question" };
+export const metadata = { robots: { index: false, follow: false }, title: "Poser une question" };
 
 /** Poser une question — réservé aux utilisateurs connectés (Sprint 5). */
 export default async function NewQuestionPage({ searchParams }: { searchParams: Promise<{ community?: string }> }) {

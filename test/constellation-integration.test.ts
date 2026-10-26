@@ -38,9 +38,20 @@ describe.skipIf(!db)("Constellation PostgreSQL", () => {
     await publish();
     expect(await db!.communityVenture.count({ where: { ownerId: owner, status: "PUBLISHED" } })).toBe(1);
   });
-  it("requires an independent moderator", async () => {
+  it("requires an independent reviewer except for admins", async () => {
     await expect(reviewVenture(db!, { id: owner, role: "USER" }, { id: ventureId, revision: 1, status: "PUBLISHED", note: "" })).rejects.toThrow("modération");
     await expect(reviewVenture(db!, { id: owner, role: "MODERATOR" }, { id: ventureId, revision: 1, status: "PUBLISHED", note: "" })).rejects.toThrow("autre personne");
+  });
+  it("allows an admin to publish their own pending venture and records the decision", async () => {
+    await db!.user.update({ where: { id: owner }, data: { role: "ADMIN" } });
+    await reviewVenture(db!, { id: owner, role: "ADMIN" }, { id: ventureId, revision: 1, status: "PUBLISHED", note: "" });
+    expect(await db!.communityVenture.findUnique({ where: { id: ventureId } })).toMatchObject({ status: "PUBLISHED", revision: 2 });
+    expect(await db!.auditLog.findFirst({ where: { actorId: owner, entityId: ventureId, entityType: "COMMUNITY_VENTURE" } })).toMatchObject({ metadata: { operation: "review", selfReview: true, reviewerRole: "ADMIN" } });
+    await expect(reviewVenture(db!, { id: owner, role: "ADMIN" }, { id: ventureId, revision: 1, status: "PUBLISHED", note: "" })).rejects.toThrow("changé");
+  });
+  it("does not let admins bypass a suspension on their own venture", async () => {
+    await db!.communityVenture.update({ where: { id: ventureId }, data: { status: "SUSPENDED" } });
+    await expect(reviewVenture(db!, { id: owner, role: "ADMIN" }, { id: ventureId, revision: 1, status: "PUBLISHED", note: "" })).rejects.toThrow("changé");
   });
   it("rejects stale moderation after an owner edit", async () => {
     await saveVenture(db!, owner, { ...data(), id: ventureId });

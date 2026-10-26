@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import type { SolutionType } from "@prisma/client";
@@ -14,7 +15,10 @@ import { FilterPills } from "@/components/molecules/filter-pills";
 import { ProductCard } from "@/components/molecules/product-card";
 import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 
-export const metadata = { title: "AfroAtlas" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/atlas", page), "Solutions et initiatives tech en Afrique", "L’AfroAtlas rassemble des solutions, services et initiatives pour découvrir ce qui existe et construire des projets utiles.");
+}
 
 /** AfroAtlas Lite — annuaire des solutions (Sprint 6), façon Product Hunt. */
 export default async function AtlasPage({

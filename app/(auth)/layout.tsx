@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { PRIVATE_ROBOTS } from "@/lib/seo";
+
+export const metadata = { robots: PRIVATE_ROBOTS };
 
 /** Layout d'authentification : carte centrée, sans chrome applicatif. */
 export default function AuthLayout({

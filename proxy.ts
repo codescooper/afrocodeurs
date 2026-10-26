@@ -9,17 +9,11 @@ export function proxy(request: NextRequest) {
 
   if (pathname === "/construction") {
     return previewEnabled
-      ? NextResponse.redirect(new URL("/", request.url))
+      ? NextResponse.redirect(new URL("/register", request.url))
       : NextResponse.next();
   }
-
-  // La charte publique reste consultable pendant la phase de construction.
-  // Les routes d'administration restent derrière la gate et leur RBAC.
-  if (pathname === "/brand") {
-    return NextResponse.next();
-  }
-
-  if (!previewEnabled) {
+  // The puzzle is an onboarding step, not authentication for public content.
+  if ((pathname === "/register" || pathname.startsWith("/register/")) && !previewEnabled) {
     return NextResponse.redirect(new URL("/construction", request.url));
   }
 
@@ -27,7 +21,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|icon.svg|manifest.webmanifest|robots.txt|sitemap.xml|sw.js|pow-worker.js|ancestral-pixel-loop.mp3|whatsapp-community-qr.png).*)",
-  ],
+  matcher: ["/register/:path*", "/construction"],
 };

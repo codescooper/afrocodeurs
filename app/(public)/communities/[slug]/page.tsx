@@ -1,3 +1,4 @@
+import { publicContentMetadata } from "@/features/seo/metadata";
 import { BookOpen, CircleHelp, MapPin, Settings, TriangleAlert, Users } from "lucide-react";
 import Link from "next/link";
 import { ContentShare } from "@/components/shared/content-share";
@@ -36,7 +37,7 @@ export default async function CommunityDetailPage({
       knowledge: { where: { status: "PUBLISHED" }, orderBy: { publishedAt: "desc" }, take: 6, select: { id: true, slug: true, title: true, summary: true, lastVerifiedAt: true } },
       problems: { orderBy: { createdAt: "desc" }, take: 6, select: { id: true, slug: true, title: true, summary: true } },
       questions: { orderBy: { createdAt: "desc" }, take: 6, select: { id: true, slug: true, title: true, status: true } },
-      chat: { select: { id: true, messages: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 101, select: { id: true, body: true, createdAt: true, authorId: true, author: { select: { username: true, name: true, image: true } } } } } },
+      chat: { select: { id: true } },
     },
   });
 
@@ -55,6 +56,9 @@ export default async function CommunityDetailPage({
   const location = [community.city, community.country]
     .filter(Boolean)
     .join(", ");
+  const chatMessages = isMember && session?.user?.isEmailVerified && community.chat
+    ? await db.message.findMany({ where: { conversationId: community.chat.id, deletedAt: null }, orderBy: { createdAt: "desc" }, take: 101, select: { id: true, body: true, createdAt: true, authorId: true, author: { select: { username: true, name: true, image: true } } } })
+    : [];
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
@@ -142,7 +146,7 @@ export default async function CommunityDetailPage({
       {isMember && community.chat && userId && (
           <section id="chat" className="mt-10 overflow-hidden rounded-xl border border-border">
           <header className="border-b border-border bg-muted/40 px-5 py-4"><h2 className="font-semibold">Salon · {community.name}</h2><p className="text-xs text-muted-foreground">Réservé aux membres · historique complet</p></header>
-          {session?.user?.isEmailVerified ? <ChatRoom conversationId={community.chat.id} currentUserId={userId} initialMessages={community.chat.messages.slice(0, 100).reverse().map((message) => ({ ...message, createdAt: message.createdAt.toISOString() }))} initialHasMore={community.chat.messages.length > 100} compact canModerate={canManage} /> : <p className="p-6 text-sm text-muted-foreground">Confirmez votre adresse e-mail pour participer au salon.</p>}
+          {session?.user?.isEmailVerified ? <ChatRoom conversationId={community.chat.id} currentUserId={userId} initialMessages={chatMessages.slice(0, 100).reverse().map((message) => ({ ...message, createdAt: message.createdAt.toISOString() }))} initialHasMore={chatMessages.length > 100} compact canModerate={canManage} /> : <p className="p-6 text-sm text-muted-foreground">Confirmez votre adresse e-mail pour participer au salon.</p>}
         </section>
       )}
 
@@ -164,4 +168,9 @@ export default async function CommunityDetailPage({
 
 function CommunityContentSection({ title, icon, items }: { title: string; icon: React.ReactNode; items: Array<{ href: string; title: string; detail?: string | null; badge?: string }> }) {
   return <div className="rounded-xl border border-border p-4"><h3 className="flex items-center gap-2 font-semibold">{icon}{title}</h3>{items.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Aucun contenu.</p> : <ul className="mt-3 space-y-3">{items.map((item) => <li key={item.href}><Link href={item.href} className="block rounded-lg bg-muted/40 p-3 hover:bg-muted"><span className="flex items-start justify-between gap-2"><strong className="text-sm">{item.title}</strong>{item.badge && <span className="shrink-0 rounded-full bg-background px-2 py-0.5 text-[10px]">{item.badge}</span>}</span>{item.detail && <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">{item.detail}</span>}</Link></li>)}</ul>}</div>;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return publicContentMetadata("communities", slug);
 }

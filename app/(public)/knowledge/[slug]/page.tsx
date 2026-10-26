@@ -1,3 +1,4 @@
+import { publicContentMetadata } from "@/features/seo/metadata";
 import Link from "next/link";
 import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
@@ -203,4 +204,9 @@ export default async function KnowledgeDetailPage({
       )}
     </div>
   );
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return publicContentMetadata("knowledge", slug);
 }

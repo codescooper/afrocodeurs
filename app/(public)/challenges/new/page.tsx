@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { ChallengeForm } from "@/features/challenges/challenge-form";
 
-export const metadata = { title: "Proposer une énigme" };
+export const metadata = { robots: { index: false, follow: false }, title: "Proposer une énigme" };
 
 export default async function NewChallengePage() {
   const session = await auth();

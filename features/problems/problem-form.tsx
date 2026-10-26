@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { createProblemAction } from "./actions";
@@ -18,7 +19,7 @@ export function ProblemForm({ community }: { community?: { id: string; name: str
   );
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-4">
+    <ActionForm action={formAction} className="flex max-w-2xl flex-col gap-4">
       {community && <><input type="hidden" name="communityId" value={community.id} /><p className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm">Publié depuis la communauté <strong>{community.name}</strong>. Le problème restera visible dans l’Explorer général.</p></>}
       <label className="flex flex-col gap-1 text-sm font-medium">
         Titre
@@ -106,6 +107,6 @@ export function ProblemForm({ community }: { community?: { id: string; name: str
       <Button type="submit" disabled={pending} size="lg" className="self-start">
         {pending ? "Publication…" : "Proposer le problème"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

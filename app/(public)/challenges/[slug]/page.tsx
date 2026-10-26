@@ -1,3 +1,4 @@
+import { publicContentMetadata } from "@/features/seo/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle2, LockKeyhole, Trophy } from "lucide-react";
@@ -41,4 +42,9 @@ export default async function ChallengePage({ params }: { params: Promise<{ slug
   {canSeeSolution && <section className="mt-10 rounded-xl border border-border bg-muted/30 p-6"><h2 className="text-xl font-semibold">Explication de la solution</h2><div className="mt-4"><Markdown>{challenge.solutionExplanation}</Markdown></div></section>}
   {challenge.solves.length > 0 && <section className="mt-10"><h2 className="flex items-center gap-2 text-xl font-semibold"><Trophy className="size-5 text-primary" /> Classement du défi</h2><ol className="mt-4 divide-y divide-border rounded-xl border border-border">{challenge.solves.map((entry, index) => <li key={entry.id} className="flex items-center justify-between px-4 py-3 text-sm"><span><strong className="mr-3 text-primary">#{index + 1}</strong>{entry.user.name ?? `@${entry.user.username}`}</span><span>{entry.score} pts · {entry.attemptsUsed} tentative(s)</span></li>)}</ol></section>}
   </div>;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return publicContentMetadata("challenges", slug);
 }

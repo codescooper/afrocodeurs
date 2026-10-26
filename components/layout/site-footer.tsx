@@ -71,6 +71,8 @@ export function SiteFooter() {
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Projet
               </span>
+              <Link href="/a-propos" className="text-muted-foreground transition-colors hover:text-foreground">À propos d’AfroCodeurs</Link>
+              <Link href="/participer" className="text-muted-foreground transition-colors hover:text-foreground">Participer et contribuer</Link>
               <a
                 href={GITHUB_URL}
                 target="_blank"

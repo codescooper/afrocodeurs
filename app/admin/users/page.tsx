@@ -1,3 +1,4 @@
+import { ActionForm } from "@/components/shared/action-form";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -66,7 +67,7 @@ export default async function AdminUsersPage() {
                   {USER_ROLE_LABELS[user.role]}
                 </span>
               ) : (
-                <form action={updateUserRoleAction} className="flex gap-2">
+                <ActionForm action={updateUserRoleAction} className="flex gap-2">
                   <input type="hidden" name="userId" value={user.id} />
                   <select
                     name="role"
@@ -82,7 +83,7 @@ export default async function AdminUsersPage() {
                   <Button type="submit" size="sm" variant="outline">
                     Enregistrer
                   </Button>
-                </form>
+                </ActionForm>
               )}
             </li>
           );

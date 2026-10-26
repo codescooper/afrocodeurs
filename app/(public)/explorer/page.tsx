@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 
 import { auth } from "@/lib/auth";
@@ -12,7 +13,10 @@ import { sectorIcon } from "@/components/atoms/sector-icon";
 import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 import { FilterPills } from "@/components/molecules/filter-pills";
 
-export const metadata = { title: "Explorer les problèmes" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/explorer", page), "Problèmes à résoudre en Afrique", "Explore les problèmes partagés par les membres et contribue à des solutions concrètes adaptées aux réalités africaines.");
+}
 
 /** Problem Hub — liste des problèmes du continent (Sprint 3), filtrable par secteur. */
 export default async function ExplorerPage({

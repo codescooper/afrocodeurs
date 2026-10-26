@@ -1,7 +1,39 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-23**
+**Dernière MAJ : 2026-10-26**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Decouverte publique et SEO - 26 octobre 2026
+
+- Suite decouverte : page publique `/participer`, parcours de premiere contribution,
+  lien dans le pied de page et sitemap. Plan editorial, partenariats, mesure
+  respectueuse et actions externes documentes dans `docs/DISCOVERY-LAUNCH.md`.
+- Controle apres deploiement disponible : `node scripts/check-public-discovery.mjs`.
+  Aucun envoi communautaire, outil de tracking, validation Search Console/Bing ni
+  deploiement realise par ce lot. Les actions externes restent explicitement ouvertes.
+- Verification de ce lot : quatre tests du controle de deploiement et trois tests
+  de rendu public reussis ; lint cible et `git diff --check` sans erreur.
+  Le controle lui-meme est ajoute a la CI ; aucune recette production anticipee.
+
+- Ajout a la PR #99, sur demande explicite : l'enigme ne concerne plus que l'inscription. Les pages publiques sont accessibles sans cookie ; les controles Auth.js et RBAC des espaces prives sont conserves. Apres resolution, redirection vers `/register`.
+- Presentation publique `/a-propos`, accueil explicite, donnees structurees factuelles, metadata par rubrique/fiche, URL canoniques et image PNG de partage. Sitemap filtre selon la publication ; pages privees et formulaires hors indexation.
+- Constellation lisible en HTML serveur avant JavaScript. Messages communautaires non charges pour les anonymes/non-membres ; filtre invalide de l'annuaire neutralise.
+- Configuration Google/Bing et procedure apres deploiement dans `docs/SEO-DISCOVERY.md`. Aucune propriete externe verifiee ni indexation garantie. Changements non deployes.
+- Commit SEO `292cbc7` : CI GitHub complete reussie (audit, migrations, bases d'integration, lint, tests et build), execution `40278336218`. Dix-sept tests SEO/publication cibles reussis localement et controle TypeScript reussi. La suite locale complete a rencontre des depassements de delai ; elle a ete arretee, ainsi que le build local redondant apres validation de la CI. Ces interruptions ne sont pas presentees comme des succes locaux.
+
+## Fiabilite des formulaires et droits Constellation - 26 octobre 2026
+
+- En branche de revue : auto-validation Constellation reservee aux ADMIN, restriction maintenue pour les moderateurs sur leur propre fiche. Decisions journalisees dans la transaction ; version et statut PENDING toujours controles.
+- Protection commune des saisies dans 35 surfaces de formulaire, sans stockage persistant des brouillons ou mots de passe. Commentaires generiques avec messages de refus explicites ; confirmation d'enregistrement des modifications de contenu.
+- Dependances verrouillees : Zod 4.6.7 et fast-uri 3.1.9. CI renforcee pour bloquer les alertes elevees et activer les tests PostgreSQL jusque-la ignores faute de bases dediees.
+- Verification sur installation propre : 240 tests reussis sans tests ignores, 31 migrations appliquees a chacune des deux bases PostgreSQL isolees, build Next/TypeScript reussi, lint sans erreur (quatre avertissements preexistants). `npm ci` ne signale aucune vulnerabilite. Audit et limites dans `docs/PLATFORM-RELIABILITY-AUDIT.md`.
+- PR #99 preparee : `https://github.com/codescooper/afrocodeurs/pull/99`. Revue independante et CI requises ; protections de branche conservees.
+- Aucun nouveau deploiement de ces changements, aucune nouvelle migration. L'ancien depot Git local n'etant plus disponible, correctifs recuperes dans `C:/Users/BEJ technologie/.codex/worktrees/afrocodeurs-recovery` depuis une copie propre de main.
+
+## Recette mentorat de la PR #98 - 23 octobre 2026
+
+- Fusion `5eeba3e` deployee : image `afrocodeurs-web:chat-presence-5eeba3e-20261023t093639z`. Sauvegarde dans `/opt/afrocodeurs/backups/chat-presence-20261023T093639Z`. Aucun changement de schema requis ; application et base ok apres bascule.
+- Chrome en production : soumission avec sujet trop court refusee en francais ; titre, description, langues, disponibilite, capacite 3 et case decochee conserves. Aucune offre de test publiee.
 
 ## Annuaire du chat et fermeture des bulles - 23 octobre 2026
 
@@ -153,7 +185,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir et fusionner le correctif de conservation des saisies mentorat avant son deploiement.**
+**Faire revoir la PR #99 de fiabilite formulaires et auto-validation Constellation avant fusion et deploiement.**
 
 ## ⚠️ Risques
 

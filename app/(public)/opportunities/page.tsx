@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { Briefcase, CalendarDays, MapPin, Plus } from "lucide-react";
 import { db } from "@/lib/db";
@@ -7,7 +8,10 @@ import { FilterPills } from "@/components/molecules/filter-pills";
 import { buttonVariants } from "@/components/ui/button";
 import { OPPORTUNITY_TYPES, OPPORTUNITY_TYPE_LABELS } from "@/features/opportunities/constants";
 
-export const metadata = { title: "Opportunités" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/opportunities", page), "Opportunités et collaborations tech en Afrique", "Découvre les opportunités et propositions de la communauté AfroCodeurs et entre en contact avec leurs auteurs.");
+}
 
 export default async function OpportunitiesPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
   const [{ type }, session] = await Promise.all([searchParams, auth()]);

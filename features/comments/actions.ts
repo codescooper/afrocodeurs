@@ -17,19 +17,21 @@ async function owner(type: EntityType, id: string) {
   if (type === "OPPORTUNITY") return db.opportunity.findUnique({ where: { id }, select: { authorId: true, title: true } });
   return null;
 }
-export async function addEntityCommentAction(formData: FormData) {
-  const g = await guard({ permission: "content:comment", verified: true }); if (!g.ok) return;
+export type EntityCommentState = { error?: string; success?: boolean } | undefined;
+export async function addEntityCommentAction(_: EntityCommentState, formData: FormData): Promise<EntityCommentState> {
+  const g = await guard({ permission: "content:comment", verified: true }); if (!g.ok) return { error: g.error };
   const targetType = String(formData.get("targetType")) as EntityType, targetId = String(formData.get("targetId") ?? ""), body = String(formData.get("body") ?? "").trim(), returnPath = String(formData.get("returnPath") ?? "/");
-  if (!ALLOWED.has(targetType) || !targetId || body.length < 2 || body.length > 3000 || !returnPath.startsWith("/")) return;
-  const target = await owner(targetType, targetId); if (!target) return;
+  if (!ALLOWED.has(targetType) || !targetId || body.length < 2 || body.length > 3000 || !returnPath.startsWith("/") || returnPath.startsWith("//")) return { error: "Le commentaire doit contenir de 2 à 3 000 caractères et viser un contenu valide." };
+  const target = await owner(targetType, targetId); if (!target) return { error: "Ce contenu n’est plus disponible." };
   if (targetType === "COMMUNITY_VENTURE") {
-    if (!rateLimit(`venture-comment:${g.user.id}`, 10, 5 * 60 * 1000).ok) return;
-    if (!("href" in target) || target.href !== returnPath) return;
+    if (!rateLimit(`venture-comment:${g.user.id}`, 10, 5 * 60 * 1000).ok) return { error: "Trop de commentaires. Patiente quelques minutes." };
+    if (!("href" in target) || target.href !== returnPath) return { error: "Cette fiche n’est plus disponible." };
     const blocked = await db.ventureBlock.findFirst({ where: { OR: [{ blockerId: g.user.id, blockedId: target.authorId }, { blockerId: target.authorId, blockedId: g.user.id }] }, select: { id: true } });
-    if (blocked) return;
+    if (blocked) return { error: "Tu ne peux pas commenter cette fiche." };
   }
   const comment = await db.comment.create({ data: { authorId: g.user.id, targetType, targetId, body } });
   await recordAudit({ actorId: g.user.id, action: "CREATE", entityType: "COMMENT", entityId: comment.id, after: { body, targetType, targetId } });
   await notify({ userId: target.authorId, actorId: g.user.id, type: "COMMENT", title: "Nouveau commentaire", body: `@${g.user.username} a commenté « ${target.title} ».`, link: returnPath });
   revalidatePath(returnPath);
+  return { success: true };
 }

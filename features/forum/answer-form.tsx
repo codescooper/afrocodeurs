@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionForm } from "@/components/shared/action-form";
 import { useActionState } from "react";
 
 import { createAnswerAction } from "./actions";
@@ -22,7 +23,7 @@ export function AnswerForm({
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <ActionForm action={formAction} resetAfterSuccess={state?.success ? state : undefined} className="flex flex-col gap-3">
       <input type="hidden" name="questionId" value={questionId} />
       <input type="hidden" name="slug" value={slug} />
       <textarea
@@ -37,6 +38,6 @@ export function AnswerForm({
       <Button type="submit" disabled={pending} className="self-start">
         {pending ? "Envoi…" : "Répondre"}
       </Button>
-    </form>
+    </ActionForm>
   );
 }

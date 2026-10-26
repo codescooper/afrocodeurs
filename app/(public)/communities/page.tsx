@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { Users } from "lucide-react";
 import type { CommunityType } from "@prisma/client";
@@ -7,6 +8,7 @@ import { db } from "@/lib/db";
 import { buttonVariants } from "@/components/ui/button";
 import {
   COMMUNITY_TYPE_LABELS,
+  COMMUNITY_TYPES,
 } from "@/features/communities/constants";
 import { getLeaderboard } from "@/features/reputation/queries";
 import { HubTemplate } from "@/components/templates/hub-template";
@@ -15,7 +17,10 @@ import { FilterPills } from "@/components/molecules/filter-pills";
 import { AvatarCard } from "@/components/molecules/avatar-card";
 import { DiscoveryCard } from "@/components/molecules/discovery-card";
 
-export const metadata = { title: "Communautés" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/communities", page), "Communautés tech africaines", "Rencontre des communautés tech locales et thématiques en Afrique et dans la diaspora. Échange avec des développeurs, designers et porteurs de projets.");
+}
 
 /** Liste publique des communautés (Sprint 2), façon annuaire de serveurs Discord. */
 export default async function CommunitiesPage({
@@ -23,7 +28,8 @@ export default async function CommunitiesPage({
 }: {
   searchParams: Promise<{ type?: string }>;
 }) {
-  const { type } = await searchParams;
+  const { type: requestedType } = await searchParams;
+  const type = COMMUNITY_TYPES.find((candidate) => candidate === requestedType);
   const session = await auth();
 
   const [communities, typeCounts, makers] = await Promise.all([

@@ -23,7 +23,7 @@ export function VentureCloud({ ventures }: { ventures: VentureBubble[] }) {
     <div className="flex flex-wrap items-center justify-between gap-3 py-4"><p className="text-sm text-muted-foreground">{ventures.length} réalisation(s) sur cette page</p>
       <div className="flex items-center gap-1" role="group" aria-label="Affichage"><button type="button" title="Nuée de projets" aria-label="Nuée de projets" aria-pressed={view === "cloud"} onClick={() => setView("cloud")} className={`rounded-md p-2 ${view === "cloud" ? "bg-muted" : ""}`}><CircleDot className="size-5" /></button><button type="button" title="Vue liste" aria-label="Vue liste" aria-pressed={view === "list"} onClick={() => setView("list")} className={`rounded-md p-2 ${view === "list" ? "bg-muted" : ""}`}><List className="size-5" /></button>{view === "cloud" && <button type="button" title={paused ? "Reprendre les mouvements" : "Suspendre les mouvements"} aria-label={paused ? "Reprendre les mouvements" : "Suspendre les mouvements"} onClick={() => setPaused((p) => !p)} className="rounded-md p-2">{paused ? <Play className="size-4" /> : <Pause className="size-4" />}</button>}</div>
     </div>
-    <div ref={container} style={{ height: view === "cloud" ? height : 0 }} className="relative w-full overflow-hidden bg-[#0c1210]">
+    <div ref={container} style={{ height: view === "cloud" && size.width ? height : 0 }} className="relative w-full overflow-hidden bg-[#0c1210]">
       <div className="pointer-events-none absolute inset-0 opacity-10" style={{ backgroundImage: "linear-gradient(#b6c9bc 1px, transparent 1px),linear-gradient(90deg,#b6c9bc 1px,transparent 1px)", backgroundSize: "64px 64px" }} />
       {positions.map((position, index) => {
         const venture = ventures[index];
@@ -33,10 +33,8 @@ export function VentureCloud({ ventures }: { ventures: VentureBubble[] }) {
           <span className="line-clamp-2 min-h-8 max-w-full break-words text-xs font-medium leading-4">{venture.name}</span>
         </Link>;
       })}
-      {!size.width && <p className="absolute inset-0 grid place-items-center text-sm text-white/60" role="status">Chargement des réalisations…</p>}
     </div>
-    {view === "list" && <ul className="divide-y divide-border">{ventures.map((v) => <li key={v.id}><Link href={`/constellation/${v.slug}`} scroll={false} prefetch={false} className="flex gap-4 py-5"><VentureMark {...v} /><div className="min-w-0"><h2 className="break-words font-semibold">{v.name}</h2><p className="text-xs text-muted-foreground">{countryName(v.country)} · {(SECTORS[v.sector as Sector] ?? SECTORS.OTHER).label}</p><p className="mt-2 text-sm">{v.summary}</p></div></Link></li>)}</ul>}
-    <noscript><ul>{ventures.map((v) => <li key={v.id}><a href={`/constellation/${v.slug}`}>{v.name}</a></li>)}</ul></noscript>
+    {(view === "list" || !size.width) && <ul className="divide-y divide-border">{ventures.map((v) => <li key={v.id}><Link href={`/constellation/${v.slug}`} scroll={false} prefetch={false} className="flex gap-4 py-5"><VentureMark {...v} /><div className="min-w-0"><h2 className="break-words font-semibold">{v.name}</h2><p className="text-xs text-muted-foreground">{countryName(v.country)} · {(SECTORS[v.sector as Sector] ?? SECTORS.OTHER).label}</p><p className="mt-2 text-sm">{v.summary}</p></div></Link></li>)}</ul>}
     <style>{`@keyframes ventureFloat { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-3px) } } .venture-float { animation:ventureFloat 6s ease-in-out infinite } @media(prefers-reduced-motion:reduce) { .venture-float { animation:none } }`}</style>
   </section>;
 }

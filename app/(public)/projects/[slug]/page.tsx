@@ -1,3 +1,4 @@
+import { publicContentMetadata } from "@/features/seo/metadata";
 import Link from "next/link";
 import { ContentShare } from "@/components/shared/content-share";
 import { notFound } from "next/navigation";
@@ -496,4 +497,9 @@ export default async function ProjectDetailPage({
       <CommentSection targetType="PROJECT" targetId={project.id} returnPath={`/projects/${project.slug}`} />
     </div>
   );
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return publicContentMetadata("projects", slug);
 }

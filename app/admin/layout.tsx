@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { auth } from "@/lib/auth";
 import { hasRank } from "@/lib/permissions";
+import { PRIVATE_ROBOTS } from "@/lib/seo";
+
+export const metadata = { robots: PRIVATE_ROBOTS };
 
 /** Layout admin : réservé aux MODERATOR et ADMIN (cf. SDD §7, §16). */
 export default async function AdminLayout({

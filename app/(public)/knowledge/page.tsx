@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { Clock, Zap } from "lucide-react";
 import type { KnowledgeType } from "@prisma/client";
@@ -20,7 +21,10 @@ import { knowledgeTypeIcon } from "@/components/atoms/knowledge-type-icon";
 import { Avatar } from "@/components/shared/avatar";
 import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 
-export const metadata = { title: "Ressources" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/knowledge", page), "Ressources et apprentissage tech en Afrique", "Articles, tutoriels et ressources partagés par la communauté panafricaine AfroCodeurs pour apprendre et construire ensemble.");
+}
 
 /** Bibliothèque communautaire de ressources publiées et filtrables. */
 export default async function KnowledgePage({

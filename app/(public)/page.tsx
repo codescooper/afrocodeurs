@@ -10,6 +10,10 @@ import { getLeaderboard } from "@/features/reputation/queries";
 import { DiscoveryCard } from "@/components/molecules/discovery-card";
 import { auth } from "@/lib/auth";
 import { DISCORD_INVITE_URL } from "@/lib/community-links";
+import { communityStructuredData, publicMetadata, SITE_DESCRIPTION } from "@/lib/seo";
+import { StructuredData } from "@/components/shared/structured-data";
+
+export const metadata = publicMetadata("/", "Communauté tech africaine et panafricaine", SITE_DESCRIPTION);
 
 export default async function HomePage() {
   const [session, problems, knowledge, communities, makers, counts, countries] = await Promise.all([
@@ -38,17 +42,18 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4">
+      <StructuredData data={communityStructuredData()} />
       {/* Hero */}
       <section className="flex flex-col items-center gap-6 py-16 text-center md:py-24">
         <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-          Des problèmes aux solutions,{" "}
-          <span className="text-primary">ensemble.</span>
+          AfroCodeurs,{" "}
+          <span className="text-primary">la communauté tech africaine.</span>
         </h1>
         <p className="max-w-2xl text-lg text-muted-foreground">
-          La communauté panafricaine où les passionnés de technologie
-          apprennent, collaborent et construisent des solutions adaptées aux
-          réalités du continent.
+          Développeurs, designers, étudiants et entrepreneurs d’Afrique et de la diaspora :
+          apprenons, collaborons et construisons des solutions adaptées aux réalités du continent.
         </p>
+        <Link href="/a-propos" className="text-sm underline">Découvrir la communauté panafricaine AfroCodeurs</Link>
 
         <form
           action="/search"

@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 
-export const metadata = { title: "Modifier la communauté" };
+export const metadata = { robots: { index: false, follow: false }, title: "Modifier la communauté" };
 
 export default async function EditCommunityPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

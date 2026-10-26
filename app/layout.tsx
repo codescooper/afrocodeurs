@@ -5,6 +5,7 @@ import { CookieBanner } from "@/components/layout/cookie-banner";
 import { ThemeScript } from "@/components/layout/theme-script";
 import { ChatDock } from "@/features/messaging/chat-dock";
 import { FeedbackWidget } from "@/features/product-feedback/feedback-widget";
+import { SITE_DESCRIPTION, siteUrl as canonicalSiteUrl } from "@/lib/seo";
 
 const displaySans = Space_Grotesk({
   variable: "--font-display",
@@ -16,31 +17,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = canonicalSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "AfroCodeurs — Des problèmes aux solutions, ensemble.",
+    default: "AfroCodeurs — Communauté tech africaine et panafricaine",
     template: "%s · AfroCodeurs",
   },
-  description:
-    "La communauté panafricaine où les passionnés de technologie apprennent, collaborent et construisent des solutions adaptées aux réalités du continent.",
+  description: SITE_DESCRIPTION,
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION } : undefined,
+  },
   applicationName: "AfroCodeurs",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
   openGraph: {
     type: "website",
     siteName: "AfroCodeurs",
     locale: "fr_FR",
-    title: "AfroCodeurs — Des problèmes aux solutions, ensemble.",
-    description:
-      "La communauté panafricaine des makers tech. Build Before Consume.",
+    title: "AfroCodeurs — Communauté tech africaine et panafricaine",
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "AfroCodeurs, communauté tech africaine" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "AfroCodeurs",
-    description:
-      "La communauté panafricaine des makers tech. Build Before Consume.",
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
 };
 
