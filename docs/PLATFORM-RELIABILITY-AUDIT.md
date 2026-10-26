@@ -25,6 +25,10 @@
 - Edition de contenu : confirmation visible apres enregistrement.
 - Correctifs de dependances : Zod 4.6.7 et fast-uri 3.1.9 dans le lockfile,
   sans modification des autres dependances.
+- CI : les suites PostgreSQL etaient ignorees faute d'URL de test. Deux bases
+  dediees sont maintenant creees et migrees, puis utilisees par les tests
+  Constellation, mentorat et chat. Le controle des dependances de production
+  bloque aussi les alertes elevees, pas seulement critiques.
 
 ## Limites et points restant a traiter
 
