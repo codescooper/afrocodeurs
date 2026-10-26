@@ -8,7 +8,8 @@
 - En branche de revue : auto-validation Constellation reservee aux ADMIN, restriction maintenue pour les moderateurs sur leur propre fiche. Decisions journalisees dans la transaction ; version et statut PENDING toujours controles.
 - Protection commune des saisies dans 35 surfaces de formulaire, sans stockage persistant des brouillons ou mots de passe. Commentaires generiques avec messages de refus explicites ; confirmation d'enregistrement des modifications de contenu.
 - Dependances verrouillees : Zod 4.6.7 et fast-uri 3.1.9. CI renforcee pour bloquer les alertes elevees et activer les tests PostgreSQL jusque-la ignores faute de bases dediees.
-- Tests d'autorisation, de conservation des saisies et PostgreSQL reussis ; verification finale avec installation propre des dependances en cours. Audit et limites dans `docs/PLATFORM-RELIABILITY-AUDIT.md`.
+- Verification sur installation propre : 240 tests reussis sans tests ignores, 31 migrations appliquees a chacune des deux bases PostgreSQL isolees, build Next/TypeScript reussi, lint sans erreur (quatre avertissements preexistants). `npm ci` ne signale aucune vulnerabilite. Audit et limites dans `docs/PLATFORM-RELIABILITY-AUDIT.md`.
+- PR #99 preparee : `https://github.com/codescooper/afrocodeurs/pull/99`. Revue independante et CI requises ; protections de branche conservees.
 - Aucun nouveau deploiement de ces changements, aucune nouvelle migration. L'ancien depot Git local n'etant plus disponible, correctifs recuperes dans `C:/Users/BEJ technologie/.codex/worktrees/afrocodeurs-recovery` depuis une copie propre de main.
 
 ## Recette mentorat de la PR #98 - 23 octobre 2026
@@ -166,7 +167,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir la PR de fiabilite formulaires et auto-validation Constellation avant fusion et deploiement.**
+**Faire revoir la PR #99 de fiabilite formulaires et auto-validation Constellation avant fusion et deploiement.**
 
 ## ⚠️ Risques
 

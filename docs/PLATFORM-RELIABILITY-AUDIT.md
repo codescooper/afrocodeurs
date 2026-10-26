@@ -32,6 +32,12 @@
 
 ## Limites et points restant a traiter
 
+Verification locale finale : installation propre, 240 tests reussis sans tests
+ignores, 31 migrations sur chacune des deux bases isolees, build Next/TypeScript
+reussi et lint sans erreur (quatre avertissements preexistants). Aucun probleme
+de dependance signale par `npm ci`. La recette navigateur des nouveaux droits
+reste a faire apres fusion/deploiement ; les tests de page ici sont rendus en test.
+
 - Cette PR ne constitue pas un audit de securite exhaustif ni une recette
   navigateur de tous les parcours. Les tests DOM simulent les refus serveur ;
   les tests PostgreSQL controlent les transactions et autorisations couvertes.
