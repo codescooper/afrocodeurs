@@ -1,7 +1,20 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-23**
+**Dernière MAJ : 2026-10-26**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Fiabilite des formulaires et droits Constellation - 26 octobre 2026
+
+- En branche de revue : auto-validation Constellation reservee aux ADMIN, restriction maintenue pour les moderateurs sur leur propre fiche. Decisions journalisees dans la transaction ; version et statut PENDING toujours controles.
+- Protection commune des saisies dans 35 surfaces de formulaire, sans stockage persistant des brouillons ou mots de passe. Commentaires generiques avec messages de refus explicites ; confirmation d'enregistrement des modifications de contenu.
+- Dependances verrouillees : Zod 4.6.7 et fast-uri 3.1.9. CI renforcee pour bloquer les alertes elevees et activer les tests PostgreSQL jusque-la ignores faute de bases dediees.
+- Tests d'autorisation, de conservation des saisies et PostgreSQL reussis ; verification finale avec installation propre des dependances en cours. Audit et limites dans `docs/PLATFORM-RELIABILITY-AUDIT.md`.
+- Aucun nouveau deploiement de ces changements, aucune nouvelle migration. L'ancien depot Git local n'etant plus disponible, correctifs recuperes dans `C:/Users/BEJ technologie/.codex/worktrees/afrocodeurs-recovery` depuis une copie propre de main.
+
+## Recette mentorat de la PR #98 - 23 octobre 2026
+
+- Fusion `5eeba3e` deployee : image `afrocodeurs-web:chat-presence-5eeba3e-20261023t093639z`. Sauvegarde dans `/opt/afrocodeurs/backups/chat-presence-20261023T093639Z`. Aucun changement de schema requis ; application et base ok apres bascule.
+- Chrome en production : soumission avec sujet trop court refusee en francais ; titre, description, langues, disponibilite, capacite 3 et case decochee conserves. Aucune offre de test publiee.
 
 ## Annuaire du chat et fermeture des bulles - 23 octobre 2026
 
@@ -153,7 +166,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir et fusionner le correctif de conservation des saisies mentorat avant son deploiement.**
+**Faire revoir la PR de fiabilite formulaires et auto-validation Constellation avant fusion et deploiement.**
 
 ## ⚠️ Risques
 
