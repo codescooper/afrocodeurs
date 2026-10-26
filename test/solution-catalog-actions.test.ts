@@ -71,3 +71,10 @@ it("throttles repeated claims", async () => {
   expect(await requestSolutionClaimAction(undefined, form({ solutionId: "solution", evidence: "Je peux placer le code de contrôle dans le dépôt officiel du projet." }))).toHaveProperty("error");
   expect(mocks.claimCreate).not.toHaveBeenCalled();
 });
+it("reopens only the signed-in member's rejected claim and invalidates stale review", async () => {
+  mocks.solutionFind.mockResolvedValue({ slug: "solution" });
+  mocks.claimReopen.mockResolvedValue({ count: 1 });
+  const state = await requestSolutionClaimAction(undefined, form({ solutionId: "solution", evidence: "Nouvelles preuves du contrôle du dépôt officiel de cette solution." }));
+  expect(state?.success).toContain("soumise à nouveau");
+  expect(mocks.claimReopen).toHaveBeenCalledWith(expect.objectContaining({ where: { solutionId: "solution", userId: "user", status: "REJECTED" }, data: expect.objectContaining({ revision: { increment: 1 }, githubVerifiedAt: null }) }));
+});

@@ -28,6 +28,7 @@ export const claimSchema = z.object({
 
 export const reviewClaimSchema = z.object({
   id: z.string().min(1).max(100),
+  revision: z.coerce.number().int().positive(),
   status: z.enum(["APPROVED", "REJECTED"]),
   note: z.string().trim().min(20, "Expliquez la vérification et votre décision (20 caractères minimum).").max(2000),
   confirmed: z.string().optional(),

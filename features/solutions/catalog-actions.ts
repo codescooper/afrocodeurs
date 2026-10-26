@@ -39,7 +39,7 @@ export async function requestSolutionClaimAction(_previous: CatalogState, form: 
   if (!rateLimit(`solution-claim:${g.user.id}`, 5, 3600000).ok) return { error: "Trop de demandes. Réessayez dans une heure." };
   const solution = await db.solution.findUnique({ where: { id: parsed.data.solutionId }, select: { slug: true } });
   if (!solution) return { error: "Solution introuvable." };
-  const reopened = await db.solutionClaim.updateMany({ where: { solutionId: parsed.data.solutionId, userId: g.user.id, status: "REJECTED" }, data: { evidence: parsed.data.evidence, status: "PENDING", reviewNote: null, reviewerId: null, reviewedAt: null, githubVerifiedAt: null, githubVerifiedRepo: null } });
+  const reopened = await db.solutionClaim.updateMany({ where: { solutionId: parsed.data.solutionId, userId: g.user.id, status: "REJECTED" }, data: { evidence: parsed.data.evidence, status: "PENDING", reviewNote: null, reviewerId: null, reviewedAt: null, githubVerifiedAt: null, githubVerifiedRepo: null, revision: { increment: 1 } } });
   // A unique row per member and solution prevents duplicate/concurrent claims.
   await db.solutionClaim.createMany({ data: [{ ...parsed.data, userId: g.user.id }], skipDuplicates: true });
   revalidatePath(`/atlas/${solution.slug}`);

@@ -7,11 +7,11 @@ import { catalogFilters, catalogSchema, claimSchema, normalizeCatalogParams, rev
 const tx = { $queryRaw: vi.fn(), solutionClaim: { findUnique: vi.fn(), updateMany: vi.fn() }, solutionMaintainer: { upsert: vi.fn() }, auditLog: { create: vi.fn() } };
 const transaction = vi.fn();
 const db = { $transaction: transaction } as unknown as PrismaClient;
-const input = { id: "claim", status: "APPROVED" as const, note: "Code temporaire vérifié dans le dépôt officiel." };
+const input = { id: "claim", revision: 1, status: "APPROVED" as const, note: "Code temporaire vérifié dans le dépôt officiel." };
 beforeEach(() => {
   vi.resetAllMocks();
   transaction.mockImplementation(work => work(tx));
-  tx.solutionClaim.findUnique.mockResolvedValue({ id: "claim", solutionId: "solution", userId: "claimant", status: "PENDING", solution: { slug: "solution" } });
+  tx.solutionClaim.findUnique.mockResolvedValue({ id: "claim", revision: 1, solutionId: "solution", userId: "claimant", status: "PENDING", solution: { slug: "solution" } });
   tx.solutionClaim.updateMany.mockResolvedValue({ count: 1 });
 });
 
@@ -25,7 +25,7 @@ it("requires independent review even for an administrator", async () => {
 });
 it("grants one membership and audits the decision in the transaction", async () => {
   expect(await reviewSolutionClaim(db, { id: "reviewer", role: "ADMIN" }, input)).toEqual({ userId: "claimant", slug: "solution" });
-  expect(tx.solutionClaim.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "claim", status: "PENDING" } }));
+  expect(tx.solutionClaim.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "claim", status: "PENDING", revision: 1 } }));
   expect(tx.solutionMaintainer.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: { solutionId: "solution", userId: "claimant" } }));
   expect(tx.auditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({ metadata: expect.objectContaining({ operation: "solution_claim_review", note: input.note }) }) });
 });
@@ -42,6 +42,11 @@ it("rejects duplicate and concurrent decisions", async () => {
 it("does not revisit a final decision", async () => {
   tx.solutionClaim.findUnique.mockResolvedValue({ status: "REJECTED" });
   await expect(reviewSolutionClaim(db, { id: "reviewer", role: "ADMIN" }, input)).rejects.toThrow("attente");
+});
+it("rejects stale approval after a rejected claim was resubmitted", async () => {
+  tx.solutionClaim.findUnique.mockResolvedValue({ id: "claim", revision: 3, userId: "claimant", status: "PENDING" });
+  await expect(reviewSolutionClaim(db, { id: "reviewer", role: "ADMIN" }, input)).rejects.toThrow("version");
+  expect(tx.solutionMaintainer.upsert).not.toHaveBeenCalled();
 });
 it("normalizes lists without inventing license verification", () => {
   const parsed = catalogSchema.parse({ countriesServed: "Sénégal, Bénin, Sénégal", languages: "français, anglais", licenseVerified: true });

@@ -36,7 +36,7 @@ const cases: [string, () => ReactElement][] = [
   ["community", () => createElement(CommunityForm)],
   ["solution", () => createElement(SolutionForm)],
   ["solution claim", () => createElement(ClaimForm, { solutionId: "solution" })],
-  ["solution claim review", () => createElement(ClaimReviewForm, { id: "claim", self: false })],
+  ["solution claim review", () => createElement(ClaimReviewForm, { id: "claim", revision: 1, self: false })],
   ["solution license review", () => createElement(LicenseReviewForm, { id: "solution", revision: 1 })],
   ["solution invitation", () => createElement(TeamInviteForm, { solutionId: "solution" })],
   ["solution invitation response", () => createElement(TeamResponseForm, { id: "invite" })],

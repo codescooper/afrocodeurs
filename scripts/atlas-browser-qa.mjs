@@ -62,7 +62,7 @@ try {
   assert.equal(await claim.locator('textarea[name="evidence"]').inputValue(), "court");
   await claim.locator('textarea[name="evidence"]').fill("Recette locale : contrôle du dépôt officiel et code personnel à vérifier par l’administrateur dédié.");
   await claim.getByRole("button").click();
-  await owner.getByText(/Votre demande est enregistrée/).waitFor();
+  await owner.getByText(/Placez ce code personnel/).waitFor();
   const admin = await login(users[2]);
   await admin.goto(new URL("/admin/atlas", origin).href);
   const review = admin.locator("section").filter({ has: admin.getByRole("link", { name: solution.name, exact: true }) });
@@ -97,7 +97,7 @@ try {
   const publicContext = await browser.newContext({ viewport: { width: 390, height: 844 } }); contexts.push(publicContext);
   const mobile = await publicContext.newPage();
   await mobile.goto(new URL(`/atlas?q=${nonce}&country=${encodeURIComponent("Bénin")}`, origin).href);
-  await mobile.getByRole("link", { name: solution.name, exact: true }).waitFor();
+  await mobile.locator(`a[href="/atlas/${solution.slug}"]`).waitFor();
   assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await mobile.screenshot({ path: join(output, "atlas-mobile.png"), fullPage: true });
   await recipient.goto(new URL(`/atlas/${solution.slug}/edit`, origin).href);

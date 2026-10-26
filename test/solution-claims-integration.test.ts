@@ -30,7 +30,7 @@ describe.skipIf(!db)("Atlas PostgreSQL claims", () => {
   });
   it("allows only one concurrent decision and keeps multiple verified maintainers", async () => {
     const claim = await db!.solutionClaim.create({ data: { solutionId, userId: users[1], evidence: "Code temporaire examiné dans le dépôt officiel de test." } });
-    const input = { id: claim.id, status: "APPROVED" as const, note: "Contrôle du dépôt officiel vérifié manuellement." };
+    const input = { id: claim.id, revision: 1, status: "APPROVED" as const, note: "Contrôle du dépôt officiel vérifié manuellement." };
     const decisions = await Promise.allSettled([reviewSolutionClaim(db!, { id: users[0], role: "ADMIN" }, input), reviewSolutionClaim(db!, { id: users[0], role: "ADMIN" }, input)]);
     expect(decisions.filter(item => item.status === "fulfilled")).toHaveLength(1);
     expect(await db!.auditLog.count({ where: { entityId: solutionId } })).toBe(1);

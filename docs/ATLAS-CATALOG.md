@@ -37,12 +37,29 @@ automatique a l'URL fournie : pas de verifier reseau SSRF implicite.
 
 ## Moderation et limites explicites
 
-- Une demande par membre et solution, y compris apres rejet. En cas d'erreur,
-  contacter l'equipe ; pas de boucle automatique de nouvelles demandes.
+- Une demande par membre et solution. Apres rejet, le membre peut fournir de
+  nouvelles preuves et remettre cette meme demande en attente ; limite de debit
+  conservee et nouvelle verification independante obligatoire.
 - Plusieurs mainteneurs peuvent demander et recevoir leur acces independamment.
-- Les invitations de co-gestionnaires, transferts/revocations avec interface,
-  verification OAuth du controle GitHub et reexamen d'un rejet sont des lots
-  suivants. Aucun transfert de propriete intellectuelle n'est realise ici.
+- Invitations et transferts accessibles aux gestionnaires depuis l'edition.
+  Acceptation explicite dans `/dashboard/atlas`, expiration apres sept jours,
+  refus et annulation. Aucun droit n'est accorde au simple envoi.
+- Un transfert ajoute le destinataire puis retire seulement l'expediteur, dans
+  la meme transaction. Les autres gestionnaires ne sont pas remplaces.
+- Chaque membre peut quitter la gestion ; seul ADMIN retire l'acces d'un autre,
+  avec motif et confirmation. Le dernier acces ne peut etre retire : effectuer
+  un transfert accepte d'abord. Les invitations du gestionnaire retire sont annulees.
+- Les operations d'equipe, l'edition et la validation des demandes utilisent
+  le meme verrou de ligne Solution pour eviter les incoherences concurrentes.
+  Acceptation impossible si l'expediteur a perdu ses droits entretemps.
+- Verification GitHub automatique du marqueur via API officielle uniquement,
+  aucun token utilisateur requis. Le fichier doit etre sur la branche par defaut
+  a `.afrocodeurs/claims/<id-demande>.txt` et contenir le code personnel exact.
+  Pas de redirection, URL reseau arbitraire ni telechargement non borne : 4 Ko,
+  delai dix secondes. Le resultat est prive et ne dispense pas d'une revue admin.
+  La verification OAuth des permissions GitHub n'est pas necessaire a ce parcours
+  et n'est pas mise en place ; jamais de preuve basee sur un simple pseudo.
+  Reference : https://docs.github.com/en/rest/repos/contents#get-repository-content
 - Un litige est transmis par le signalement existant ou le contact de l'equipe.
   Pas de suppression de la fiche ni de retrait automatique d'un autre mainteneur.
 - La licence doit etre examinee dans le vrai depot : compatible open source,
@@ -56,12 +73,20 @@ automatique a l'URL fournie : pas de verifier reseau SSRF implicite.
 
 ## Deploiement
 
-Migration additive `20261026160000_solution_catalog_claims` obligatoire avant le
+Migrations additives `20261026160000_solution_catalog_claims` et
+`20261026170000_solution_team_invitations` obligatoires avant le
 nouveau serveur. Les fiches existantes sont conservees ; aucune migration ne les
 declare verifiees et aucun auteur ne devient automatiquement gestionnaire.
 Sauvegarder la base avant migration. Ne pas deployer le code avant la migration.
 Recette : referencer -> demander -> verifier independamment -> modifier ->
 controler anonymement la fiche, les filtres et la confidentialite des preuves.
+
+Recette navigateur locale reproductible (Playwright et Chrome installes) :
+`node scripts/atlas-browser-qa.mjs`, avec `DATABASE_URL` dirige vers une base
+locale isolee `constellation_test`, `ATLAS_QA_ORIGIN` vers le serveur local et
+eventuellement `PLAYWRIGHT_MODULE` vers l'installation Playwright. Le script
+refuse les cibles distantes, cree trois comptes de recette, puis les supprime
+avec leur fiche et leurs journaux. Aucune invitation a un membre reel.
 
 ## Verification avant revue
 

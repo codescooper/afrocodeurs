@@ -1129,6 +1129,7 @@ model SolutionClaim {
   evidence String
   githubVerifiedAt DateTime?
   githubVerifiedRepo String?
+  revision Int @default(1)
   status String @default("PENDING")
   reviewNote String?
   reviewerId String?
