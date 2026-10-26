@@ -1,3 +1,4 @@
+import { publicContentMetadata } from "@/features/seo/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -22,4 +23,9 @@ export default async function MentorPage({ params }: { params: Promise<{ id: str
     {!session?.user ? <Link href="/login" className="underline">Se connecter pour solliciter ce mentor</Link> : session.user.id === offer.mentorId || existing ? <Link href="/dashboard/mentorship" className="underline">Voir mon suivi</Link> : !session.user.isEmailVerified ? <p>Confirme ton email depuis le tableau de bord avant de faire une demande.</p> : offer._count.requests >= offer.capacity ? <p>Toutes les places sont prises.</p> : <MentorshipForm fields={{ command: "request", id: offer.id }} label="Envoyer ma demande"><label className="flex flex-col gap-2 text-sm">Ton objectif et ce que tu as déjà essayé<textarea name="message" required minLength={40} maxLength={2000} rows={5} className="rounded-md border border-border bg-background p-3" /></label></MentorshipForm>}
     {session?.user && session.user.id !== offer.mentorId && <div className="flex flex-wrap gap-6 border-t border-border pt-5"><ReportForm targetType="MENTORSHIP_OFFER" targetId={offer.id} /><MentorshipForm fields={{ command: "block", id: offer.mentorId }} label="Bloquer le mentorat avec ce membre" /></div>}
   </div>;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return publicContentMetadata("mentorship", id);
 }

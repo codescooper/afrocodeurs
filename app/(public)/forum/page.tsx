@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import type { QuestionStatus } from "@prisma/client";
@@ -14,7 +15,10 @@ import { FilterPills } from "@/components/molecules/filter-pills";
 import { VoteStatColumn } from "@/components/molecules/vote-stat-column";
 import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 
-export const metadata = { title: "Forum" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/forum", page), "Forum d’entraide de la communauté tech africaine", "Pose tes questions techniques et partage tes méthodes avec les développeurs et passionnés de technologie d’Afrique et de la diaspora.");
+}
 
 /** Forum d'entraide — liste des questions (Sprint 5), façon Stack Overflow. */
 export default async function ForumPage({

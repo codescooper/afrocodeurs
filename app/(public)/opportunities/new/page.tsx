@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { OpportunityForm } from "@/features/opportunities/opportunity-form";
 
-export const metadata = { title: "Publier une opportunité" };
+export const metadata = { robots: { index: false, follow: false }, title: "Publier une opportunité" };
 
 export default async function NewOpportunityPage() {
   const session = await auth();

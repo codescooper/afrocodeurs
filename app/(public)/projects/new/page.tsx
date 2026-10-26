@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { can } from "@/lib/permissions";
 import { ProjectForm } from "@/features/projects/project-form";
 
-export const metadata = { title: "Référencer un projet" };
+export const metadata = { robots: { index: false, follow: false }, title: "Référencer un projet" };
 
 export const dynamic = "force-dynamic";
 

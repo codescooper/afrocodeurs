@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { SolutionForm } from "@/features/solutions/solution-form";
 
-export const metadata = { title: "Ajouter une solution" };
+export const metadata = { robots: { index: false, follow: false }, title: "Ajouter une solution" };
 
 /** Ajout d'une solution — réservé aux utilisateurs connectés (Sprint 6). */
 export default async function NewSolutionPage() {

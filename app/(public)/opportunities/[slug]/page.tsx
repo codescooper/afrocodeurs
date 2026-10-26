@@ -1,3 +1,4 @@
+import { publicContentMetadata } from "@/features/seo/metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, ExternalLink, MapPin, MessageSquare, UserRound } from "lucide-react";
@@ -13,9 +14,9 @@ import { CommentSection } from "@/features/comments/comment-section";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const item = await db.opportunity.findUnique({ where: { slug }, select: { title: true, summary: true } });
-  return item ? { title: item.title, description: item.summary } : {};
+  return publicContentMetadata("opportunities", slug);
 }
+
 
 export default async function OpportunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

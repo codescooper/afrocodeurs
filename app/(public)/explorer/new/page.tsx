@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { ProblemForm } from "@/features/problems/problem-form";
 import { postingCommunityBySlug } from "@/features/communities/posting";
 
-export const metadata = { title: "Proposer un problème" };
+export const metadata = { robots: { index: false, follow: false }, title: "Proposer un problème" };
 
 /** Proposition de problème — réservé aux utilisateurs connectés (Sprint 3). */
 export default async function NewProblemPage({ searchParams }: { searchParams: Promise<{ community?: string }> }) {

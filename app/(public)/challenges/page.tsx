@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { BrainCircuit, CalendarDays, Trophy } from "lucide-react";
 
@@ -9,7 +10,10 @@ import { EmptyState } from "@/components/atoms/empty-state";
 import { HubTemplate } from "@/components/templates/hub-template";
 import { CHALLENGE_DIFFICULTY_LABELS } from "@/features/challenges/constants";
 
-export const metadata = { title: "Défis" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/challenges", page), "Défis et énigmes de la communauté AfroCodeurs", "Pratique, résous des énigmes et relève les défis proposés par les membres de la communauté tech panafricaine AfroCodeurs.");
+}
 
 export default async function ChallengesPage() {
   const session = await auth();

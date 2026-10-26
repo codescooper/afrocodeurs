@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { CommunityForm } from "@/features/communities/community-form";
 
-export const metadata = { title: "Créer une communauté" };
+export const metadata = { robots: { index: false, follow: false }, title: "Créer une communauté" };
 
 /** Création de communauté — réservé aux utilisateurs connectés (Sprint 2). */
 export default async function NewCommunityPage() {

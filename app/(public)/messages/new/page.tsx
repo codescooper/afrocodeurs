@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { NewConversationForm } from "@/features/messaging/new-conversation-form";
 
-export const metadata = { title: "Nouvelle conversation" };
+export const metadata = { robots: { index: false, follow: false }, title: "Nouvelle conversation" };
 
 export default async function NewMessagePage() {
   const session = await auth();

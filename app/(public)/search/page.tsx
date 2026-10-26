@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 
 import { globalSearch, type SearchHit } from "@/features/search/search";
 
-export const metadata = { title: "Recherche" };
+export const metadata = { title: "Recherche", robots: { index: false, follow: false } };
 
 const GROUPS: { key: keyof Omit<Awaited<ReturnType<typeof globalSearch>>, "total">; label: string }[] =
   [

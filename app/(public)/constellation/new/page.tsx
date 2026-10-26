@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { VentureForm } from "@/features/constellation/venture-form";
 import { VerifyEmailBanner } from "@/features/auth/verify-email-banner";
-export const metadata = { title: "Présenter ma réalisation" };
+export const metadata = { robots: { index: false, follow: false }, title: "Présenter ma réalisation" };
 export default async function NewVenturePage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   const session = await auth(); if (!session?.user) redirect("/login");
   const { edit } = await searchParams;

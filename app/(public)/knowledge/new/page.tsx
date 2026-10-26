@@ -6,7 +6,7 @@ import { can } from "@/lib/permissions";
 import { KnowledgeForm } from "@/features/knowledge/knowledge-form";
 import { postingCommunityBySlug } from "@/features/communities/posting";
 
-export const metadata = { title: "Partager une ressource" };
+export const metadata = { robots: { index: false, follow: false }, title: "Partager une ressource" };
 
 /** Proposition d'une ressource par un membre de la communauté. */
 export default async function NewKnowledgePage({ searchParams }: { searchParams: Promise<{ community?: string; type?: string }> }) {

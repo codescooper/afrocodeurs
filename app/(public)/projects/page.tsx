@@ -1,3 +1,4 @@
+import { paginatedPath, publicMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { GitBranch } from "lucide-react";
 import type { ProjectStatus } from "@prisma/client";
@@ -13,7 +14,10 @@ import { ProgressBar } from "@/components/atoms/progress-bar";
 import { FilterPills } from "@/components/molecules/filter-pills";
 import { SuggestionsRail } from "@/components/organisms/suggestions-rail";
 
-export const metadata = { title: "Projets" };
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  return publicMetadata(paginatedPath("/projects", page), "Projets open source de la communauté africaine", "Découvre les projets open source des AfroCodeurs, leur roadmap et les tâches auxquelles contribuer avec la communauté tech africaine.");
+}
 
 // La base peut être injoignable au build (prod) → rendu dynamique.
 export const dynamic = "force-dynamic";
