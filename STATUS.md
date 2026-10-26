@@ -5,6 +5,16 @@
 
 ## Decouverte publique et SEO - 26 octobre 2026
 
+- Suite decouverte : page publique `/participer`, parcours de premiere contribution,
+  lien dans le pied de page et sitemap. Plan editorial, partenariats, mesure
+  respectueuse et actions externes documentes dans `docs/DISCOVERY-LAUNCH.md`.
+- Controle apres deploiement disponible : `node scripts/check-public-discovery.mjs`.
+  Aucun envoi communautaire, outil de tracking, validation Search Console/Bing ni
+  deploiement realise par ce lot. Les actions externes restent explicitement ouvertes.
+- Verification de ce lot : quatre tests du controle de deploiement et trois tests
+  de rendu public reussis ; lint cible et `git diff --check` sans erreur.
+  Le controle lui-meme est ajoute a la CI ; aucune recette production anticipee.
+
 - Ajout a la PR #99, sur demande explicite : l'enigme ne concerne plus que l'inscription. Les pages publiques sont accessibles sans cookie ; les controles Auth.js et RBAC des espaces prives sont conserves. Apres resolution, redirection vers `/register`.
 - Presentation publique `/a-propos`, accueil explicite, donnees structurees factuelles, metadata par rubrique/fiche, URL canoniques et image PNG de partage. Sitemap filtre selon la publication ; pages privees et formulaires hors indexation.
 - Constellation lisible en HTML serveur avant JavaScript. Messages communautaires non charges pour les anonymes/non-membres ; filtre invalide de l'annuaire neutralise.

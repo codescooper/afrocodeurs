@@ -75,6 +75,9 @@ jobs:
       - name: Lint
         run: ./run lint
 
+      - name: Test public discovery checker
+        run: node --test scripts/check-public-discovery.test.mjs
+
       - name: Test
         env:
           CONSTELLATION_TEST_DATABASE_URL: postgresql://afrocodeurs:afrocodeurs@127.0.0.1:5432/constellation_test
