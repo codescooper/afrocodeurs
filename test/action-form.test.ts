@@ -50,7 +50,7 @@ it("clears inputs only after an explicitly confirmed success", async () => {
   expect(body.value).toBe("Mon commentaire");
   fireEvent.submit(form);
   await waitFor(() => expect(view.getByRole("status").textContent).toBe("Enregistré"));
-  expect(body.value).toBe("");
+  await waitFor(() => expect(body.value).toBe(""));
 });
 
 it("includes the submit button name and value", async () => {

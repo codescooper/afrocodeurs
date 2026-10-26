@@ -29,6 +29,7 @@ const NAV_SECTIONS: { label: string; items: NavEntry[] }[] = [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
       { label: "Mes contributions", href: "/dashboard/contributions", icon: FileText },
       { label: "Mes réalisations", href: "/dashboard/constellation", icon: Users },
+      { label: "Mes solutions Atlas", href: "/dashboard/atlas", icon: FileText },
       { label: "Historique", href: "/dashboard/activity", icon: History },
       { label: "Mes communautés", href: "/dashboard/communities", icon: Users },
       { label: "Mon mentorat", href: "/dashboard/mentorship", icon: Users },

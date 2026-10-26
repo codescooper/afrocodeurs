@@ -19,6 +19,8 @@ import { SOLUTION_TYPE_LABELS } from "@/features/solutions/constants";
 import { PROJECT_STATUS_LABELS } from "@/features/projects/constants";
 import { ReportForm } from "@/features/admin/report-form";
 import { buttonVariants } from "@/components/ui/button";
+import { ClaimForm, LicenseReviewForm, GithubProofForm } from "@/features/solutions/claim-forms";
+import { claimProofCode, LIFECYCLES, SECTORS } from "@/features/solutions/catalog";
 
 /** Page détail d'une solution de l'AfroAtlas (Sprint 6). */
 export default async function SolutionDetailPage({
@@ -33,14 +35,18 @@ export default async function SolutionDetailPage({
     where: { slug },
     include: {
       createdBy: { select: { username: true, name: true } },
+      maintainers: { select: { userId: true, user: { select: { username: true, name: true } } } },
       projects: {
+        where: { status: { not: "ARCHIVED" } },
         orderBy: { createdAt: "desc" },
-        select: { id: true, name: true, slug: true, status: true },
+        select: { id: true, name: true, slug: true, status: true, communityVentures: { where: { status: "PUBLISHED" }, select: { id: true, name: true, slug: true } } },
       },
     },
   });
 
   if (!solution) notFound();
+  const mine = session?.user ? await db.solutionClaim.findUnique({ where: { solutionId_userId: { solutionId: solution.id, userId: session.user.id } }, select: { id: true, status: true, reviewNote: true } }) : null;
+  const canEdit = session?.user?.role === "ADMIN" || solution.maintainers.some(member => member.userId === session?.user?.id);
 
   await db.solution.update({
     where: { id: solution.id },
@@ -85,6 +91,7 @@ export default async function SolutionDetailPage({
         {solution.name}
       </h1>
       <ContentShare title={solution.name} path={`/atlas/${encodeURIComponent(solution.slug)}`} />
+      <p className="mt-3 text-sm font-medium">{solution.licenseVerified && solution.repositoryUrl ? "Licence open source vérifiée" : "Licence open source à vérifier"} · {LIFECYCLES[solution.lifecycle as keyof typeof LIFECYCLES] ?? "État à préciser"}</p>
       <p className="mt-2 text-sm text-muted-foreground">
         Référencé par{" "}
         <Link
@@ -94,12 +101,24 @@ export default async function SolutionDetailPage({
           {solution.createdBy.name ?? `@${solution.createdBy.username}`}
         </Link>
       </p>
+      <section className="mt-6 border-y border-border py-5">
+        <h2 className="font-semibold">Gestion de cette fiche</h2>
+        {solution.maintainers.length ? <ul className="mt-2 flex flex-wrap gap-3">{solution.maintainers.map(member => <li key={member.userId}><Link href={`/u/${member.user.username}`} className="underline">{member.user.name ?? `@${member.user.username}`}</Link></li>)}</ul> : <p className="mt-2 text-sm">Référencée par la communauté — non revendiquée.</p>}
+        <p className="mt-2 text-sm text-muted-foreground">La gestion vérifiée d’une fiche ne constitue pas une certification de la solution ni un transfert de propriété.</p>
+        {canEdit && <Link href={`/atlas/${solution.slug}/edit`} className="mt-3 inline-block underline">Gérer la fiche</Link>}
+        {!solution.maintainers.some(member => member.userId === session?.user?.id) && <details className="mt-4"><summary className="cursor-pointer font-medium">Je maintiens cette solution</summary><div className="mt-4">{mine ? <><p>{mine.status === "PENDING" ? "Votre demande est en cours de vérification." : mine.status === "APPROVED" ? "Cette demande a été approuvée. Si votre accès a ensuite été retiré, contactez l’équipe." : "Votre demande a été refusée. Vous pouvez fournir de nouvelles preuves."}</p>{mine.reviewNote && <p className="mt-2 whitespace-pre-wrap">{mine.reviewNote}</p>}{mine.status === "REJECTED" && <div className="mt-4"><ClaimForm solutionId={solution.id} /></div>}</> : session?.user ? <ClaimForm solutionId={solution.id} /> : <Link href="/login" className="underline">Se connecter pour demander la gestion</Link>}</div></details>}
+      </section>
+
+      {mine?.status === "PENDING" && session?.user && <aside className="mt-4 border-l-4 border-primary pl-4"><p className="text-sm">Placez ce code personnel à l’emplacement public indiqué dans votre demande (dépôt ou site officiel), puis laissez-le jusqu’à la décision :</p><code className="mt-2 block break-all text-sm">{claimProofCode(mine.id, session.user.id)}</code><p className="mt-2 text-sm">Pour GitHub : créez le fichier <code className="break-all">.afrocodeurs/claims/{mine.id}.txt</code> sur la branche par défaut du dépôt lié à la fiche, avec uniquement ce code.</p><GithubProofForm id={mine.id} /><p className="mt-2 text-sm">Sans accès à ces supports, contactez l’équipe pour une vérification manuelle alternative.</p></aside>}
 
       <div className="mt-6 whitespace-pre-wrap text-sm leading-relaxed">
         {solution.description}
       </div>
 
       <dl className="mt-8 flex flex-col gap-3 text-sm">
+        <div><dt className="font-medium">Secteur</dt><dd>{SECTORS[solution.sector as keyof typeof SECTORS] ?? "Autres usages"}</dd></div>
+        <div><dt className="font-medium">Pays d’utilisation</dt><dd>{solution.countriesServed.join(", ") || "Non précisés"}</dd></div>
+        <div><dt className="font-medium">Langues disponibles</dt><dd>{solution.languages.join(", ") || "Non précisées"}</dd></div>
         <div className="flex items-center gap-2">
           <Eye className="size-4 text-muted-foreground" />
           {solution.views} vue{solution.views > 1 ? "s" : ""}
@@ -107,7 +126,7 @@ export default async function SolutionDetailPage({
         {solution.country && (
           <div className="flex items-center gap-2">
             <MapPin className="size-4 text-muted-foreground" />
-            {solution.country}
+            Pays d’origine déclaré : {solution.country}
           </div>
         )}
         {solution.license && (
@@ -139,6 +158,11 @@ export default async function SolutionDetailPage({
           </a>
         )}
       </dl>
+      {solution.repositoryUrl && <a href={solution.repositoryUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block underline">Consulter le dépôt source</a>}
+      {solution.africanContext && <section className="mt-8"><h2 className="font-semibold">Équipe et ancrage africain</h2><p className="mt-2 whitespace-pre-wrap text-sm">{solution.africanContext}</p><p className="mt-2 text-xs text-muted-foreground">Informations déclarées sur la fiche.</p></section>}
+      {solution.contributionNeeds && <section className="mt-8"><h2 className="font-semibold">Comment contribuer</h2><p className="mt-2 whitespace-pre-wrap text-sm">{solution.contributionNeeds}</p></section>}
+      {solution.projects.some(project => project.communityVentures.length) && <section className="mt-8"><h2 className="font-semibold">Réalisations dans la Constellation</h2><ul className="mt-3 space-y-2">{[...new Map(solution.projects.flatMap(project => project.communityVentures).map(venture => [venture.id, venture])).values()].map(venture => <li key={venture.id}><Link href={`/constellation/${venture.slug}`} className="underline">{venture.name}</Link></li>)}</ul></section>}
+      {session?.user?.role === "ADMIN" && <details className="mt-8 border-t border-border pt-4"><summary className="cursor-pointer">Vérifier la licence open source</summary><div className="mt-4"><LicenseReviewForm id={solution.id} revision={solution.revision} /></div></details>}
 
       <section className="mt-10 rounded-2xl border border-border bg-muted/30 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
