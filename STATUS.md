@@ -8,7 +8,8 @@
 - Ajout a la PR #99, sur demande explicite : l'enigme ne concerne plus que l'inscription. Les pages publiques sont accessibles sans cookie ; les controles Auth.js et RBAC des espaces prives sont conserves. Apres resolution, redirection vers `/register`.
 - Presentation publique `/a-propos`, accueil explicite, donnees structurees factuelles, metadata par rubrique/fiche, URL canoniques et image PNG de partage. Sitemap filtre selon la publication ; pages privees et formulaires hors indexation.
 - Constellation lisible en HTML serveur avant JavaScript. Messages communautaires non charges pour les anonymes/non-membres ; filtre invalide de l'annuaire neutralise.
-- Configuration Google/Bing et procedure apres deploiement dans `docs/SEO-DISCOVERY.md`. Aucune propriete externe verifiee ni indexation garantie. Changements non deployes ; verification finale en cours.
+- Configuration Google/Bing et procedure apres deploiement dans `docs/SEO-DISCOVERY.md`. Aucune propriete externe verifiee ni indexation garantie. Changements non deployes.
+- Commit SEO `292cbc7` : CI GitHub complete reussie (audit, migrations, bases d'integration, lint, tests et build), execution `40278336218`. Dix-sept tests SEO/publication cibles reussis localement et controle TypeScript reussi. La suite locale complete a rencontre des depassements de delai ; elle a ete arretee, ainsi que le build local redondant apres validation de la CI. Ces interruptions ne sont pas presentees comme des succes locaux.
 
 ## Fiabilite des formulaires et droits Constellation - 26 octobre 2026
 

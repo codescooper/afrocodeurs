@@ -69,3 +69,15 @@ Le sitemap est actuellement borne a 2 000 fiches par famille de contenu.
 Prevoir des sitemaps pagines avant de depasser cette taille pour une famille.
 La validation externe des proprietes et la recette sur le domaine de production
 restent a effectuer apres deploiement.
+
+## Verification du code
+
+- Commit `292cbc7` : CI complete reussie (audit de securite, migrations,
+  integrations PostgreSQL, tests, lint et build) :
+  https://github.com/codescooper/afrocodeurs/actions/runs/40278336218
+- Dix-sept tests cibles SEO/acces public reussis localement : gate, canonical,
+  sitemap, confidentialite des metadata, rendu HTML et image PNG.
+- Controle TypeScript local reussi. La suite complete locale a rencontre des
+  depassements de delai ; le build local redondant a ete interrompu apres la
+  validation equivalente en CI. Aucun resultat local interrompu n'est compte
+  comme un test ou un build reussi.
