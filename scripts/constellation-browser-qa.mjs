@@ -14,7 +14,7 @@ const origin = new URL(process.env.CONSTELLATION_QA_ORIGIN || "http://localhost:
 const connection = new URL(process.env.DATABASE_URL || "invalid:");
 if (!["localhost", "127.0.0.1"].includes(origin.hostname) || !["localhost", "127.0.0.1"].includes(connection.hostname) || connection.pathname !== "/constellation_test") throw new Error("Only localhost and isolated constellation_test are allowed");
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: connection.href }) });
-const browser = await chromium.launch({ headless: true, channel: "chrome" });
+const browser = await chromium.launch({ headless: true, ...(process.env.QA_BROWSER === "chromium" ? {} : { channel: "chrome" }) });
 const contexts = [], users = [];
 const password = randomUUID() + "aA1!", nonce = randomUUID().slice(0, 8);
 const name = `Recette Constellation ${nonce}`;

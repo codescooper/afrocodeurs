@@ -55,6 +55,12 @@ une installation locale de Playwright. Variables : DATABASE_URL et facultativeme
 CONSTELLATION_QA_ORIGIN (defaut http://localhost:3042). Aucune action sur des membres
 ou des services de production.
 
+La CI installe uniquement Chromium headless puis execute ce script contre le
+build de production, sur la base ephemere constellation_test. Les captures sont
+jointes au run pour sept jours. Playwright est une dependance de developpement
+epinglee ; aucun navigateur n'est ajoute a l'image de production.
+Reference : https://playwright.dev/docs/ci
+
 Apres fusion/deploiement : refaire recherche par fragment/sans accents, formulaire
 invalide conservant ses valeurs, publication/modification/refus, fenetre mobile,
 renouvellement et verifications d'appartenance avec comptes de recette dedies.
