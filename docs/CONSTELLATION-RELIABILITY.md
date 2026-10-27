@@ -61,6 +61,19 @@ jointes au run pour sept jours. Playwright est une dependance de developpement
 epinglee ; aucun navigateur n'est ajoute a l'image de production.
 Reference : https://playwright.dev/docs/ci
 
+## Resultats verifies
+
+- 271 tests locaux reussis sans tests ignores ; migration sur deux bases neuves.
+- CI complete du code `3e40149` reussie : audit, migrations, lint, tests, build et
+  recette Chromium sur le build de production. Execution :
+  https://github.com/codescooper/afrocodeurs/actions/runs/40599122597
+- Recette navigateur : formulaire invalide conserve, mots-cles et limites,
+  moderation initiale, recherche locale/globale, modal mobile opaque et refermable,
+  modifications publiques approuvees/refusees, brouillon non expose, version
+  concurrente refusee, collaboration annulee puis renouvelee avec historique.
+- Les essais Chrome locaux ont rencontre un manque d'espace disque et ont ete
+  completes par la recette CI. Aucun deploiement de ces correctifs n'a ete fait.
+
 Apres fusion/deploiement : refaire recherche par fragment/sans accents, formulaire
 invalide conservant ses valeurs, publication/modification/refus, fenetre mobile,
 renouvellement et verifications d'appartenance avec comptes de recette dedies.
