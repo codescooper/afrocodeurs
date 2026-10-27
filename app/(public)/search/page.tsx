@@ -13,6 +13,7 @@ const GROUPS: { key: keyof Omit<Awaited<ReturnType<typeof globalSearch>>, "total
     { key: "communities", label: "Communautés" },
     { key: "solutions", label: "Atlas" },
     { key: "projects", label: "Projets" },
+    { key: "ventures", label: "Constellation" },
     { key: "users", label: "Membres" },
   ];
 
@@ -46,7 +47,7 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const query = (q ?? "").trim();
+  const query = typeof q === "string" ? q.trim().slice(0, 80) : "";
   const results = query ? await globalSearch(query) : null;
 
   return (

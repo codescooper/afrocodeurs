@@ -1,7 +1,28 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-26**
+**Dernière MAJ : 2026-10-28**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Correctifs Constellation et mots-cles - 27 octobre 2026
+
+- Branche dediee `codex/fix-constellation-keywords`, base main `15e540e` apres
+  fusion #99. PR Atlas #100 non incluse ; changements AGENTS.md generes par Next
+  laisses hors du correctif.
+- Separateurs et doublons de mots-cles normalises, C accepte, limites explicites
+  en francais. Recherche partielle sans accents sur texte public et besoins,
+  ajoutee a la recherche globale avec filtre de publication et blocages.
+- Edition versionnee ; une fiche deja publiee reste visible jusqu'a approbation
+  de ses modifications. Refus sans retrait de l'ancienne presentation publique.
+- Renouvellement des collaborations terminees avec delai et historique prive,
+  controle de version des decisions et maintien des protections anti-abus.
+- Migration additive preparee et appliquee sur deux bases locales isolees.
+  Suite de 271 tests reussie sans tests ignores ; lint sans erreur (quatre
+  avertissements preexistants). CI complete du commit `3e40149` reussie, y compris
+  build et recette Chromium contre le build de production (execution 40599122597).
+- PR #101 preparee : mots-cles, recherche, versions publiques et collaborations.
+  Les premiers essais Chrome locaux ont ete perturbes par le disque plein ; ils
+  ne sont pas presentes comme une recette locale complete. La recette CI passe.
+- Documentation : `docs/CONSTELLATION-RELIABILITY.md`. Aucun deploiement effectue.
 
 ## Decouverte publique et SEO - 26 octobre 2026
 
@@ -185,7 +206,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir la PR #99 de fiabilite formulaires et auto-validation Constellation avant fusion et deploiement.**
+**Faire revoir la PR #101, puis deployer avec sa migration et refaire la recette sur le domaine public.**
 
 ## ⚠️ Risques
 

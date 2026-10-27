@@ -6,6 +6,9 @@ import { hasRank } from "@/lib/permissions";
 import { sendPush } from "@/features/notifications/push";
 import { categoryForType } from "@/features/notifications/constants";
 import { ventureSchema, type CollaborationCommand } from "./validators";
+import { ventureSearchText } from "./keywords";
+import { pendingFields } from "./pending-changes";
+import { collaborationHistory, collaborationRetryAt } from "./collaboration-policy";
 import type { z } from "zod";
 
 export class VentureError extends Error {}
@@ -53,12 +56,19 @@ export async function saveVenture(db: PrismaClient, userId: string, data: z.infe
       openSourceProjectId: data.openSourceProjectId || null,
     };
     if (data.id) {
-      const changed = await tx.communityVenture.updateMany({ where: { id: data.id, ownerId: userId, status: { not: "SUSPENDED" } }, data: { ...fields, status: "PENDING", reviewNote: null, revision: { increment: 1 } } });
-      if (changed.count !== 1) fail("Cette fiche est introuvable ou suspendue par la modération.");
+      const existing = await tx.communityVenture.findFirst({ where: { id: data.id, ownerId: userId, status: { not: "SUSPENDED" } } });
+      if (!existing) fail("Cette fiche est introuvable ou suspendue par la modération.");
+      if (existing.revision !== data.revision) fail("La fiche a été modifiée depuis son ouverture. Tes saisies sont conservées ; copie-les avant de recharger pour comparer les versions.");
+      const published = existing.status === "PUBLISHED";
+      const changed = await tx.communityVenture.updateMany({ where: { id: data.id, ownerId: userId, revision: data.revision, status: existing.status }, data: published
+        ? { pendingChanges: fields, reviewNote: null, revision: { increment: 1 } }
+        : { ...fields, searchText: ventureSearchText(fields), status: "PENDING", pendingChanges: Prisma.DbNull, reviewNote: null, revision: { increment: 1 } } });
+      if (changed.count !== 1) fail("La fiche vient d’être modifiée. Recharge la page après avoir conservé tes saisies.");
+      await tx.auditLog.create({ data: { actorId: userId, action: "UPDATE", entityType: "COMMUNITY_VENTURE", entityId: data.id, before: { revision: existing.revision, status: existing.status }, after: { revision: existing.revision + 1, status: published ? "PUBLISHED" : "PENDING", pendingReview: true }, metadata: { operation: "venture_edit" } } });
       return;
     }
     if (await tx.communityVenture.count({ where: { ownerId: userId } }) >= 20) fail("Tu as déjà vingt réalisations référencées. Contacte la modération.");
-    await tx.communityVenture.create({ data: { ...fields, slug: `${slugify(data.name) || "realisation"}-${randomUUID().slice(0, 8)}`, ownerId: userId } });
+    await tx.communityVenture.create({ data: { ...fields, searchText: ventureSearchText(fields), slug: `${slugify(data.name) || "realisation"}-${randomUUID().slice(0, 8)}`, ownerId: userId } });
   });
 }
 
@@ -66,16 +76,22 @@ export async function reviewVenture(db: PrismaClient, actor: { id: string; role:
   if (!hasRank(actor.role, "MODERATOR")) fail("Action réservée à la modération.");
   return atomic(db, async (tx, queue) => {
     const venture = await tx.communityVenture.findUnique({ where: { id: input.id } });
-    if (!venture || venture.status !== "PENDING" || venture.revision !== input.revision) fail("La fiche a changé depuis son ouverture. Recharge la page.");
+    const editingPublished = venture?.status === "PUBLISHED" && venture.pendingChanges != null;
+    if (!venture || (venture.status !== "PENDING" && !editingPublished) || venture.revision !== input.revision) fail("La fiche a changé depuis son ouverture. Recharge la page.");
     const selfReview = venture.ownerId === actor.id;
     if (selfReview && actor.role !== "ADMIN") fail("Une autre personne doit valider ta propre réalisation.");
-    const result = await tx.communityVenture.updateMany({ where: { id: venture.id, status: "PENDING", revision: input.revision }, data: { status: input.status, reviewNote: input.note || null, revision: { increment: 1 } } });
+    const proposed = editingPublished ? pendingFields(venture.pendingChanges) : null;
+    if (editingPublished && !proposed) fail("Les modifications proposées sont invalides. Demande une nouvelle soumission.");
+    if (proposed?.openSourceProjectId && !await tx.project.findFirst({ where: { id: proposed.openSourceProjectId, createdById: venture.ownerId }, select: { id: true } })) fail("Le projet open source associé n’est plus disponible pour ce porteur.");
+    const status = editingPublished ? "PUBLISHED" : input.status;
+    const fields = input.status === "PUBLISHED" && proposed ? { ...proposed, searchText: ventureSearchText(proposed) } : {};
+    const result = await tx.communityVenture.updateMany({ where: { id: venture.id, status: venture.status, revision: input.revision }, data: { ...fields, status, pendingChanges: Prisma.DbNull, reviewNote: input.note || null, revision: { increment: 1 } } });
     if (result.count !== 1) fail("La fiche vient d'être mise à jour.");
     await tx.auditLog.create({ data: {
       actorId: actor.id, action: "UPDATE", entityType: "COMMUNITY_VENTURE", entityId: venture.id,
       before: { status: venture.status, revision: venture.revision },
-      after: { status: input.status, revision: input.revision + 1, reviewNote: input.note || null },
-      metadata: { operation: "review", selfReview, reviewerRole: actor.role },
+      after: { status, revision: input.revision + 1, reviewNote: input.note || null },
+      metadata: { operation: "review", selfReview, reviewerRole: actor.role, ...(editingPublished ? { publishedEdit: true, accepted: input.status === "PUBLISHED" } : {}) },
     } });
     await notice(tx, queue, venture.ownerId, actor.id, input.status === "PUBLISHED" ? "Ta réalisation rejoint la Constellation" : "Ta fiche nécessite des ajustements", "VENTURE_PUBLISHED");
   });
@@ -83,9 +99,9 @@ export async function reviewVenture(db: PrismaClient, actor: { id: string; role:
 
 export async function archiveVenture(db: PrismaClient, userId: string, id: string) {
   return atomic(db, async (tx) => {
-    const result = await tx.communityVenture.updateMany({ where: { id, ownerId: userId, status: { not: "SUSPENDED" } }, data: { status: "ARCHIVED", revision: { increment: 1 } } });
+    const result = await tx.communityVenture.updateMany({ where: { id, ownerId: userId, status: { not: "SUSPENDED" } }, data: { status: "ARCHIVED", pendingChanges: Prisma.DbNull, revision: { increment: 1 } } });
     if (result.count !== 1) fail("Fiche introuvable ou suspendue.");
-    await tx.ventureCollaboration.updateMany({ where: { ventureId: id, status: "PENDING" }, data: { status: "CANCELLED" } });
+    await tx.ventureCollaboration.updateMany({ where: { ventureId: id, status: "PENDING" }, data: { status: "CANCELLED", revision: { increment: 1 } } });
   });
 }
 
@@ -101,7 +117,7 @@ export async function collaborate(db: PrismaClient, userId: string, command: Col
       await tx.ventureBlock.upsert({ where: { blockerId_blockedId: { blockerId: userId, blockedId: command.id } }, create: { blockerId: userId, blockedId: command.id }, update: {} });
       await tx.ventureCollaboration.updateMany({ where: { status: { in: ["PENDING", "ACCEPTED"] }, OR: [
         { applicantId: userId, venture: { ownerId: command.id } }, { applicantId: command.id, venture: { ownerId: userId } },
-      ] }, data: { status: "CANCELLED" } });
+      ] }, data: { status: "CANCELLED", revision: { increment: 1 } } });
       return;
     }
     if (command.command === "request") {
@@ -109,13 +125,23 @@ export async function collaborate(db: PrismaClient, userId: string, command: Col
       if (!venture) fail("Cette réalisation n'est pas disponible.");
       if (venture.ownerId === userId) fail("Tu es déjà le porteur de cette réalisation.");
       if (await tx.ventureBlock.findFirst({ where: blockedPair(userId, venture.ownerId) })) fail("Cette collaboration n'est pas disponible.");
+      const previous = await tx.ventureCollaboration.findUnique({ where: { ventureId_applicantId: { ventureId: venture.id, applicantId: userId } } });
+      if (previous && ["PENDING", "ACCEPTED"].includes(previous.status)) fail("Une proposition est déjà en cours pour cette réalisation.");
+      const retryAt = previous ? collaborationRetryAt(previous.status, previous.updatedAt) : null;
+      if (retryAt && retryAt > new Date()) fail(`Une nouvelle proposition sera possible à partir du ${retryAt.toLocaleString("fr-FR", { timeZone: "Europe/Paris" })} (heure de Paris).`);
       if (await tx.ventureCollaboration.count({ where: { applicantId: userId, status: "PENDING" } }) >= 5) fail("Tu as déjà cinq propositions en attente.");
-      await tx.ventureCollaboration.create({ data: { ventureId: venture.id, applicantId: userId, message: command.message } });
+      if (previous) {
+        const history = [...collaborationHistory(previous.history), { message: previous.message, status: previous.status, at: previous.updatedAt.toISOString() }].slice(-10);
+        const changed = await tx.ventureCollaboration.updateMany({ where: { id: previous.id, status: previous.status, revision: previous.revision }, data: { message: command.message, status: "PENDING", history, revision: { increment: 1 } } });
+        if (changed.count !== 1) fail("La proposition vient d’être mise à jour. Recharge la page.");
+        await tx.auditLog.create({ data: { actorId: userId, action: "UPDATE", entityType: "VENTURE_COLLABORATION", entityId: previous.id, before: { message: previous.message, status: previous.status }, after: { message: command.message, status: "PENDING" }, metadata: { operation: "collaboration_renew" } } });
+      } else await tx.ventureCollaboration.create({ data: { ventureId: venture.id, applicantId: userId, message: command.message } });
       await notice(tx, queue, venture.ownerId, userId, "Nouvelle proposition de collaboration", "VENTURE_REQUEST");
       return;
     }
     const request = await tx.ventureCollaboration.findUnique({ where: { id: command.id }, include: { venture: { select: { ownerId: true, status: true } } } });
     if (!request || (request.applicantId !== userId && request.venture.ownerId !== userId)) fail("Proposition introuvable.");
+    if (request.revision !== command.revision) fail("Cette proposition a changé. Recharge la page avant de prendre une décision.");
     if (command.status === "CANCELLED") {
       if (!["PENDING", "ACCEPTED"].includes(request.status)) fail("Cette proposition est déjà terminée.");
     } else {
@@ -123,7 +149,7 @@ export async function collaborate(db: PrismaClient, userId: string, command: Col
       if (request.venture.status !== "PUBLISHED") fail("La fiche n'est plus publique.");
       if (await tx.ventureBlock.findFirst({ where: blockedPair(userId, request.applicantId) })) fail("Cette collaboration n'est pas disponible.");
     }
-    const result = await tx.ventureCollaboration.updateMany({ where: { id: request.id, status: request.status }, data: { status: command.status } });
+    const result = await tx.ventureCollaboration.updateMany({ where: { id: request.id, status: request.status, revision: command.revision }, data: { status: command.status, revision: { increment: 1 } } });
     if (result.count !== 1) fail("La proposition vient d'être traitée.");
     await notice(tx, queue, userId === request.venture.ownerId ? request.applicantId : request.venture.ownerId, userId, "Ta proposition de collaboration a évolué");
   });

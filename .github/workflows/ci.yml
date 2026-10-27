@@ -86,3 +86,42 @@ jobs:
 
       - name: Build
         run: ./run build
+
+      - name: Install Chromium for Constellation regression
+        run: npx playwright install --with-deps chromium --only-shell
+
+      - name: Browser regression (Constellation)
+        timeout-minutes: 10
+        env:
+          DATABASE_URL: postgresql://afrocodeurs:afrocodeurs@127.0.0.1:5432/constellation_test
+          AUTH_TRUST_HOST: "true"
+          NEXTAUTH_URL: http://127.0.0.1:3042
+          CONSTELLATION_QA_ORIGIN: http://127.0.0.1:3042
+          CONSTELLATION_QA_OUTPUT: ${{ runner.temp }}/constellation-browser
+          QA_BROWSER: chromium
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3042 > "$RUNNER_TEMP/constellation-server.log" 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent http://127.0.0.1:3042/api/health >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            cat "$RUNNER_TEMP/constellation-server.log"
+            exit 1
+          fi
+          node scripts/constellation-browser-qa.mjs
+
+      - name: Upload Constellation browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: constellation-browser-evidence
+          path: ${{ runner.temp }}/constellation-browser/
+          if-no-files-found: ignore
+          retention-days: 7

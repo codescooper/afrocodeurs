@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { VentureCloud } from "@/features/constellation/cloud";
 import { ventureBlockedIds } from "@/features/constellation/queries";
 import { COUNTRIES, SECTORS, type Sector } from "@/features/constellation/constants";
+import { ventureSearchWhere } from "@/features/constellation/keywords";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const { page } = await searchParams;
@@ -21,7 +22,7 @@ export default async function ConstellationPage({ searchParams }: { searchParams
   const session = await auth();
   const blocked = await ventureBlockedIds(session?.user?.id);
   const where = { status: "PUBLISHED" as const, ownerId: { notIn: blocked }, ...(country ? { country } : {}), ...(sector ? { sector } : {}),
-    ...(q ? { OR: [{ name: { contains: q, mode: "insensitive" as const } }, { summary: { contains: q, mode: "insensitive" as const } }, { needs: { has: q.toLowerCase() } }] } : {}),
+    ...ventureSearchWhere(q),
   };
   const [ventures, total] = await Promise.all([
     db.communityVenture.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "asc" }], skip: (page - 1) * 18, take: 18, select: { id: true, slug: true, name: true, summary: true, country: true, sector: true, logoUrl: true, needs: true } }),
