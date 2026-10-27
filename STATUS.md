@@ -1,7 +1,24 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-26**
+**Dernière MAJ : 2026-10-27**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Correctifs Constellation et mots-cles - 27 octobre 2026
+
+- Branche dediee `codex/fix-constellation-keywords`, base main `15e540e` apres
+  fusion #99. PR Atlas #100 non incluse ; changements AGENTS.md generes par Next
+  laisses hors du correctif.
+- Separateurs et doublons de mots-cles normalises, C accepte, limites explicites
+  en francais. Recherche partielle sans accents sur texte public et besoins,
+  ajoutee a la recherche globale avec filtre de publication et blocages.
+- Edition versionnee ; une fiche deja publiee reste visible jusqu'a approbation
+  de ses modifications. Refus sans retrait de l'ancienne presentation publique.
+- Renouvellement des collaborations terminees avec delai et historique prive,
+  controle de version des decisions et maintien des protections anti-abus.
+- Migration additive preparee et appliquee sur deux bases locales isolees.
+  Suite de 271 tests reussie sans tests ignores ; lint sans erreur (quatre
+  avertissements preexistants). Recette Chrome et build final en verification.
+- Documentation : `docs/CONSTELLATION-RELIABILITY.md`. Aucun deploiement effectue.
 
 ## Decouverte publique et SEO - 26 octobre 2026
 

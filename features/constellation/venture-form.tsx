@@ -6,7 +6,8 @@ import { ImageUploadButton } from "@/features/media/image-upload";
 import { Button } from "@/components/ui/button";
 import { COUNTRIES, SECTORS } from "./constants";
 import { saveVentureAction } from "./actions";
-type Defaults = { id: string; name: string; summary: string; description: string; country: string; sector: string; websiteUrl: string; logoUrl: string | null; screenshots: string[]; needs: string[]; openSourceProjectId: string | null };
+import { parseKeywords } from "./keywords";
+type Defaults = { id: string; revision: number; name: string; summary: string; description: string; country: string; sector: string; websiteUrl: string; logoUrl: string | null; screenshots: string[]; needs: string[]; openSourceProjectId: string | null };
 const input = "rounded-md border border-border bg-background px-3 py-2 text-sm";
 export function VentureForm({ venture, projects }: { venture?: Defaults; projects: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState(saveVentureAction, undefined);
@@ -23,7 +24,7 @@ export function VentureForm({ venture, projects }: { venture?: Defaults; project
     const data = new FormData(event.currentTarget);
     startTransition(() => action(data));
   }} className="grid gap-5">
-    {venture && <input type="hidden" name="id" value={venture.id} />}
+    {venture && <><input type="hidden" name="id" value={venture.id} /><input type="hidden" name="revision" value={venture.revision} /></>}
     <label className="grid gap-1 text-sm">Nom de la réalisation<input className={input} name="name" required minLength={3} maxLength={100} {...field("name")} /></label>
     <label className="grid gap-1 text-sm">En une phrase<textarea className={input} name="summary" rows={2} required minLength={20} maxLength={180} {...field("summary")} /></label>
     <label className="grid gap-1 text-sm">Le produit, son public et le problème résolu<textarea className={input} name="description" rows={6} required minLength={80} maxLength={6000} {...field("description")} /></label>
@@ -35,7 +36,8 @@ export function VentureForm({ venture, projects }: { venture?: Defaults; project
       {shots.length < 3 && <ImageUploadButton label="Ajouter une capture (3 maximum)" onUploaded={(url) => setShots((current) => [...new Set([...current, url])].slice(0, 3))} />}
       <div className="flex flex-wrap gap-3">{shots.map((shot, index) => <div key={shot} className="relative h-20 w-32 rounded-md border border-border bg-cover bg-center" style={{ backgroundImage: `url(${JSON.stringify(shot)})` }} role="img" aria-label={`Capture ${index + 1}`}><button type="button" title="Retirer cette capture" aria-label={`Retirer la capture ${index + 1}`} className="absolute right-0 top-0 bg-background p-1" onClick={() => setShots((current) => current.filter((s) => s !== shot))}><X className="size-4" /></button></div>)}</div>
     </fieldset>
-    <label className="grid gap-1 text-sm">Collaborations recherchées (séparées par des virgules)<input className={input} name="needs" maxLength={300} placeholder="design, développement, tests, partenariats" {...field("needs")} /></label>
+    <label className="grid gap-1 text-sm">Mots-clés de collaboration<textarea rows={2} className={input} name="needs" maxLength={300} placeholder="design, développement, tests, partenariats" aria-describedby="venture-keywords-status" aria-invalid={parseKeywords(values.needs).length > 6} {...field("needs")} /></label>
+    <p id="venture-keywords-status" className={`-mt-3 text-xs ${parseKeywords(values.needs).length > 6 ? "text-destructive" : "text-muted-foreground"}`}>{parseKeywords(values.needs).length}/6 mots-clés · 50 caractères maximum par mot-clé.</p>
     <label className="grid gap-1 text-sm">Mon projet open source associé (facultatif)<select name="openSourceProjectId" className={input} {...field("openSourceProjectId")}><option value="">Aucun dépôt associé</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
     <label className="flex items-start gap-2 text-sm"><input className="mt-1" name="confirmed" type="checkbox" required checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />Je représente cette réalisation et dispose des droits nécessaires pour publier sa présentation et ses images.</label>
     {state?.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}

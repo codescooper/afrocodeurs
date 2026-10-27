@@ -1227,6 +1227,8 @@ model CommunityVenture {
   logoUrl             String?
   screenshots         String[] @default([])
   needs               String[] @default([])
+  searchText          String @default("")
+  pendingChanges      Json?
   status              VentureStatus @default(PENDING)
   reviewNote          String?
   revision            Int @default(1)
@@ -1251,6 +1253,8 @@ model VentureCollaboration {
   applicantId String
   applicant   User @relation(fields: [applicantId], references: [id], onDelete: Cascade)
   message     String
+  history     Json @default("[]")
+  revision    Int @default(1)
   status      VentureCollaborationStatus @default(PENDING)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

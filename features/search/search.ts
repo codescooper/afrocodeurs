@@ -1,6 +1,9 @@
 import "server-only";
 
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { ventureBlockedIds } from "@/features/constellation/queries";
+import { ventureSearchWhere } from "@/features/constellation/keywords";
 
 export type SearchHit = {
   title: string;
@@ -15,6 +18,7 @@ export type SearchResults = {
   communities: SearchHit[];
   solutions: SearchHit[];
   projects: SearchHit[];
+  ventures: SearchHit[];
   users: SearchHit[];
   total: number;
 };
@@ -26,6 +30,7 @@ const EMPTY: SearchResults = {
   communities: [],
   solutions: [],
   projects: [],
+  ventures: [],
   users: [],
   total: 0,
 };
@@ -39,13 +44,15 @@ const EMPTY: SearchResults = {
  * une instance est disponible.
  */
 export async function globalSearch(rawQuery: string): Promise<SearchResults> {
-  const q = rawQuery.trim();
+  const q = rawQuery.trim().slice(0, 80);
   if (q.length < 2) return EMPTY;
 
   const match = { contains: q, mode: "insensitive" as const };
   const take = 10;
+  const session = await auth();
+  const blocked = await ventureBlockedIds(session?.user?.id);
 
-  const [problems, knowledge, questions, communities, solutions, projects, users] =
+  const [problems, knowledge, questions, communities, solutions, projects, users, ventures] =
     await Promise.all([
       db.problem.findMany({
         where: { OR: [{ title: match }, { summary: match }, { sector: match }] },
@@ -85,9 +92,11 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
         take,
         select: { username: true, name: true },
       }),
+      db.communityVenture.findMany({ where: { status: "PUBLISHED", ownerId: { notIn: blocked }, ...ventureSearchWhere(q) }, take, orderBy: [{ createdAt: "desc" }, { id: "asc" }], select: { name: true, slug: true, summary: true } }),
     ]);
 
   const results: SearchResults = {
+    ventures: ventures.map(venture => ({ title: venture.name, href: `/constellation/${venture.slug}`, subtitle: venture.summary })),
     problems: problems.map((p) => ({
       title: p.title,
       href: `/explorer/${p.slug}`,
@@ -130,6 +139,7 @@ export async function globalSearch(rawQuery: string): Promise<SearchResults> {
     results.communities.length +
     results.solutions.length +
     results.projects.length +
+    results.ventures.length +
     results.users.length;
 
   return results;
