@@ -124,7 +124,7 @@ exponentielle. Règle simple — commence bas, **mesure**, monte si l'abus persi
 ```bash
 # .env (production)
 POW_ENABLED="true"
-NEXT_PUBLIC_POW_ENABLED="true"
+# Le formulaire est configure par le serveur au runtime : pas de flag NEXT_PUBLIC.
 POW_DIFFICULTY="20"        # ~1 s, adapté à l'inscription
 # AUTH_SECRET est déjà là : il sert aussi à signer les défis.
 ```

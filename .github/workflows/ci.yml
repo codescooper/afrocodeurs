@@ -99,6 +99,12 @@ jobs:
           CONSTELLATION_QA_ORIGIN: http://127.0.0.1:3042
           CONSTELLATION_QA_OUTPUT: ${{ runner.temp }}/constellation-browser
           QA_BROWSER: chromium
+          # Official Cloudflare dummy keys, localhost-only recipe; no real secrets.
+          TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+          TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+          POW_ENABLED: "true"
+          POW_DIFFICULTY: "20"
+          EARLY_ACCESS_SEQUENCE: sun,baobab,laptop,logo
         run: |
           npm run start -- --hostname 127.0.0.1 --port 3042 > "$RUNNER_TEMP/constellation-server.log" 2>&1 &
           app_pid=$!
@@ -117,6 +123,7 @@ jobs:
           fi
           node scripts/constellation-browser-qa.mjs
           SECURITY_QA_ORIGIN=http://127.0.0.1:3042 SECURITY_QA_OUTPUT="$RUNNER_TEMP/constellation-browser/security" node scripts/security-browser-qa.mjs
+          SIGNUP_QA_ORIGIN=http://127.0.0.1:3042 SIGNUP_QA_OUTPUT="$RUNNER_TEMP/constellation-browser/signup" node scripts/signup-browser-qa.mjs
 
       - name: Upload Constellation browser evidence
         if: ${{ !cancelled() }}

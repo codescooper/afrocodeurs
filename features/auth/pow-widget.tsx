@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const enabled = process.env.NEXT_PUBLIC_POW_ENABLED === "true";
-
-type Phase = "idle" | "fetching" | "solving" | "ready" | "skip" | "error";
+type Phase = "idle" | "fetching" | "solving" | "ready" | "error";
 
 const FETCH_TIMEOUT_MS = 10_000;
-const SOLVE_TIMEOUT_MS = 20_000;
+const SOLVE_TIMEOUT_MS = 60_000;
 
 type PowWidgetProps = {
+  enabled: boolean;
   onReadyChange?: (ready: boolean) => void;
 };
 
@@ -20,11 +19,11 @@ type PowWidgetProps = {
  *  3. injecte la preuve en champs cachés `pow-challenge` / `pow-nonce`,
  *     lus côté serveur par `verifyPoW` (cf. features/auth/actions.ts).
  *
- * Sans `NEXT_PUBLIC_POW_ENABLED="true"` → rien (no-op, comme Turnstile en dev).
+ * L'activation est fournie par le serveur a chaque ouverture du formulaire.
  * Le calcul démarre au montage : il est presque toujours fini avant que
  * l'utilisateur ait rempli le formulaire.
  */
-export function PowWidget({ onReadyChange }: PowWidgetProps) {
+export function PowWidget({ enabled, onReadyChange }: PowWidgetProps) {
   const [phase, setPhase] = useState<Phase>(enabled ? "fetching" : "idle");
   const [challenge, setChallenge] = useState("");
   const [nonce, setNonce] = useState("");
@@ -42,6 +41,8 @@ export function PowWidget({ onReadyChange }: PowWidgetProps) {
     const abortController = new AbortController();
     let fetchTimeout: ReturnType<typeof setTimeout> | undefined;
     let solveTimeout: ReturnType<typeof setTimeout> | undefined;
+    let expiryTimeout: ReturnType<typeof setTimeout> | undefined;
+    onReadyChange?.(false);
 
     (async () => {
       try {
@@ -57,13 +58,15 @@ export function PowWidget({ onReadyChange }: PowWidgetProps) {
           enabled?: boolean;
           challenge?: string;
           difficulty?: number;
+          expiresAt?: number;
         };
         if (cancelled) return;
-        if (!data.enabled || !data.challenge || !data.difficulty) {
-          setPhase("skip");
-          onReadyChange?.(true); // serveur non activé : on laisse passer
-          return;
-        }
+        if (!data.enabled || !data.challenge || !data.difficulty || !data.expiresAt || data.expiresAt <= Date.now()) throw new Error("PoW configuration or challenge unavailable");
+        expiryTimeout = setTimeout(() => {
+          onReadyChange?.(false);
+          setNonce("");
+          setAttempt((current) => current + 1);
+        }, Math.max(1, data.expiresAt - Date.now()));
 
         setChallenge(data.challenge);
         setPhase("solving");
@@ -79,6 +82,7 @@ export function PowWidget({ onReadyChange }: PowWidgetProps) {
           }
         }, SOLVE_TIMEOUT_MS);
         worker.onmessage = (event: MessageEvent) => {
+          if (cancelled) return;
           const msg = event.data as { type: string; nonce?: number };
           if (msg.type === "found" && typeof msg.nonce === "number") {
             clearTimeout(solveTimeout);
@@ -90,6 +94,7 @@ export function PowWidget({ onReadyChange }: PowWidgetProps) {
           }
         };
         worker.onerror = () => {
+          if (cancelled) return;
           clearTimeout(solveTimeout);
           setPhase("error");
           onReadyChange?.(false);
@@ -113,10 +118,11 @@ export function PowWidget({ onReadyChange }: PowWidgetProps) {
       abortController.abort();
       clearTimeout(fetchTimeout);
       clearTimeout(solveTimeout);
+      clearTimeout(expiryTimeout);
       workerRef.current?.terminate();
       workerRef.current = null;
     };
-  }, [attempt, onReadyChange]);
+  }, [attempt, enabled, onReadyChange]);
 
   if (!enabled) return null;
 
@@ -128,10 +134,10 @@ export function PowWidget({ onReadyChange }: PowWidgetProps) {
           Vérification anti-robot…
         </span>
       )}
-      {phase === "ready" && <span className="text-emerald-600">✓ Vérifié</span>}
+      {phase === "ready" && <span className="text-emerald-600">✓ Preuve de travail validée</span>}
       {phase === "error" && (
         <span className="inline-flex flex-wrap items-center gap-2 text-destructive">
-          Vérification indisponible.
+          Vérification indisponible. Tes saisies sont conservées.
           <button
             type="button"
             className="font-medium underline underline-offset-2"
