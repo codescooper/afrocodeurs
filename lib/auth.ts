@@ -9,11 +9,12 @@ import { z } from "zod";
 import { db } from "./db";
 import { minimizeAuthToken } from "./auth-token";
 import { socialProviderConfig } from "./oauth-config";
+import { consumeCredentialAttempt } from "./credential-rate-limit";
 import type { UserRole } from "@prisma/client";
 
 const credentialsSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: z.string().email().max(254),
+  password: z.string().min(8).max(1024),
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -39,6 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const { email, password } = parsed.data;
+        if (!(await consumeCredentialAttempt(email))) return null;
         const user = await db.user.findUnique({ where: { email } });
         if (!user?.passwordHash) return null;
 
@@ -52,6 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           image: user.image,
           username: user.username,
           role: user.role,
+          sessionVersion: user.sessionVersion,
         };
       },
     }),
@@ -92,7 +95,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       token = minimizeAuthToken(token);
       if (user) {
         token.id = user.id as string;
@@ -106,9 +109,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token.id) {
         const dbUser = await db.user.findUnique({
           where: { id: token.id as string },
-          select: { username: true, role: true, emailVerified: true },
+          select: { username: true, role: true, emailVerified: true, sessionVersion: true },
         });
         if (!dbUser) return null;
+        if (user) {
+          // Credentials carry the version read BEFORE bcrypt, closing a reset race.
+          if (account?.provider === "credentials" && user.sessionVersion !== dbUser.sessionVersion) return null;
+          token.sessionVersion = dbUser.sessionVersion;
+        }
+        // Legacy cookies deliberately require a fresh login after deployment.
+        if (token.sessionVersion !== dbUser.sessionVersion) return null;
         token.username = dbUser.username;
         token.role = dbUser.role;
         token.isEmailVerified = Boolean(dbUser.emailVerified);

@@ -48,7 +48,7 @@ export async function changePasswordAction(
 
   const user = await db.user.findUnique({
     where: { id: g.user.id },
-    select: { passwordHash: true },
+    select: { passwordHash: true, email: true },
   });
   if (!user) return { error: "Utilisateur introuvable." };
 
@@ -60,12 +60,18 @@ export async function changePasswordAction(
   }
 
   const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
-  await db.user.update({
-    where: { id: g.user.id },
-    data: { passwordHash },
+  const changed = await db.$transaction(async (tx) => {
+    const result = await tx.user.updateMany({
+      where: { id: g.user.id, passwordHash: user.passwordHash },
+      data: { passwordHash, sessionVersion: { increment: 1 } },
+    });
+    if (result.count !== 1) return false;
+    await tx.verificationToken.deleteMany({ where: { identifier: `reset:${user.email}` } });
+    return true;
   });
+  if (!changed) return { error: "Le mot de passe a changé depuis l'ouverture du formulaire. Reconnecte-toi." };
 
-  return { success: true };
+  await signOut({ redirectTo: "/login?passwordChanged=1" });
 }
 
 /** Déconnexion. */

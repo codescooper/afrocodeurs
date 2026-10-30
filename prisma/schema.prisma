@@ -260,6 +260,7 @@ model User {
   username      String    @unique
   image         String?
   passwordHash  String?
+  sessionVersion Int      @default(0)
   role          UserRole  @default(USER)
 
   profile                 Profile?
@@ -737,6 +738,14 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model AuthRateLimit {
+  key       String   @id
+  count     Int
+  expiresAt DateTime
+
+  @@index([expiresAt])
 }
 
 model NewsletterSubscriber {
