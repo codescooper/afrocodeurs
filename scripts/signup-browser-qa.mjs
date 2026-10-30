@@ -52,6 +52,14 @@ try {
   assert.equal(await page.locator('[name=username]').inputValue(), takenUsername);
   pass("duplicate username retains fields and renews both anti-bot proofs");
   await page.screenshot({ path: join(output,"signup-error-mobile.png"), fullPage: true });
+  for (const [name, width] of [["mobile",390],["tablet",768],["desktop",1440]]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert.equal(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth-innerWidth)), 0);
+    await page.screenshot({ path: join(output,`signup-${name}.png`), fullPage: true });
+  }
+  await page.locator('[name=name]').focus(); await page.keyboard.press("Tab");
+  assert.equal(await page.locator('[name=username]').evaluate(el => document.activeElement === el), true);
+  pass("signup has no horizontal overflow on three sizes and basic keyboard order is intact");
   await page.locator('[name=username]').fill(username);
   await create.waitFor(); await create.click(); await page.waitForURL("**/dashboard");
   let user = await db.user.findUniqueOrThrow({ where: { email } });
