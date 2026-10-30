@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type TurnstileApi = {
   render: (container: HTMLElement, options: {
-    sitekey: string; theme: string; "response-field": boolean;
+    sitekey: string; theme: string; size: "compact"; "response-field": boolean;
     callback: (token: string) => void;
     "expired-callback": () => void;
     "error-callback": () => void;
@@ -39,7 +39,7 @@ export function TurnstileWidget({ siteKey, onReadyChange }: {
     const current = ++generation.current;
     try {
       widget.current = api.render(container.current, {
-        sitekey: siteKey, theme: "auto", "response-field": false,
+        sitekey: siteKey, theme: "auto", size: "compact", "response-field": false,
         callback: (value) => {
           if (!active.current || generation.current !== current) return;
           clearTimeout(deadline.current);

@@ -17,6 +17,7 @@ it("passes the runtime key to the provider, clears expired tokens and resets", a
   const ready = vi.fn(); const view = render(createElement(TurnstileWidget, { siteKey: "runtime-key", onReadyChange: ready }));
   await act(async () => { await vi.advanceTimersByTimeAsync(1); });
   expect(api.render.mock.calls[0][1].sitekey).toBe("runtime-key");
+  expect(api.render.mock.calls[0][1].size).toBe("compact");
   act(() => options.callback("token")); expect(ready).toHaveBeenLastCalledWith(true);
   expect((view.container.querySelector("input") as HTMLInputElement).value).toBe("token");
   act(() => options["expired-callback"]()); expect(ready).toHaveBeenLastCalledWith(false);
