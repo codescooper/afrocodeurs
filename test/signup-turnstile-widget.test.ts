@@ -2,7 +2,7 @@
 import { createElement } from "react";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-vi.mock("next/script", () => ({ default: () => null }));
+vi.mock("next/script", () => ({ default: ({ src }: { src: string }) => createElement("script", { "data-test-src": src }) }));
 import { TurnstileWidget } from "../features/auth/turnstile-widget";
 type Options = { callback: (token: string) => void; "expired-callback": () => void; "error-callback": () => void };
 let options: Options;
@@ -40,4 +40,13 @@ it("shows a retry after bounded waiting and removes its widget on unmount", asyn
   const view = render(createElement(TurnstileWidget, { siteKey: "runtime-key", onReadyChange: vi.fn() }));
   await act(async () => { await vi.advanceTimersByTimeAsync(60001); });
   expect(view.getByRole("alert")).toBeTruthy(); view.unmount(); expect(api.remove).toHaveBeenCalled();
+});
+it("remounts the failed script on retry, rather than reusing Next Script's failed load", async () => {
+  Reflect.deleteProperty(window, "turnstile");
+  const view = render(createElement(TurnstileWidget, { siteKey: "runtime-key", onReadyChange: vi.fn() }));
+  const original = view.container.querySelector("script");
+  await act(async () => { await vi.advanceTimersByTimeAsync(60001); });
+  fireEvent.click(view.getByRole("button", { name: "Réessayer la vérification" }));
+  const retry = view.container.querySelector("script");
+  expect(retry).not.toBe(original); expect(retry?.getAttribute("data-test-src")).toContain("retry=1");
 });

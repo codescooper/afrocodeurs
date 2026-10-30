@@ -26,6 +26,8 @@ const pass = message => { results.push(message); console.log("PASS "+message); }
 const url = path => new URL(path, origin).href;
 try {
   await db.user.create({ data: { email: takenEmail, username: takenUsername } });
+  let blockCaptchaScript = true;
+  await page.route("**/turnstile/v0/api.js*", route => blockCaptchaScript ? route.abort() : route.continue());
   await page.goto(url("/register")); await page.waitForURL("**/construction");
   // Dedicated CI sequence; no production puzzle value is embedded here.
   for (const name of ["Sun", "Baobab", "Laptop"]) {
@@ -34,8 +36,14 @@ try {
   }
   await page.locator('button[aria-label="Pixel mystérieux"]').first().click();
   await page.waitForURL("**/register"); pass("real puzzle unlocks the signup form");
+  await page.locator('[name=name]').fill("Recette inscription");
+  await page.getByRole("button", { name: "Réessayer la vérification", exact: true }).waitFor();
+  blockCaptchaScript = false;
+  await page.getByRole("button", { name: "Réessayer la vérification", exact: true }).click();
   const create = page.getByRole("button", { name: "Créer mon compte", exact: true });
   await create.waitFor();
+  assert.equal(await page.locator('[name=name]').inputValue(), "Recette inscription");
+  pass("blocked provider script can be retried without reloading or losing fields");
   await page.locator('[name=name]').fill("Recette inscription");
   await page.locator('[name=username]').fill(takenUsername.toUpperCase());
   await page.locator('[name=email]').fill(email);

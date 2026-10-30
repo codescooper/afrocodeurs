@@ -26,6 +26,7 @@ export function TurnstileWidget({ siteKey, onReadyChange }: {
   const [token, setToken] = useState("");
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [scriptAttempt, setScriptAttempt] = useState(0);
   const invalidateCallbacks = useCallback(() => { generation.current++; }, []);
   const fail = useCallback(() => {
     if (!active.current) return;
@@ -71,7 +72,7 @@ export function TurnstileWidget({ siteKey, onReadyChange }: {
   }, [attempt, siteKey, onReadyChange, renderWidget, fail, invalidateCallbacks]);
   if (!siteKey) return null;
   return <>
-    <Script src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&retry=${attempt}`}
+    <Script key={scriptAttempt} src={`https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&retry=${scriptAttempt}`}
       async defer onReady={renderWidget} onError={fail} />
     <div ref={container} />
     <input type="hidden" name="cf-turnstile-response" value={token} readOnly />
@@ -79,6 +80,7 @@ export function TurnstileWidget({ siteKey, onReadyChange }: {
       La vérification Cloudflare n&apos;a pas abouti. Tes saisies sont conservées.{" "}
       <button type="button" className="underline" onClick={() => {
         setFailed(false); setToken(""); onReadyChange?.(false);
+        if (!getApi()) setScriptAttempt((current) => current + 1);
         setAttempt((current) => current + 1);
       }}>Réessayer la vérification</button>
     </p>}
