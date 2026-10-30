@@ -49,3 +49,14 @@ it("skips work only when the server explicitly disabled it", () => {
   const ready = vi.fn(); render(createElement(PowWidget, { enabled: false, onReadyChange: ready }));
   expect(ready).toHaveBeenCalledWith(true); expect(TestWorker.instances).toHaveLength(0);
 });
+it("also bounds a challenge response whose body stalls after headers", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(async (_url, init: { signal: AbortSignal }) => ({
+    ok: true, json: () => new Promise((_resolve, reject) => {
+      init.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+    }),
+  })));
+  const ready = vi.fn(); const view = render(createElement(PowWidget, { enabled: true, onReadyChange: ready }));
+  await act(async () => { await vi.advanceTimersByTimeAsync(10001); });
+  expect(view.getByRole("button", { name: "Réessayer" })).toBeTruthy();
+  expect(ready).not.toHaveBeenCalledWith(true);
+});

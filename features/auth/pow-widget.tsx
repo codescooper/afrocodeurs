@@ -51,8 +51,6 @@ export function PowWidget({ enabled, onReadyChange }: PowWidgetProps) {
           cache: "no-store",
           signal: abortController.signal,
         });
-        clearTimeout(fetchTimeout);
-
         if (!res.ok) throw new Error(`PoW HTTP ${res.status}`);
         const data = (await res.json()) as {
           enabled?: boolean;
@@ -60,11 +58,13 @@ export function PowWidget({ enabled, onReadyChange }: PowWidgetProps) {
           difficulty?: number;
           expiresAt?: number;
         };
+        clearTimeout(fetchTimeout);
         if (cancelled) return;
         if (!data.enabled || !data.challenge || !data.difficulty || !data.expiresAt || data.expiresAt <= Date.now()) throw new Error("PoW configuration or challenge unavailable");
         expiryTimeout = setTimeout(() => {
           onReadyChange?.(false);
           setNonce("");
+          setPhase("fetching");
           setAttempt((current) => current + 1);
         }, Math.max(1, data.expiresAt - Date.now()));
 
@@ -106,6 +106,7 @@ export function PowWidget({ enabled, onReadyChange }: PowWidgetProps) {
           difficulty: data.difficulty,
         });
       } catch {
+        clearTimeout(fetchTimeout);
         if (!cancelled) {
           setPhase("error");
           onReadyChange?.(false);
