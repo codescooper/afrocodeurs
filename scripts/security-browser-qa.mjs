@@ -20,7 +20,7 @@ const password = randomUUID() + "aA1!", nextPassword = randomUUID() + "aA1!", fi
 const output = process.env.SECURITY_QA_OUTPUT || join(tmpdir(), "afro-security-" + randomUUID());
 await mkdir(output, { recursive: true });
 const url = path => new URL(path, origin).href;
-const session = async context => (await context.request.get(url("/api/auth/session"))).json();
+const session = async context => (await (await context.request.get(url("/api/auth/session"))).json()) ?? {};
 let forwardedAttempt = 0;
 async function context() { const value = await browser.newContext(); contexts.push(value); return value; }
 async function apiLogin(ctx, email, value) {
