@@ -62,11 +62,16 @@ export function PushToggle() {
         applicationServerKey: urlBase64ToUint8Array(VAPID as string) as BufferSource,
       });
       const json = sub.toJSON();
-      await fetch("/api/push/subscribe", {
+      const response = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
       });
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        setError(result?.error ?? "Impossible d'activer les notifications push.");
+        return;
+      }
       setSubscribed(true);
     } catch {
       setError("Impossible d'activer les notifications push.");

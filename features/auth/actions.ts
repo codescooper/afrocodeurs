@@ -195,7 +195,7 @@ export async function resetPasswordAction(
   formData: FormData,
 ): Promise<PasswordResetState> {
   const token = formData.get("token");
-  if (typeof token !== "string" || !token) return { error: "Lien invalide." };
+  if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) return { error: "Lien invalide." };
 
   const parsed = resetPasswordSchema.safeParse({
     password: formData.get("password"),
@@ -215,10 +215,16 @@ export async function resetPasswordAction(
 
   const email = record.identifier.slice("reset:".length);
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
-  await db.user.update({ where: { email }, data: { passwordHash } });
-  await db.verificationToken.deleteMany({
-    where: { identifier: record.identifier },
+  const changed = await db.$transaction(async (tx) => {
+    const consumed = await tx.verificationToken.deleteMany({
+      where: { token, identifier: record.identifier, expires: { gt: new Date() } },
+    });
+    if (consumed.count !== 1) return false;
+    await tx.user.update({ where: { email }, data: { passwordHash, sessionVersion: { increment: 1 } } });
+    await tx.verificationToken.deleteMany({ where: { identifier: record.identifier } });
+    return true;
   });
+  if (!changed) return { error: "Lien invalide ou expiré. Refais une demande." };
 
   return { done: true };
 }

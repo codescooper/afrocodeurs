@@ -1,7 +1,16 @@
 # STATUS — AfroCodeurs
 
-**Dernière MAJ : 2026-10-28**
+**Dernière MAJ : 2026-10-30**
 > Le triage du 19 octobre porte sur origin/main (21e6f27). Les constats historiques ci-dessous sur Railway et les services externes ne constituent pas un audit actuel de production.
+
+## Securisation prioritaire - 30 octobre 2026
+
+- PR #102 : quotas Credentials partages, revocation des sessions et Web Push borne.
+- Migration additive `20261030090000_auth_session_security`, avant le nouveau build.
+- Anciennes sessions : reconnexion requise lors du deploiement.
+- 324 tests locaux reussis, sans ignore, dont 53 nouveaux tests de securite.
+- Build Next/TypeScript reussi ; recette HTTP isolee ajoutee a la CI.
+- Aucun deploiement ; revue independante et CI requises avant fusion.
 
 ## Correctifs Constellation et mots-cles - 27 octobre 2026
 
@@ -206,7 +215,7 @@
 
 ## ⏭️ Prochaine action
 
-**Faire revoir la PR #101, puis deployer avec sa migration et refaire la recette sur le domaine public.**
+**Faire revoir la PR #102 et ses controles CI avant deploiement avec sa migration.**
 
 ## ⚠️ Risques
 

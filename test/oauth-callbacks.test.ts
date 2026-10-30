@@ -4,6 +4,7 @@ import type { NextAuthConfig } from "next-auth";
 const mocks = vi.hoisted(() => ({
   auth: vi.fn(), upsert: vi.fn(), configure: vi.fn(), findUser: vi.fn(),
 }));
+vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ db: { user: { findUnique: mocks.findUser }, profile: { upsert: mocks.upsert } } }));
 vi.mock("next-auth", () => ({ default: (config: NextAuthConfig) => {
   mocks.configure(config);
