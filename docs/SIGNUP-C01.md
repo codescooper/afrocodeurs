@@ -20,6 +20,11 @@ Turnstile : un token expire/erreur est retire, nouvelle verification apres erreu
 metier, tentative de chargement sans recharger la page et sans perdre le formulaire.
 Le mot de passe reste seulement dans l'etat React, jamais dans le stockage navigateur.
 
+La premiere recette CI a aussi reproduit un bouton recouvert par le bandeau cookies
+sur mobile apres une erreur. Le bandeau reserve maintenant sa hauteur reelle dans
+la page (mise a jour au resize) et a un fond opaque ; la recette ne le masque pas
+artificiellement pour cliquer sur le formulaire.
+
 ## Configuration requise avant livraison
 
 - `TURNSTILE_SITE_KEY` : cle publique du widget actuel autorisant afrocodeurs.org.

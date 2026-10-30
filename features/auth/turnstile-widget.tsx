@@ -47,7 +47,9 @@ export function TurnstileWidget({ siteKey, onReadyChange }: {
         "expired-callback": () => {
           if (!active.current || generation.current !== current) return;
           setToken(""); onReadyChange?.(false);
-          if (widget.current !== null) api.reset(widget.current);
+          clearTimeout(deadline.current);
+          deadline.current = setTimeout(fail, 60_000);
+          try { if (widget.current !== null) api.reset(widget.current); } catch { fail(); }
         },
         "error-callback": () => { if (generation.current === current) fail(); },
       });

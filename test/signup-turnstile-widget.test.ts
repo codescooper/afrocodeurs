@@ -21,6 +21,8 @@ it("passes the runtime key to the provider, clears expired tokens and resets", a
   expect((view.container.querySelector("input") as HTMLInputElement).value).toBe("token");
   act(() => options["expired-callback"]()); expect(ready).toHaveBeenLastCalledWith(false);
   expect((view.container.querySelector("input") as HTMLInputElement).value).toBe(""); expect(api.reset).toHaveBeenCalledWith("widget");
+  await act(async () => { await vi.advanceTimersByTimeAsync(60001); });
+  expect(view.getByRole("button", { name: "Réessayer la vérification" })).toBeTruthy();
 });
 it("invalidates a previously valid token on error and retries without navigating", async () => {
   const ready = vi.fn(); const view = render(createElement(TurnstileWidget, { siteKey: "runtime-key", onReadyChange: ready }));
