@@ -12,7 +12,7 @@
 .live i, .whatsappDot { color: #50d890; }
 .live i { width: 7px; height: 7px; border-radius: 50%; background: #50d890; }
 .layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; min-height: calc(100dvh - 160px); }
-.story { position: relative; min-width: 0; min-height: 480px; overflow: hidden; border: 1px solid #f2b54450; border-radius: 8px; background: #111b22; }
+.story { position: relative; width: 100%; min-width: 0; min-height: 480px; overflow: hidden; border: 1px solid #f2b54450; border-radius: 8px; background: #111b22; }
 .story canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; image-rendering: pixelated; }
 .vignette { position: absolute; inset: 0; background: linear-gradient(180deg, #02040600 40%, #020406ed 100%); pointer-events: none; }
 .copy { position: absolute; z-index: 2; left: 24px; right: 16px; bottom: 48px; pointer-events: none; }
