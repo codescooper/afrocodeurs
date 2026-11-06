@@ -71,7 +71,7 @@
 .opening .portal { animation: portal .65s steps(7) forwards; }
 @keyframes portal { 45% { opacity: 1; transform: scaleY(.08); } 100% { opacity: 1; transform: scaleY(1); } }
 @media (min-width: 1200px) { .copy h1 { font-size: 64px; } .layout { gap: 44px; } }
-@media (max-width: 1000px) { .copy h1 { font-size: 36px; } .coordinates { display: none; } .join h2 { font-size: 28px; } }
+@media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 20px; } .story { min-height: 360px; aspect-ratio: 16 / 9; } .copy h1 { font-size: 36px; } .coordinates { display: none; } .join h2 { font-size: 28px; } }
 @media (max-width: 760px) {
   .page { padding: 12px 16px 24px; }
   .header { gap: 8px; margin-bottom: 12px; }
