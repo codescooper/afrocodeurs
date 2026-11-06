@@ -38,8 +38,13 @@ reelle avec indice intermediaire, liens directs, Echap, membre connecte et reduc
 Les comptes de test sont supprimes. La sequence de recette est propre a la CI,
 aucune valeur de production n'est versionnee. Recettes existantes conservees.
 
-CI : runner fixe sur ubuntu-24.04 et installation navigateur bornee a 10 minutes.
+CI : runner fixe sur ubuntu-24.04, Chrome preinstalle pilote par Playwright avec
+`channel: chrome`, version loguee et presence du navigateur obligatoire.
 Le premier essai ubuntu-latest/26 a ete annule apres un telechargement anormalement
 lent de polices (21,9 Mo a installer). Aucun test n'est retire ou ignore pour cela.
-Le label explicite evite les migrations implicites documentees par GitHub :
+Les memes recettes restent executees ; elles utilisaient deja Chrome en local.
+Le label explicite evite les migrations implicites et le navigateur disponible
+evite un telechargement APT sans rapport avec le code du site :
 https://github.com/actions/runner-images/blob/main/README.md#latest-migration-process
+https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#browsers-and-drivers
+https://playwright.dev/docs/browsers#google-chrome--microsoft-edge

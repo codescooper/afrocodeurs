@@ -88,9 +88,9 @@ jobs:
       - name: Build
         run: ./run build
 
-      - name: Install Chromium for Constellation regression
-        timeout-minutes: 10
-        run: npx playwright install --with-deps chromium --only-shell
+      - name: Check preinstalled Chrome for browser regression
+        timeout-minutes: 2
+        run: google-chrome --version
 
       - name: Browser regression (Constellation)
         timeout-minutes: 10
@@ -100,7 +100,7 @@ jobs:
           NEXTAUTH_URL: http://127.0.0.1:3042
           CONSTELLATION_QA_ORIGIN: http://127.0.0.1:3042
           CONSTELLATION_QA_OUTPUT: ${{ runner.temp }}/constellation-browser
-          QA_BROWSER: chromium
+          QA_BROWSER: chrome
           EARLY_ACCESS_SEQUENCE: sun,baobab,laptop,logo
         run: |
           npm run start -- --hostname 127.0.0.1 --port 3042 > "$RUNNER_TEMP/constellation-server.log" 2>&1 &
