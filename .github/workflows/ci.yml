@@ -15,7 +15,8 @@ concurrency:
 jobs:
   quality:
     name: Lint & Build
-    runs-on: ubuntu-latest
+    # Keep the browser recipe stable across ubuntu-latest migrations.
+    runs-on: ubuntu-24.04
 
     # Base Postgres éphémère : sert à valider les migrations (et, plus tard, les tests).
     services:
@@ -88,6 +89,7 @@ jobs:
         run: ./run build
 
       - name: Install Chromium for Constellation regression
+        timeout-minutes: 10
         run: npx playwright install --with-deps chromium --only-shell
 
       - name: Browser regression (Constellation)

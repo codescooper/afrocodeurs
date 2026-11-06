@@ -37,3 +37,9 @@ accueil SSR, animations et captures 320/390/768/1440, visite persistante, enigme
 reelle avec indice intermediaire, liens directs, Echap, membre connecte et reduced-motion.
 Les comptes de test sont supprimes. La sequence de recette est propre a la CI,
 aucune valeur de production n'est versionnee. Recettes existantes conservees.
+
+CI : runner fixe sur ubuntu-24.04 et installation navigateur bornee a 10 minutes.
+Le premier essai ubuntu-latest/26 a ete annule apres un telechargement anormalement
+lent de polices (21,9 Mo a installer). Aucun test n'est retire ou ignore pour cela.
+Le label explicite evite les migrations implicites documentees par GitHub :
+https://github.com/actions/runner-images/blob/main/README.md#latest-migration-process
