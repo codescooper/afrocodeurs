@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { NotificationBell } from "./notification-bell";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
+import { cn } from "@/lib/utils";
 
 /** En-tête mobile compact : logo + actions. La navigation principale est dans la sidebar (desktop). */
 export async function SiteHeader() {
@@ -31,7 +32,7 @@ export async function SiteHeader() {
           <>
             <Link
               href="/login"
-              className={`${buttonVariants({ variant: "ghost", size: "sm" })} hidden min-[420px]:inline-flex`}
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "hidden min-[420px]:inline-flex")}
             >
               Connexion
             </Link>

@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { CommunityEntry } from "@/app/construction/community-entry";
+import { PREVIEW_COOKIE, VISITOR_COOKIE, shouldShowCommunityEntry } from "@/lib/community-entry";
 import { ExternalLink, MessageCircle, Search } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -39,13 +42,16 @@ export default async function HomePage() {
     db.profile.groupBy({ by: ["country"], where: { country: { not: null } }, _count: { country: true }, orderBy: { _count: { country: "desc" } }, take: 8 }),
   ]);
   const [problemCount, solutionCount, userCount] = counts;
+  const cookieStore = await cookies();
+  const showEntry = shouldShowCommunityEntry(Boolean(session?.user), cookieStore.get(VISITOR_COOKIE)?.value, cookieStore.get(PREVIEW_COOKIE)?.value);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4">
       <StructuredData data={communityStructuredData()} />
+      {showEntry && <CommunityEntry overlay />}
       {/* Hero */}
       <section className="flex flex-col items-center gap-6 py-16 text-center md:py-24">
-        <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+        <h1 id="community-home-title" tabIndex={-1} className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
           AfroCodeurs,{" "}
           <span className="text-primary">la communauté tech africaine.</span>
         </h1>
@@ -63,7 +69,7 @@ export default async function HomePage() {
           <input
             name="q"
             placeholder="Quel problème souhaitez-vous résoudre ?"
-            className="flex-1 bg-transparent py-2 text-sm outline-none"
+            className="min-w-0 flex-1 bg-transparent py-2 text-sm outline-none"
           />
           <button type="submit" className={buttonVariants({ size: "sm" })}>
             Rechercher
