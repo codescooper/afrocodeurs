@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,6 +9,8 @@ const STORAGE_KEY = "ac-cookie-consent";
 export function CookieBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
+  const banner = useRef<HTMLDivElement>(null);
+  const [reservedHeight, setReservedHeight] = useState(0);
 
   useEffect(() => {
     // Déféré pour éviter un setState synchrone dans l'effet (lint react-hooks).
@@ -22,6 +24,18 @@ export function CookieBanner() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const element = banner.current;
+    if (!element) return;
+    // Reserve the fixed notice's real height so the final form action stays reachable.
+    const measure = () => setReservedHeight(Math.ceil(element.getBoundingClientRect().height) + 32);
+    const timer = setTimeout(measure, 0);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    observer?.observe(element);
+    window.addEventListener("resize", measure);
+    return () => { clearTimeout(timer); observer?.disconnect(); window.removeEventListener("resize", measure); };
+  }, [visible, pathname]);
+
   if (!visible || pathname.startsWith("/construction")) return null;
 
   function accept() {
@@ -33,8 +47,9 @@ export function CookieBanner() {
     setVisible(false);
   }
 
-  return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 p-4 backdrop-blur md:inset-x-auto md:bottom-4 md:left-1/2 md:w-[min(40rem,90vw)] md:-translate-x-1/2 md:rounded-lg md:border">
+  return <>
+    <div aria-hidden="true" data-cookie-banner-spacer className="shrink-0" style={{ height: reservedHeight }} />
+    <div ref={banner} role="region" aria-label="Information sur les cookies" className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background p-4 md:inset-x-auto md:bottom-4 md:left-1/2 md:w-[min(40rem,90vw)] md:-translate-x-1/2 md:rounded-lg md:border">
       <div className="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
         <p className="text-muted-foreground">
           On utilise uniquement des cookies nécessaires au fonctionnement (ta
@@ -53,5 +68,5 @@ export function CookieBanner() {
         </button>
       </div>
     </div>
-  );
+  </>;
 }

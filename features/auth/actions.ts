@@ -12,6 +12,7 @@ import { sendEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { verifyPoW } from "@/lib/pow";
+import { getSignupConfig } from "@/lib/signup-config";
 import {
   signInSchema,
   signUpSchema,
@@ -52,6 +53,12 @@ export async function registerAction(
   _prev: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  try {
+    getSignupConfig();
+  } catch {
+    console.error("[signup] invalid anti-bot configuration");
+    return { error: "Inscription temporairement indisponible. Réessaie plus tard." };
+  }
   const ip = await clientIp();
   if (!rateLimit(`register:${ip}`, 5, 60 * 60 * 1000).ok) {
     return { error: "Trop de tentatives d'inscription. Réessaie plus tard." };
@@ -84,7 +91,7 @@ export async function registerAction(
       : null,
   );
   if (!pow.ok) {
-    return { error: "Vérification anti-robot échouée. Recharge la page et réessaie." };
+    return { error: "Vérification anti-robot expirée ou invalide. Attends sa nouvelle validation puis réessaie." };
   }
 
   const { email, username, password, name } = parsed.data;
