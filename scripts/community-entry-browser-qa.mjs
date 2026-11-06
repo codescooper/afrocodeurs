@@ -37,6 +37,7 @@ try {
     const overflow = await page.getByRole("dialog").evaluate(el => ({ width: el.clientWidth, scroll: el.scrollWidth,
       nodes: [...el.querySelectorAll("*")].filter(n=>n.getBoundingClientRect().right>el.getBoundingClientRect().right+1).slice(0,12).map(n=>({tag:n.tagName,cls:n.className,text:n.textContent.slice(0,90),right:n.getBoundingClientRect().right})) }));
     if (overflow.scroll > overflow.width) console.error("ENTRY_OVERFLOW", JSON.stringify(overflow));
+    if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) console.error("PAGE_OVERFLOW",JSON.stringify(await page.evaluate(()=>[...document.querySelectorAll("body *")].filter(n=>n.getBoundingClientRect().right>innerWidth+1).slice(0,16).map(n=>({tag:n.tagName,cls:n.className,text:n.textContent.slice(0,70),right:n.getBoundingClientRect().right})))));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.equal(await page.getByRole("dialog").evaluate(el => el.scrollWidth > el.clientWidth), false);
     await page.getByRole("button", { name: "Simple visiteur", exact: true }).scrollIntoViewIfNeeded();

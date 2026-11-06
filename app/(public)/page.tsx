@@ -69,7 +69,7 @@ export default async function HomePage() {
           <input
             name="q"
             placeholder="Quel problème souhaitez-vous résoudre ?"
-            className="flex-1 bg-transparent py-2 text-sm outline-none"
+            className="min-w-0 flex-1 bg-transparent py-2 text-sm outline-none"
           />
           <button type="submit" className={buttonVariants({ size: "sm" })}>
             Rechercher
