@@ -249,7 +249,7 @@ export function ConstructionGate({ onVisit, visiting, visitError }: {
         </aside>
       </section>
 
-      <footer className={styles.footer}><Link href="/a-propos">Découvrir AfroCodeurs</Link><span className={styles.riddle}>L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
+      <footer className={styles.footer}><Link href="/a-propos">Découvrir AfroCodeurs</Link><Link href="/confidentialite">Confidentialité</Link><span className={styles.riddle}>L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
       <div className={styles.portal}>ACCESS GRANTED</div>
     </main>
   );

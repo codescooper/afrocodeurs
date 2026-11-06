@@ -65,6 +65,14 @@ export default function ConfidentialitePage() {
 
       <h2>Partage des données</h2>
       <p>
+        Le choix « Simple visiteur » est mémorisé pendant 90 jours dans le cookie
+        <code> afrocodeurs-visitor</code>, avec la même valeur pour tout le monde.
+        Il ne contient aucun identifiant personnel et ne débloque pas l’inscription.
+        Tu peux toujours choisir de rejoindre la communauté ou effacer ce cookie
+        dans ton navigateur pour retrouver l’entrée de bienvenue.
+      </p>
+
+      <p>
         Le contenu que tu publies est <strong>public</strong> et visible par
         tous. Nous faisons appel à des prestataires techniques (envoi
         d&apos;emails, notifications push, hébergement) qui traitent les données
