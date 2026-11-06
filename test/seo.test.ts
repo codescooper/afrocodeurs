@@ -17,7 +17,8 @@ it("keeps the puzzle only on registration, without a crawler bypass", () => {
   const blocked = proxy(new NextRequest("https://afrocodeurs.org/register"));
   expect(blocked.headers.get("location")).toBe("https://afrocodeurs.org/construction");
   expect(proxy(new NextRequest("https://afrocodeurs.org/register/", { headers: { cookie: "afrocodeurs-preview=open" } })).headers.get("location")).toBeNull();
-  expect(proxy(new NextRequest("https://afrocodeurs.org/construction", { headers: { cookie: "afrocodeurs-preview=open" } })).headers.get("location")).toBe("https://afrocodeurs.org/register");
+  // The server page resolves signed-in members before the puzzle cookie.
+  expect(proxy(new NextRequest("https://afrocodeurs.org/construction", { headers: { cookie: "afrocodeurs-preview=open" } })).headers.get("location")).toBeNull();
   expect(config.matcher).toEqual(["/register/:path*", "/construction"]);
 });
 

@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Lightbulb, Volume2, VolumeX } from "lucide-react";
 
 import styles from "./construction.module.css";
 
@@ -22,6 +24,7 @@ function PixelScene({ hoveredSymbol }: { hoveredSymbol: RiddleSymbol | null }) {
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
     ctx.imageSmoothingEnabled = false;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     let raf = 0;
 
@@ -97,7 +100,7 @@ function PixelScene({ hoveredSymbol }: { hoveredSymbol: RiddleSymbol | null }) {
       ctx.globalAlpha = .07;
       for (let yLine = 0; yLine < 180; yLine += 3) rect(0, yLine, 320, 1, "#000");
       ctx.globalAlpha = 1;
-      raf = requestAnimationFrame(draw);
+      if (!reducedMotion) raf = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(raf);
@@ -106,16 +109,26 @@ function PixelScene({ hoveredSymbol }: { hoveredSymbol: RiddleSymbol | null }) {
   return <canvas ref={canvasRef} width="320" height="180" aria-label="Un jeune créateur africain transforme le paysage grâce au code" />;
 }
 
-export function ConstructionGate() {
+export function ConstructionGate({ onVisit, visiting, visitError }: {
+  onVisit: () => void; visiting: boolean; visitError: string;
+}) {
+  const router = useRouter();
+  const navigationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(navigationTimer.current), []);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
   const riddleQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [opening, setOpening] = useState(false);
   const [riddleProgress, setRiddleProgress] = useState(0);
   const [riddleMessage, setRiddleMessage] = useState("");
   const [hoveredSymbol, setHoveredSymbol] = useState<RiddleSymbol | null>(null);
   const [soundOn, setSoundOn] = useState(false);
-  const [formState, setFormState] = useState<"idle" | "sending" | "success" | "error">("idle");
-  const [formMessage, setFormMessage] = useState("");
+  const [hint, setHint] = useState(0);
+  const hints = [
+    "Les éléments de la scène et le symbole du nom cachent quatre fragments. Explore-les dans le bon ordre.",
+    "Un arbre, un ordinateur, le soleil et le symbole A peuvent réagir à tes clics ou au clavier.",
+    "Les quatre lumières suivent ta progression. Un mauvais choix réinitialise la suite ; demander un indice ne l’efface pas.",
+  ];
 
   async function submitRiddleSymbol(symbol: RiddleSymbol) {
     if (opening) return;
@@ -126,6 +139,7 @@ export function ConstructionGate() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ symbol }),
       });
+      if (!response.ok) throw new Error("Puzzle temporarily unavailable");
       data = (await response.json()) as typeof data;
     } catch {
       setRiddleMessage("Le signal s’est perdu. Réessayez.");
@@ -136,7 +150,7 @@ export function ConstructionGate() {
       setOpening(true);
       setRiddleProgress(4);
       setRiddleMessage("La porte reconnaît un pionnier.");
-      window.setTimeout(() => window.location.assign("/register"), 850);
+      navigationTimer.current = setTimeout(() => router.push("/register"), 850);
       return;
     }
     if (data.status === "progress") {
@@ -154,74 +168,41 @@ export function ConstructionGate() {
       .then(() => submitRiddleSymbol(symbol));
   }
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const startMusic = () => {
-      void audio.play().then(() => setSoundOn(true)).catch(() => undefined);
-    };
-
-    startMusic();
-    window.addEventListener("pointerdown", startMusic, { once: true });
-    window.addEventListener("keydown", startMusic, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", startMusic);
-      window.removeEventListener("keydown", startMusic);
-    };
-  }, []);
-
   function toggleSound() {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
-      void audio.play().then(() => setSoundOn(true));
+      void audio.play().then(() => setSoundOn(true)).catch(() => setSoundOn(false));
     } else {
       audio.pause();
       setSoundOn(false);
     }
   }
 
-  async function subscribe(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const email = new FormData(form).get("email");
-    setFormState("sending");
-    const response = await fetch("/api/newsletter", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = (await response.json()) as { message?: string };
-    setFormMessage(data.message ?? "Une erreur est survenue.");
-    setFormState(response.ok ? "success" : "error");
-    if (response.ok) form.reset();
-  }
-
   return (
     <main className={`${styles.page} ${opening ? styles.opening : ""}`}>
-      <audio ref={audioRef} src="/ancestral-pixel-loop.mp3" autoPlay loop preload="auto" />
+      <audio ref={audioRef} src="/ancestral-pixel-loop.mp3" loop preload="none" />
       <div className={styles.ambientGrid} aria-hidden="true" />
       <header className={styles.header}>
         <div className={styles.brand}><span>&lt;</span><button type="button" onClick={() => enqueueRiddleSymbol("logo")} aria-label="Pixel mystérieux">A</button><span>/&gt;</span><strong><i>AFRO</i>CODEURS</strong></div>
         <div className={styles.headerActions}>
-          <button className={styles.sound} type="button" onClick={toggleSound} aria-pressed={soundOn} aria-label={soundOn ? "Couper la musique" : "Activer la musique"}>{soundOn ? "♫ ON" : "♫ OFF"}</button>
-          <span className={styles.live}><i /> SITE EN CONSTRUCTION</span>
+          <button className={styles.sound} type="button" onClick={toggleSound} aria-pressed={soundOn} aria-label={soundOn ? "Couper la musique" : "Activer la musique"}>{soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}</button>
+          <span className={styles.live}><i /> LA COMMUNAUTÉ EST OUVERTE</span>
         </div>
       </header>
 
       <section className={styles.layout}>
-        <div className={styles.story}>
+        <div ref={storyRef} className={styles.story}>
           <PixelScene hoveredSymbol={hoveredSymbol} />
           <div className={styles.vignette} />
-          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onPointerEnter={() => setHoveredSymbol("baobab")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("baobab")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("baobab")} aria-label="Pixel mystérieux" />
-          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onPointerEnter={() => setHoveredSymbol("laptop")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("laptop")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("laptop")} aria-label="Pixel mystérieux" />
-          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onPointerEnter={() => setHoveredSymbol("sun")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("sun")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("sun")} aria-label="Pixel mystérieux" />
+          <button className={`${styles.hotspot} ${styles.hotspotBaobab}`} type="button" onPointerEnter={() => setHoveredSymbol("baobab")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("baobab")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("baobab")} aria-label="Explorer le baobab" />
+          <button className={`${styles.hotspot} ${styles.hotspotLaptop}`} type="button" onPointerEnter={() => setHoveredSymbol("laptop")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("laptop")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("laptop")} aria-label="Explorer l’ordinateur" />
+          <button className={`${styles.hotspot} ${styles.hotspotSun}`} type="button" onPointerEnter={() => setHoveredSymbol("sun")} onPointerLeave={() => setHoveredSymbol(null)} onFocus={() => setHoveredSymbol("sun")} onBlur={() => setHoveredSymbol(null)} onClick={() => enqueueRiddleSymbol("sun")} aria-label="Explorer le soleil" />
           <span className={styles.coordinates}>ABJ 05.3599° N · 04.0083° W</span>
           <div className={styles.copy}>
             <p><span>01</span> COMMUNAUTÉ TECH AFRICAINE</p>
             <h1><span>AFRO</span>CODEURS</h1>
-            <h2>Le code transforme demain.</h2>
+            <h2>Le code transforme demain. Ensemble.</h2>
           </div>
           <span className={styles.loop}>● BOUCLE EN COURS</span>
           <div className={styles.sceneMeta}>
@@ -236,26 +217,39 @@ export function ConstructionGate() {
         <aside className={styles.join}>
           <div>
             <p className={styles.eyebrow}>ÉNIGME D’ENTRÉE</p>
-            <h2>La communauté<br />vous attend.</h2>
-            <p>Résolvez l’énigme pour créer votre compte. Vous pouvez aussi recevoir les nouvelles et ressources de la communauté par email.</p>
+            <h2>Résous l’énigme pour nous rejoindre.</h2>
+            <p>Développeurs, designers, étudiants, entrepreneurs : relions nos idées et construisons des solutions pour l’Afrique.</p>
           </div>
-          <form onSubmit={subscribe} className={styles.form}>
-            <label htmlFor="launch-email">Votre adresse e-mail</label>
-            <div><input id="launch-email" name="email" type="email" placeholder="vous@exemple.com" autoComplete="email" required /><button disabled={formState === "sending"}>{formState === "sending" ? "…" : "Me prévenir"}</button></div>
-            <p className={formState === "error" ? styles.error : styles.success} role="status">{formMessage}</p>
-          </form>
+          <div className={styles.choices}>
+            <button type="button" className={styles.solve} onClick={() => {
+              setHint((current) => Math.max(current, 1));
+              storyRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+            }}><span>Résoudre l’énigme</span><ArrowRight size={18} /></button>
+            <button type="button" data-entry-visitor className={styles.visitor} disabled={visiting} onClick={onVisit}>
+              <span>{visiting ? "Ouverture…" : "Simple visiteur"}</span><ArrowRight size={18} />
+            </button>
+          </div>
+          <p className={styles.visitorHelp}>La visite est libre, sans compte ni énigme.</p>
+          {visitError && <p role="alert" className={styles.error}>{visitError} <Link href="/projects">Voir les projets</Link></p>}
+          <div className={styles.hints}>
+            <button type="button" disabled={hint === hints.length} onClick={() => setHint((current) => Math.min(current + 1, hints.length))}>
+              <Lightbulb size={16} />{hint ? "Un autre indice" : "Besoin d’un indice ?"}
+            </button>
+            <p role="status">{hint ? hints[hint - 1] : "Retrouve la bonne suite dans la scène. Les indices ne changent pas ta progression."}</p>
+          </div>
+          <p className={styles.member}>Déjà membre ? <Link href="/login">Connexion</Link></p>
 
           <div className={styles.community}>
             <a className={styles.qrCode} href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="Rejoindre le groupe WhatsApp AfroCodeurs">
               <Image src="/whatsapp-community-qr.png" width={376} height={376} alt="QR code du groupe WhatsApp AfroCodeurs" priority />
             </a>
-            <div><span className={styles.whatsappDot}>●</span><strong> Salon des pionniers</strong><p>Échangez avec les premiers bâtisseurs de la communauté.</p><a href={WHATSAPP_URL} target="_blank" rel="noreferrer">ENTRER SUR WHATSAPP ↗</a></div>
+            <div><span className={styles.whatsappDot}>●</span><strong> La communauté continue ici</strong><p>Échange avec les membres et découvre leurs projets.</p><a href={WHATSAPP_URL} target="_blank" rel="noreferrer">REJOINDRE WHATSAPP ↗</a></div>
           </div>
           <a className={styles.mail} href="mailto:info@afrocodeurs.org">info@afrocodeurs.org</a>
         </aside>
       </section>
 
-      <footer className={styles.footer}><Link href="/">Explorer le site sans s’inscrire</Link><span className={styles.riddle}>◆ L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM ◆</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
+      <footer className={styles.footer}><Link href="/a-propos">Découvrir AfroCodeurs</Link><Link href="/confidentialite">Confidentialité</Link><span className={styles.riddle}>L’ORIGINE · L’OUTIL · LA LUMIÈRE · LE NOM</span><span>© {new Date().getFullYear()} AfroCodeurs</span></footer>
       <div className={styles.portal}>ACCESS GRANTED</div>
     </main>
   );

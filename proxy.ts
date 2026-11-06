@@ -7,11 +7,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const previewEnabled = request.cookies.get(PREVIEW_COOKIE)?.value === "open";
 
-  if (pathname === "/construction") {
-    return previewEnabled
-      ? NextResponse.redirect(new URL("/register", request.url))
-      : NextResponse.next();
-  }
+  // /construction resolves authenticated members before the puzzle cookie.
   // The puzzle is an onboarding step, not authentication for public content.
   if ((pathname === "/register" || pathname.startsWith("/register/")) && !previewEnabled) {
     return NextResponse.redirect(new URL("/construction", request.url));
