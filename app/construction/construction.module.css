@@ -1,4 +1,4 @@
-.page { --gold: #f2b544; --cyan: #34d9e8; box-sizing: border-box; width: 100%; min-height: 100dvh; padding: 20px 28px; background: #080b0f; color: #f7f4ec; font-family: Inter, system-ui, sans-serif; }
+.page { --gold: #f2b544; --cyan: #34d9e8; box-sizing: border-box; min-width: 0; width: 100%; min-height: 100dvh; padding: 20px 28px; background: #080b0f; color: #f7f4ec; font-family: Inter, system-ui, sans-serif; }
 .page * { box-sizing: border-box; letter-spacing: 0; }
 .header, .layout, .footer { width: 100%; max-width: 1480px; margin-inline: auto; }
 .header { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
@@ -76,7 +76,6 @@
   .page { padding: 12px 16px 24px; }
   .header { gap: 8px; margin-bottom: 12px; }
   .brand > strong { font-size: 13px; margin-left: 2px; }
-  .brand > button { min-width: 32px; }
   .headerActions { gap: 6px; }
   .live { display: none; }
   .layout { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 20px; }

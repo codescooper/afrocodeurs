@@ -15,7 +15,7 @@ et proposer a cote un acces "Simple visiteur".
 - Resolution : meme mecanisme serveur et meme sequence configuree, jamais exposee
   par les nouveaux indices. Le cookie de resolution seul ouvre l'inscription.
 - Les membres authentifies ne voient pas l'entree et /construction les ramene a /.
-- /construction reste une URL compatible pour jouer/rejouer avant inscription ;
+- /construction reste une URL compatible pour reprendre l'enigme avant inscription ;
   elle n'est plus presentee comme une page de chantier.
 - Echap dans l'entree d'accueil choisit la visite. En cas d'erreur reseau, le choix
   est reessayable et un lien direct vers les projets reste disponible.

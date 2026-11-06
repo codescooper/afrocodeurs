@@ -26,15 +26,19 @@ try {
   await page.goto(url("/")); await page.getByRole("dialog").waitFor();
   assert.equal(await page.getByText(/SITE EN CONSTRUCTION/i).count(), 0);
   const canvas = page.getByRole("dialog").locator("canvas");
+  await page.waitForFunction(() => { const c = document.querySelector('[role="dialog"] canvas'); return c && new Set(c.getContext("2d").getImageData(0,0,320,180).data).size > 20; });
   assert.ok(await canvas.evaluate(el => new Set(el.getContext("2d").getImageData(0,0,320,180).data).size > 20));
   const before = await canvas.evaluate(el => el.toDataURL()); await page.waitForTimeout(150);
   assert.notEqual(await canvas.evaluate(el => el.toDataURL()), before);
   for (const width of [320,390,768,1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.getByRole("dialog").evaluate(el => { el.scrollTop = 0; });
+    await page.screenshot({ path: join(output,`entry-${width}-scene.png`) });
+    const overflow = await page.getByRole("dialog").evaluate(el => ({ width: el.clientWidth, scroll: el.scrollWidth,
+      nodes: [...el.querySelectorAll("*")].filter(n=>n.getBoundingClientRect().right>el.getBoundingClientRect().right+1).slice(0,12).map(n=>({tag:n.tagName,cls:n.className,text:n.textContent.slice(0,90),right:n.getBoundingClientRect().right})) }));
+    if (overflow.scroll > overflow.width) console.error("ENTRY_OVERFLOW", JSON.stringify(overflow));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.equal(await page.getByRole("dialog").evaluate(el => el.scrollWidth > el.clientWidth), false);
-    await page.screenshot({ path: join(output,`entry-${width}-scene.png`) });
     await page.getByRole("button", { name: "Simple visiteur", exact: true }).scrollIntoViewIfNeeded();
     await page.screenshot({ path: join(output,`entry-${width}-choices.png`) });
   }
@@ -61,6 +65,16 @@ try {
   await links.goto(url("/")); await links.getByRole("dialog").waitFor(); await links.keyboard.press("Escape");
   await links.getByRole("dialog").waitFor({ state: "hidden" });
   pass("public direct links remain free and Escape chooses visitor access");
+  const returning = await context({ viewport: { width:390,height:844 } }); const navigation = await returning.newPage();
+  await navigation.goto(url("/"));
+  await navigation.getByRole("dialog").getByRole("link", { name:"Découvrir AfroCodeurs",exact:true }).click();
+  await navigation.waitForURL("**/a-propos");
+  await navigation.getByRole("link", { name:"Rejoindre",exact:true }).click();
+  await navigation.waitForURL("**/construction");
+  await navigation.getByRole("button", { name:"Simple visiteur",exact:true }).click();
+  await navigation.waitForURL(url("/")); await navigation.waitForTimeout(500);
+  assert.equal(await navigation.getByRole("dialog").count(),0);
+  pass("standalone visitor choice refreshes a previously cached welcome page");
   const nonce = randomUUID().slice(0,8), password = randomUUID()+"Aa1!";
   user = await db.user.create({ data: { email: `entry_${nonce}@example.test`, username: "entry_"+nonce, passwordHash: await bcrypt.hash(password,12), emailVerified: new Date() } });
   const member = await context(); const csrf = await (await member.request.get(url("/api/auth/csrf"))).json();
@@ -70,6 +84,7 @@ try {
   await memberPage.goto(url("/construction")); await memberPage.waitForURL(url("/"));
   pass("authenticated members bypass the entrance and explicit puzzle page");
   const reduced = await context({ reducedMotion: "reduce" }); const still = await reduced.newPage(); await still.goto(url("/construction"));
+  await still.waitForFunction(() => { const c = document.querySelector("canvas"); return c && c.getContext("2d").getImageData(0,0,1,1).data[3] > 0; });
   const frame = await still.locator("canvas").evaluate(el=>el.toDataURL()); await still.waitForTimeout(150);
   assert.equal(await still.locator("canvas").evaluate(el=>el.toDataURL()),frame);
   assert.equal(await still.locator("audio").evaluate(el=>el.autoplay), false);
