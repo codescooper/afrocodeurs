@@ -32,6 +32,7 @@ try {
   assert.notEqual(await canvas.evaluate(el => el.toDataURL()), before);
   for (const width of [320,390,768,1440]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     await page.getByRole("dialog").evaluate(el => { el.scrollTop = 0; });
     await page.screenshot({ path: join(output,`entry-${width}-scene.png`) });
     const overflow = await page.getByRole("dialog").evaluate(el => ({ width: el.clientWidth, scroll: el.scrollWidth,

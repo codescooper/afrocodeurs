@@ -27,7 +27,7 @@ export function CommunityEntry({ overlay = false }: { overlay?: boolean }) {
   return <Dialog open={open} onOpenChange={(next) => { if (!next) void visit(); }}>
     <DialogContent showCloseButton={false} aria-describedby={undefined}
       onCloseAutoFocus={(event) => { event.preventDefault(); document.getElementById("community-home-title")?.focus(); }}
-      className="top-0 left-0 z-[80] block h-dvh w-screen max-w-none translate-x-0 translate-y-0 gap-0 overflow-y-auto rounded-none border-0 bg-[#080b0f] p-0 shadow-none sm:max-w-none">
+      className="top-0 left-0 z-[80] block h-dvh w-screen max-w-none translate-x-0 translate-y-0 gap-0 overflow-y-auto rounded-none border-0 bg-[#080b0f] p-0 shadow-none transition-none duration-0 data-[state=open]:animate-none data-[state=closed]:animate-none sm:max-w-none">
       <DialogTitle className="sr-only">Bienvenue dans la communauté AfroCodeurs</DialogTitle>
       {experience}
     </DialogContent>
