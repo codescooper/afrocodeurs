@@ -71,7 +71,7 @@ try {
   await navigation.goto(url("/"));
   await navigation.getByRole("dialog").getByRole("link", { name:"Découvrir AfroCodeurs",exact:true }).click();
   await navigation.waitForURL("**/a-propos");
-  await navigation.getByRole("link", { name:"Rejoindre",exact:true }).click();
+  await navigation.getByRole("link", { name:"Rejoindre AfroCodeurs",exact:true }).click();
   await navigation.waitForURL("**/construction");
   await navigation.getByRole("button", { name:"Simple visiteur",exact:true }).click();
   await navigation.waitForURL(url("/")); await navigation.waitForTimeout(500);
