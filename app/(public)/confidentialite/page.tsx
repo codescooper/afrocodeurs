@@ -63,7 +63,6 @@ export default function ConfidentialitePage() {
         visite par navigateur et par jour.
       </p>
 
-      <h2>Partage des données</h2>
       <p>
         Le choix « Simple visiteur » est mémorisé pendant 90 jours dans le cookie
         <code> afrocodeurs-visitor</code>, avec la même valeur pour tout le monde.
@@ -72,6 +71,7 @@ export default function ConfidentialitePage() {
         dans ton navigateur pour retrouver l’entrée de bienvenue.
       </p>
 
+      <h2>Partage des données</h2>
       <p>
         Le contenu que tu publies est <strong>public</strong> et visible par
         tous. Nous faisons appel à des prestataires techniques (envoi
