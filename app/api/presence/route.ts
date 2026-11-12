@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 
 const VISITOR_COOKIE = "afrocodeurs-presence";
 const ACTIVE_WINDOW_MS = 2 * 60 * 1000;
-const HISTORY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
 
 const coordinatesSchema = z.object({
   latitude: z.number().min(-37).max(38),
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: HISTORY_WINDOW_MS / 1000,
+      maxAge: COOKIE_MAX_AGE,
     });
   }
   return response;
@@ -63,7 +63,6 @@ export async function POST(request: Request) {
 export async function GET() {
   const now = Date.now();
   const points = await db.presencePoint.findMany({
-    where: { lastSeen: { gte: new Date(now - HISTORY_WINDOW_MS) } },
     select: { latitude: true, longitude: true, lastSeen: true },
   });
   const grouped = new Map<string, { latitude: number; longitude: number; active: number; previous: number }>();
@@ -80,4 +79,12 @@ export async function GET() {
     { points: [...grouped.values()] },
     { headers: { "Cache-Control": "no-store" } },
   );
+}
+
+export async function DELETE() {
+  const token = (await cookies()).get(VISITOR_COOKIE)?.value;
+  if (token) await db.presencePoint.deleteMany({ where: { visitorKey: visitorKey(token) } });
+  const response = NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
+  response.cookies.set(VISITOR_COOKIE, "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 0 });
+  return response;
 }
