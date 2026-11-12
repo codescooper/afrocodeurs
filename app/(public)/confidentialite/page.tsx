@@ -81,8 +81,13 @@ export default function ConfidentialitePage() {
 
       <h2>Conservation</h2>
       <p>
-        Les positions approximatives de la carte sont affichées et conservées
-        pendant 30 jours. Elles ne sont associées ni à ton compte ni à ton email.
+        Les positions approximatives partagées sont affichées dans l&apos;historique
+        de la carte, sans limite automatique de 30 jours. Elles ne sont associées
+        ni à ton compte ni à ton email. Une nouvelle position remplace la précédente
+        pour le même navigateur ; il ne s&apos;agit pas d&apos;un historique de déplacements.
+        Le bouton « Retirer ma position » efface le point associé au navigateur
+        actuel et arrête son actualisation. Si son cookie a été effacé ou a expiré,
+        nous ne pouvons plus rattacher les anciens points à ce navigateur.
       </p>
       <p>
         Tes données sont conservées tant que ton compte existe. À la suppression
