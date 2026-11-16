@@ -14,6 +14,7 @@ COPY prisma.config.ts ./
 CMD ["npx", "prisma", "migrate", "deploy"]
 
 FROM base AS builder
+ENV DISABLE_SENTRY_UPLOAD=1
 ARG DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
 ARG NEXT_PUBLIC_SITE_URL=https://afrocodeurs.org
 ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY

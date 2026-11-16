@@ -24,6 +24,7 @@ export type NavItem = {
 
 /** Navigation principale (cf. PRD UX/UI §3). 5 éléments max sur mobile. */
 export const MAIN_NAV: NavItem[] = [
+  { label: "Nouveautés des membres", href: "/members-feed", icon: Users },
   { label: "Mentorat", href: "/mentorship", icon: GraduationCap },
   { label: "Explorer", href: "/explorer", icon: Compass },
   { label: "Ressources", href: "/knowledge", icon: GraduationCap },

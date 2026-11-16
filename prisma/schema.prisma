@@ -253,6 +253,8 @@ enum DevelopmentGoalStatus {
 }
 
 model User {
+  memberSources MemberSource[]
+  memberUpdates MemberUpdate[]
   id            String    @id @default(cuid())
   email         String    @unique
   emailVerified DateTime?
@@ -1478,4 +1480,36 @@ model HeritageRecord {
   @@index([region])
   @@index([status])
   @@index([documentationStatus])
+}
+
+
+// Opt-in only. Existing profile URLs are never imported implicitly.
+model MemberSource {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind String
+  url String
+  consentAt DateTime @default(now())
+  lastCheckedAt DateTime?
+  lastError String?
+  updates MemberUpdate[]
+  @@unique([userId, url])
+}
+
+model MemberUpdate {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceId String?
+  source MemberSource? @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  externalId String
+  title String
+  url String
+  summary String
+  publishedAt DateTime?
+  approvedAt DateTime?
+  createdAt DateTime @default(now())
+  @@unique([userId, externalId])
+  @@index([approvedAt])
 }

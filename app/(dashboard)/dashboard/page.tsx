@@ -126,6 +126,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <Link href="/dashboard/sources" className="underline">Connecter mes projets et sources</Link>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">
