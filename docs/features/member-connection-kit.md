@@ -29,3 +29,6 @@ Publication annoncée seulement après migration, build et recette réels.
 
 ## Planificateur serveur
 Utiliser un timer système toutes les 15 min, `flock` pour éviter les chevauchements et header Bearer (jamais secret dans URL/log). Sources connectées seulement, lots bornés, conservation de l'erreur et date dernier contrôle. La fréquence par source dépend du nombre de sources en attente. Vérifier une exécution réelle et la création d'un aperçu privé avant annoncer l'automatisation.
+
+### Accès aux anciennes publications
+Le tableau de bord pagine toutes les fiches par 30, avec un tri stable (date de création puis identifiant). Les liens « Page précédente » / « Page suivante » permettent de retrouver et retirer également les publications anciennes, sans plafond de 100 fiches. Le comptage et les requêtes restent limités au propriétaire connecté ; une page hors limites est ramenée à une page existante.
