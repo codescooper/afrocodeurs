@@ -2,6 +2,25 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Technical download requests only: no IP, email, cookie or user identifier.
+model KitDownloadEvent {
+  id        String   @id @default(cuid())
+  kit       String
+  createdAt DateTime @default(now())
+  status    String
+  source    String
+  referrer  String
+  browser   String
+  os        String
+  device    String
+  automated Boolean  @default(false)
+  bytes     Int
+  version   String
+
+  @@index([kit, createdAt])
+  @@index([createdAt])
+}
+
 datasource db {
   provider = "postgresql"
 }
