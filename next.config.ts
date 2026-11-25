@@ -3,6 +3,7 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: { "/api/kits/premier-agent-ia": ["./resources/premier-agent-ia.zip"] },
 };
 
 // Sentry n'agit qu'avec les variables d'env (org/project/authToken pour les

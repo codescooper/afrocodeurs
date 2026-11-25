@@ -43,6 +43,7 @@ export default async function AdminPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-2xl font-bold">Administration</h1>
+      {isAdmin && <Link href="/admin/downloads" className="text-sm underline">Suivre les téléchargements du kit IA</Link>}
       <Link href="/admin/constellation" className="text-sm underline">Valider les réalisations de la Constellation</Link>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
